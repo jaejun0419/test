@@ -2,9 +2,12 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <!-- [수정] 모바일 화면 비율을 위한 뷰포트 태그 추가 --><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>건축 시뮬레이터: 건폐율 & 용적률</title>
-    <!-- Three.js 라이브러리 --><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Three.js 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- 3D OrbitControls (마우스 컨트롤) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +15,7 @@
     <style>
         body {
             font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* 모바일 탭 하이라이트 제거 */
         }
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
@@ -24,109 +28,43 @@
         /* 3D 캔버스 스타일 */
         #three-canvas {
             width: 100%;
-            height: 300px;
+            height: 250px;
             background-color: #f0f4f8;
             border-radius: 0.5rem;
-            cursor: move;
-            position: relative;
+            border: 1px solid #d1d5db;
+            cursor: move; /* 마우스 커서 변경 */
         }
-        /* 로비/게임 전환을 위한 숨김 처리 */
-        .hidden {
-            display: none;
-        }
-        /* 팝업 모달 스타일 */
-        .modal {
-            position: fixed;
-            z-index: 50;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 24px;
-            border: 1px solid #888;
-            border-radius: 1rem;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        /* 진행률 바 스타일 */
-        #progress-container {
-            display: flex;
-            width: 100%;
-            height: 20px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #ccc;
-        }
+        /* 프로그레스 바 커스텀 스타일 */
         .progress-segment {
-            flex: 1;
-            height: 100%;
-            border-right: 1px solid #fff; /* 칸 구분선 */
+            transition: background-color 0.3s ease;
         }
-        .progress-segment:last-child {
-            border-right: none;
-        }
-        .progress-segment.current {
-            border: 2px solid #3b82f6; /* 현재 단계 테두리 */
-            box-sizing: border-box;
-        }
-        .progress-segment.success {
-            background-color: #22c55e; /* 성공 */
-        }
-        .progress-segment.failure {
-            background-color: #ef4444; /* 실패 */
-        }
-        /* 최종 결과 그리드 */
-        #result-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-top: 16px;
-        }
-        .result-cell {
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            color: white;
-        }
-        .result-cell.success {
-            background-color: #22c55e;
-        }
-        .result-cell.failure {
-            background-color: #ef4444;
+        .progress-segment.active {
+            border: 2px solid #3b82f6; /* 파란색 테두리 */
+            box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <!-- ========== 1. 로비 화면 ========== --><div id="lobby-screen" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-lg w-full">
-        
-        <!-- 로고가 여기에 추가됩니다 --><img src="logo.png" alt="내 로고" class="max-h-24 w-auto mx-auto mb-4 shadow-lg"
-             onerror="this.src='https://placehold.co/100x40/EBF8FF/3182CE?text=LOGO'; this.onerror=null;">
-
+    <!-- ===== 로비 화면 ===== -->
+    <div id="lobby-screen" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-lg w-full">
+        <div class="flex justify-center mb-4">
+            <img src="logo.png" 
+                 alt="로고" 
+                 class="max-h-12 w-auto mx-auto"
+                 onerror="this.onerror=null; this.src='https://placehold.co/200x80/EBF8FF/3182CE?text=LOGO';">
+        </div>
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
             건축 시뮬레이터 🏙️
         </h1>
         <p class="text-center text-gray-600 mb-6">
-            건폐율과 용적률 개념을 3D 시뮬레이션으로 학습합니다.
-            학번과 이름을 입력하고 게임을 시작하세요.
+            건폐율과 용적률 개념을 3D 시뮬레이션을 통해 학습합니다.<br>
+            학번과 이름을 입력하고 시작하세요.
         </p>
         <div class="space-y-4 mb-6">
             <div>
                 <label for="student-id" class="block text-sm font-medium text-gray-700 mb-1">학번</label>
-                <input type="text" id="student-id" placeholder="예: 20251234" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <input type="text" id="student-id" placeholder="예: 20241234" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
                 <label for="student-name" class="block text-sm font-medium text-gray-700 mb-1">이름</label>
@@ -134,479 +72,469 @@
             </div>
         </div>
         <button id="start-game-btn" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-200 shadow-md">
-            게임 시작하기
+            게임 시작
         </button>
     </div>
 
-    <!-- ========== 2. 게임 화면 (처음에는 숨겨짐) ========== --><div id="game-screen" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-2xl w-full hidden">
-        
-        <!-- API 키 입력 상자 --><div id="api-key-banner" class="mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
-            <label for="api-key" class="block text-sm font-medium text-yellow-800 mb-1">Gemini API Key (AI 컨설팅용)</label>
-            <input type="password" id="api-key" placeholder="AI 기능을 사용하려면 여기에 Gemini API 키를 입력하세요" class="w-full p-2 border border-yellow-400 rounded-lg text-sm">
-        </div>
-
-        <h1 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-6">
+    <!-- ===== 게임 화면 (기본 숨김) ===== -->
+    <div id="game-screen" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-2xl w-full hidden">
+        <h1 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-4">
             건축 시뮬레이터 🏙️
         </h1>
 
-        <!-- 진행률 바 --><div class="mb-5">
+        <!-- 진행률 바 -->
+        <div class="mb-5">
             <h2 class="text-base font-semibold text-gray-700 mb-2 text-center">
                 도전 <span id="current-stage">1</span> / <span id="total-stages">15</span>
             </h2>
-            <div id="progress-container">
-                <!-- JavaScript가 15개의 .progress-segment를 여기에 생성 --></div>
-        </div>
-
-        <!-- 시나리오 카드 --><div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h2 class="text-xl font-semibold text-blue-800 mb-3 text-center">📜 이번 시나리오</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div><span class="text-gray-600">토지 용도:</span> <span id="land-use" class="font-semibold text-gray-900"></span></div>
-                <div><span class="text-gray-600">대지 면적:</span> <span id="land-area" class="font-semibold text-gray-900"></span></div>
-                <div><span class="text-gray-600">제한 건폐율:</span> <span id="bcr-limit" class="font-semibold text-red-600"></span></div>
-                <div><span class="text-gray-600">제한 용적률:</span> <span id="far-limit" class="font-semibold text-red-600"></span></div>
-                <div class="sm:col-span-2"><span class="text-gray-600">특별 제한:</span> <span id="special-condition" class="font-semibold text-purple-600"></span></div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-blue-200">
-                <h3 class="text-sm font-semibold text-blue-700 mb-1">💡 용어 설명</h3>
-                <p class="text-xs text-gray-700"><strong class="text-blue-800">건폐율:</strong> 대지 면적 대비 1층 바닥 면적의 비율입니다.</p>
-                <p class="text-xs text-gray-700 mt-1"><strong class="text-blue-800">용적률:</strong> 대지 면적 대비 건물 모든 층의 바닥 면적 합계(연면적) 비율입니다.</p>
+            <div id="progress-bar-container" class="flex w-full h-4 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
+                <!-- JavaScript로 15개 세그먼트 생성 -->
             </div>
         </div>
 
-        <!-- 3D 뷰포트 --><div id="three-canvas" class="mb-6 relative">
-             <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                 최대 허용 영역: 🟦 | 마우스로 뷰를 회전/확대하세요
-             </div>
+        <!-- 3D 뷰포트 -->
+        <div class="relative mb-4">
+            <canvas id="three-canvas"></canvas>
+            <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                최대 허용 영역: 🟦 <span class="ml-2 hidden sm:inline">| 마우스/터치로 뷰를 회전/확대하세요</span>
+            </div>
         </div>
 
-        <!-- 설계안 입력 --><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <div>
-                <label for="floor-area" class="block text-sm font-medium text-gray-700 mb-1">1. 1층 바닥 면적 (㎡)</label>
-                <input type="number" id="floor-area" placeholder="예: 400" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <div>
-                <label for="floor-count" class="block text-sm font-medium text-gray-700 mb-1">2. 총 층수 (지상)</label>
-                <input type="number" id="floor-count" placeholder="예: 5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <p class="text-xs text-gray-500 sm:col-span-2">*모든 층의 면적은 1층과 동일하다고 가정합니다.</p>
-        </div>
-
-        <!-- 버튼 영역 --><div class="flex flex-col sm:flex-row gap-2">
-            <button id="submit-btn" class="w-full sm:w-2/3 bg-blue-600 text-white p-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-200 shadow-md">
-                설계안 제출 (도전 횟수: <span id="attempt-count">3</span>/3)
-            </button>
-            <button id="hint-btn" class="w-full sm:w-1/3 bg-yellow-400 text-yellow-900 p-3 rounded-lg font-semibold hover:bg-yellow-500 transition duration-200 hidden">
-                💡 힌트 보기
-            </button>
-        </div>
-
-        <button id="next-btn" class="w-full bg-gray-500 text-white p-3 rounded-lg font-semibold mt-4 hover:bg-gray-600 transition duration-200 hidden">
-            다음 시나리오 도전
-        </button>
-        <button id="restart-btn" class="w-full bg-red-500 text-white p-3 rounded-lg font-semibold mt-2 hover:bg-red-600 transition duration-200 hidden">
-            게임 다시 시작
-        </button>
-    </div>
-
-    <!-- ========== 3. '실패' 팝업 모달 (숨겨짐) ========== --><div id="failure-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 class="text-3xl font-bold text-red-600 mb-4">🚫 건축 불허 🚫</h2>
-            <p class="text-lg text-gray-700 mb-4">설계안이 법규를 위반했습니다.</p>
-            <div class="bg-red-50 p-4 rounded-lg text-left mb-6">
-                <h3 class="font-semibold text-red-800 mb-2">위반 사유:</h3>
-                <ul id="failure-reasons" class="list-disc list-inside text-red-700 space-y-1">
-                    <!-- JavaScript가 여기에 실패 사유를 채움 --></ul>
-            </div>
-            <p id="failure-attempt-info" class="text-gray-600 mb-4">남은 도전 횟수: <span id="remaining-attempts">2</span></p>
+        <!-- 시나리오 정보 -->
+        <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+            <h2 class="text-xl font-semibold text-blue-800 text-center sm:col-span-2 mb-1">📜 이번 시나리오</h2>
             
-            <div class="flex flex-col gap-2">
-                <button id="consult-ai-btn" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    ✨ AI 컨설팅 받기
-                </button>
-                <button id="close-modal-btn" class="w-full bg-gray-300 text-gray-800 p-3 rounded-lg font-semibold hover:bg-gray-400 transition">
-                    확인 (다시 도전)
-                </button>
+            <div class="sm:col-span-2">
+                <span class="text-gray-600 font-medium">토지 용도:</span>
+                <span id="land-use" class="font-semibold text-gray-900"></span>
+            </div>
+            
+            <div>
+                <span class="text-gray-600 font-medium">대지 면적:</span>
+                <span id="land-area" class="font-semibold text-gray-900"></span>
+            </div>
+            <div>
+                <span class="text-gray-600 font-medium">제한 건폐율:</span>
+                <span id="bcr-limit" class="font-semibold text-red-600"></span>
+            </div>
+            <div>
+                <span class="text-gray-600 font-medium">제한 용적률:</span>
+                <span id="far-limit" class="font-semibold text-red-600"></span>
+            </div>
+            <div id="special-condition-box">
+                <span class="text-gray-600 font-medium">특별 제한:</span>
+                <span id="special-condition" class="font-semibold text-purple-600"></span>
             </div>
 
-            <!-- AI 컨설팅 결과 영역 --><div id="ai-consulting-box" class="mt-4 p-4 bg-gray-100 border border-gray-300 rounded-lg text-left hidden">
-                <h4 class="font-semibold text-blue-800 mb-2">🤖 AI 튜터의 조언</h4>
-                <div id="ai-consulting-result" class="text-gray-700 text-sm whitespace-pre-wrap">
-                    AI의 답변을 기다리는 중...
+            <!-- 용어 설명 (항상 표시) -->
+            <div class="mt-2 pt-3 border-t border-blue-200 sm:col-span-2">
+                <p class="text-xs text-gray-700">
+                    <strong class="text-blue-800">건폐율:</strong> 대지 면적 대비 1층 바닥 면적의 비율 (땅 덮는 비율)
+                </p>
+                <p class="text-xs text-gray-700 mt-1">
+                    <strong class="text-blue-800">용적률:</strong> 대지 면적 대비 건물 모든 층 바닥 면적 합계(연면적) 비율
+                </p>
+                <p class="text-xs text-blue-600 mt-2">*법적 상한치 기준이며, 실제 조례는 다를 수 있습니다.</p>
+            </div>
+        </div>
+
+        <!-- 설계안 입력 -->
+        <div class="space-y-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="floor-area" class="block text-sm font-medium text-gray-700 mb-1">1. 1층 바닥 면적 (㎡)</label>
+                    <input type="number" id="floor-area" placeholder="예: 400" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="floor-count" class="block text-sm font-medium text-gray-700 mb-1">2. 총 층수 (지상)</label>
+                    <input type="number" id="floor-count" placeholder="예: 5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
             </div>
+            <p class="text-xs text-gray-500 mt-1">*모든 층의 면적은 1층과 동일하다고 가정합니다.</p>
+            
+            <!-- 도전 횟수 및 힌트 버튼 -->
+            <div class="flex justify-between items-center mt-2">
+                <span id="attempt-counter" class="text-sm font-medium text-gray-700">도전 횟수: 3 / 3</span>
+                <button id="hint-btn" class="hidden bg-yellow-400 text-yellow-900 px-3 py-1 rounded-lg font-semibold text-sm hover:bg-yellow-500 transition duration-200">
+                    💡 힌트 보기
+                </button>
+            </div>
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="grid grid-cols-2 gap-4">
+            <button id="preview-btn" class="w-full bg-gray-500 text-white p-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition duration-200">
+                미리보기 
+            </button>
+            <button id="submit-btn" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-200 shadow-md">
+                설계안 제출
+            </button>
         </div>
     </div>
-    
-    <!-- ========== 4. '성공' 팝업 모달 (숨겨짐) ========== --><div id="success-modal" class="modal hidden">
-        <div class="modal-content">
+
+    <!-- ===== '실패' 팝업 (모달) ===== -->
+    <div id="failure-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-sm w-full text-center">
+            <h2 class="text-3xl font-bold text-red-600 mb-4">🚨 건축 불허 🚨</h2>
+            <p class="text-gray-700 mb-4">설계안이 법규에 맞지 않습니다.</p>
+            <div class="text-left bg-red-50 p-4 rounded-lg mb-6">
+                <h3 class="font-semibold text-red-800 mb-2">위반 사유:</h3>
+                <ul id="failure-reasons" class="list-disc list-inside text-red-700 space-y-1">
+                    <!-- JavaScript로 위반 사유 추가 -->
+                </ul>
+            </div>
+            <button id="close-modal-btn" class="w-full bg-red-600 text-white p-3 rounded-lg font-semibold hover:bg-red-700 transition duration-200">
+                다시 설계하기
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== '성공' 팝업 (모달) ===== -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-sm w-full text-center">
             <h2 class="text-3xl font-bold text-green-600 mb-4">🎉 건축 허가! 🎉</h2>
-            <p class="text-lg text-gray-700 mb-6">훌륭합니다! 설계안이 통과되었습니다.</p>
-            <button id="success-next-btn" class="w-full bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition">
+            <p class="text-gray-700 mb-6">훌륭합니다! 설계안이 통과되었습니다.</p>
+            <button id="next-scenario-btn" class="w-full bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200">
                 확인 (다음으로)
             </button>
         </div>
     </div>
-    
-    <!-- ========== 5. '힌트' 팝업 모달 (숨겨짐) ========== --><div id="hint-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 class="text-3xl font-bold text-yellow-600 mb-4">💡 힌트</h2>
-            <p class="text-lg text-gray-700 mb-4">현재 시나리오의 핵심 제한 수치입니다.</p>
-            <div class="bg-yellow-50 p-4 rounded-lg text-left mb-6">
-                <ul id="hint-details" class="list-disc list-inside text-yellow-800 space-y-2">
-                    <!-- JavaScript가 여기에 힌트를 채움 --></ul>
+
+    <!-- ===== '힌트' 팝업 (모달) ===== -->
+    <div id="hint-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-sm w-full text-center">
+            <h2 class="text-3xl font-bold text-yellow-600 mb-4">💡 힌트 💡</h2>
+            <p class="text-gray-700 mb-4">마지막 기회입니다! 아래 제한을 확인하세요.</p>
+            <div class="text-left bg-yellow-50 p-4 rounded-lg mb-6 space-y-2">
+                <div id="hint-bcr"><strong>최대 건폐율:</strong> <span class="font-semibold"></span></div>
+                <div id="hint-far"><strong>최대 용적률:</strong> <span class="font-semibold"></span></div>
+                <div id="hint-height"><strong>특별 제한:</strong> <span class="font-semibold"></span></div>
             </div>
-            <button id="close-hint-modal-btn" class="w-full bg-gray-300 text-gray-800 p-3 rounded-lg font-semibold hover:bg-gray-400 transition">
+            <button id="close-hint-btn" class="w-full bg-yellow-500 text-white p-3 rounded-lg font-semibold hover:bg-yellow-600 transition duration-200">
                 닫기
             </button>
         </div>
     </div>
 
-    <!-- ========== 6. '최종 결과' 팝업 모달 (숨겨짐) ========== --><div id="results-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 class="text-3xl font-bold text-blue-600 mb-4">🏆 최종 결과 🏆</h2>
-            <div class="mb-4 text-left p-3 bg-gray-100 rounded-lg">
-                <p class="text-gray-700"><strong>학번:</strong> <span id="result-student-id"></span></p>
-                <p class="text-700"><strong>이름:</strong> <span id="result-student-name"></span></p>
+    <!-- ===== '최종 결과' 팝업 (모달) ===== -->
+    <div id="final-result-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-lg w-full">
+            <h2 class="text-3xl font-bold text-center text-blue-600 mb-4">🏆 게임 완료! 🏆</h2>
+            <div class="text-center bg-gray-100 p-3 rounded-lg mb-4">
+                <span class="font-semibold text-gray-700">학번:</span> <span id="final-student-id" class="text-gray-900"></span><br>
+                <span class="font-semibold text-gray-700">이름:</span> <span id="final-student-name" class="text-gray-900"></span>
             </div>
-            <div class="mb-4">
-                <p class="text-lg">총 <strong id="total-success" class="text-green-600">0</strong>회 성공, <strong id="total-failure" class="text-red-600">0</strong>회 실패</p>
+            <div class="flex justify-around mb-4">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-green-600" id="final-success-count">0</div>
+                    <div class="text-sm text-gray-600">성공</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-red-600" id="final-failure-count">0</div>
+                    <div class="text-sm text-gray-600">실패</div>
+                </div>
             </div>
-            <h3 class="text-lg font-semibold mb-2">단계별 결과</h3>
-            <div id="result-grid">
-                <!-- JavaScript가 15개 결과 셀을 여기에 생성 --></div>
-            <button id="close-results-modal-btn" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold mt-6 hover:bg-blue-700 transition">
-                게임 다시하기
+            
+            <h3 class="text-lg font-semibold text-center text-gray-800 mb-3">단계별 결과 요약</h3>
+            <div id="final-grid-container" class="grid grid-cols-5 gap-2 bg-gray-100 p-3 rounded-lg">
+                <!-- JavaScript로 15개 결과 칸 생성 -->
+            </div>
+            
+            <button id="restart-game-btn" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold mt-6 hover:bg-blue-700 transition duration-200">
+                게임 다시 시작
             </button>
         </div>
     </div>
 
+
     <script>
-        // --- 3D 시각화 (three.js) 관련 전역 변수 ---
-        let scene, camera, renderer, controls;
-        let groundMesh, buildingMesh, guideMesh, guideWireframe; // guideWireframe 추가
-        const canvasContainer = document.getElementById('three-canvas');
-        
+        // --- 3D 시각화 관련 변수 ---
+        let scene, camera, renderer, ground, guideBox, currentBuilding;
+        let canvas; // canvas 변수
+        let is3DInitialized = false; // 3D 초기화 여부 플래그
+        let controls; // 마우스 컨트롤 (OrbitControls)
+
         // --- 시나리오 데이터 (총 15단계) ---
         const scenarios = [
-            // 특별 제한 (층수) + 일반 주거
-            { land: 1000, bcrLimit: 50, farLimit: 100, use: "제1종 주거(경관보호)", desc: "문화재 경관 보호", heightLimit: 3 },
-            { land: 800, bcrLimit: 60, farLimit: 180, use: "제1종 일반주거", desc: "낮은 층수 주택", heightLimit: 4 },
-            { land: 700, bcrLimit: 60, farLimit: 220, use: "제2종 일반주거", desc: "중간 층수 주택", heightLimit: 7 },
-            { land: 1200, bcrLimit: 50, farLimit: 250, use: "제3종 일반주거", desc: "중고층 주택", heightLimit: null },
-            // 특별 제한 (층수) + 상업
-            { land: 500, bcrLimit: 80, farLimit: 700, use: "일반 상업(스카이라인)", desc: "도시 스카이라인 관리", heightLimit: 20 },
-            { land: 1500, bcrLimit: 80, farLimit: 1000, use: "일반 상업", desc: "상업 및 업무 기능", heightLimit: null },
-            { land: 600, bcrLimit: 90, farLimit: 1300, use: "중심 상업", desc: "도심, 부도심 기능", heightLimit: null },
-            // 공업
-            { land: 3000, bcrLimit: 70, farLimit: 300, use: "일반 공업", desc: "공업 편익 증진", heightLimit: null },
-            { land: 2500, bcrLimit: 70, farLimit: 350, use: "준공업 지역", desc: "경공업, 주거 복합", heightLimit: null },
-            // 녹지 (낮은 층수 제한)
-            { land: 2000, bcrLimit: 20, farLimit: 80, use: "자연 녹지(개발제한)", desc: "도시 녹지 공간 보전", heightLimit: 4 },
-            { land: 1000, bcrLimit: 20, farLimit: 60, use: "생산 녹지", desc: "농업적 생산 유보", heightLimit: 2 },
-            // 기타
-            { land: 900, bcrLimit: 70, farLimit: 400, use: "준주거 지역", desc: "주거, 상업 기능 보완", heightLimit: 10 },
-            { land: 1100, bcrLimit: 50, farLimit: 150, use: "제3종 일반주거(고도제한)", desc: "공항 인근 고도제한", heightLimit: 5 },
-            { land: 400, bcrLimit: 20, farLimit: 50, use: "보전 녹지", desc: "도시 자연환경 보전", heightLimit: 2 },
-            { land: 1800, bcrLimit: 70, farLimit: 350, use: "근린 상업", desc: "근린 지역 편의", heightLimit: 7 }
+            // 초급 (단순 건폐율/용적률)
+            { land: 1000, bcrLimit: 50, farLimit: 100, use: "제1종 전용주거", desc: "단독주택 중심", heightLimit: null, conditionDesc: null },
+            { land: 800, bcrLimit: 60, farLimit: 150, use: "제1종 일반주거", desc: "낮은 층수 주택", heightLimit: null, conditionDesc: null },
+            { land: 1200, bcrLimit: 60, farLimit: 200, use: "제2종 일반주거", desc: "중간 층수 주택", heightLimit: null, conditionDesc: null },
+            { land: 1000, bcrLimit: 50, farLimit: 250, use: "제3종 일반주거", desc: "중고층 주택", heightLimit: null, conditionDesc: null },
+            
+            // 중급 (특별 제한 - 층수)
+            { land: 500, bcrLimit: 40, farLimit: 100, use: "제1종 전용주거", desc: "단독주택 중심", heightLimit: 3, conditionDesc: "고도 제한 (3층 이하)" },
+            { land: 700, bcrLimit: 60, farLimit: 180, use: "제1종 일반주거", desc: "낮은 층수 주택", heightLimit: 4, conditionDesc: "고도 제한 (4층 이하)" },
+            { land: 900, bcrLimit: 20, farLimit: 80, use: "자연 녹지", desc: "도시 녹지 보전", heightLimit: 4, conditionDesc: "경관 보호 (4층 이하)" },
+            { land: 600, bcrLimit: 20, farLimit: 50, use: "보전 녹지", desc: "환경 보전", heightLimit: 2, conditionDesc: "절대 보전 (2층 이하)" },
+
+            // 고급 (상업/공업/복합)
+            { land: 1500, bcrLimit: 70, farLimit: 500, use: "준주거 지역", desc: "주거+상업 복합", heightLimit: null, conditionDesc: null },
+            { land: 2000, bcrLimit: 70, farLimit: 300, use: "일반 공업", desc: "환경 저해 없는 공업", heightLimit: null, conditionDesc: null },
+            { land: 800, bcrLimit: 80, farLimit: 1000, use: "일반 상업", desc: "일반적 상업 기능", heightLimit: null, conditionDesc: null },
+            { land: 500, bcrLimit: 90, farLimit: 1300, use: "중심 상업", desc: "도심/부도심", heightLimit: null, conditionDesc: null },
+            { land: 1000, bcrLimit: 70, farLimit: 400, use: "준공업 지역", desc: "경공업+주거/상업", heightLimit: null, conditionDesc: null },
+            { land: 600, bcrLimit: 70, farLimit: 800, use: "근린 상업", desc: "근린 서비스", heightLimit: null, conditionDesc: null },
+            { land: 2500, bcrLimit: 20, farLimit: 100, use: "생산 녹지", desc: "농업 생산", heightLimit: 4, conditionDesc: "경관 보호 (4층 이하)" }
         ];
         const totalStages = scenarios.length;
-        let currentStageIndex = 0;
-        let currentAttempts = 3;
-        let stageResults = []; // 각 단계의 성공(true)/실패(false) 저장
-        
+        let shuffledScenarios = [];
+        let currentStageIndex = 0; // 0부터 시작
+        let stageAttempts = 3; // 단계별 시도 횟수
+        // 0 = 미도전, 1 = 성공, -1 = 실패
+        let stageResults = new Array(totalStages).fill(0); 
+
         // --- DOM 요소 참조 ---
         // 로비
         const lobbyScreen = document.getElementById('lobby-screen');
+        const gameScreen = document.getElementById('game-screen');
         const studentIdInput = document.getElementById('student-id');
         const studentNameInput = document.getElementById('student-name');
         const startGameBtn = document.getElementById('start-game-btn');
-        
+
         // 게임
-        const gameScreen = document.getElementById('game-screen');
-        const apiKeyBanner = document.getElementById('api-key-banner');
-        const apiKeyInput = document.getElementById('api-key');
-        
         const currentStageEl = document.getElementById('current-stage');
-        const progressContainer = document.getElementById('progress-container');
-        
+        const totalStagesEl = document.getElementById('total-stages');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+
         const landUseEl = document.getElementById('land-use');
         const landAreaEl = document.getElementById('land-area');
         const bcrLimitEl = document.getElementById('bcr-limit');
         const farLimitEl = document.getElementById('far-limit');
+        const specialConditionBox = document.getElementById('special-condition-box');
         const specialConditionEl = document.getElementById('special-condition');
         
         const floorAreaInput = document.getElementById('floor-area');
         const floorCountInput = document.getElementById('floor-count');
-        const attemptCountEl = document.getElementById('attempt-count');
         
-        const submitBtn = document.getElementById('submit-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const restartBtn = document.getElementById('restart-btn');
+        const attemptCounter = document.getElementById('attempt-counter');
         const hintBtn = document.getElementById('hint-btn');
-
-        // 실패 모달
+        const submitBtn = document.getElementById('submit-btn');
+        const previewBtn = document.getElementById('preview-btn'); // 미리보기 버튼
+        
+        // 팝업 (모달)
         const failureModal = document.getElementById('failure-modal');
         const failureReasonsEl = document.getElementById('failure-reasons');
-        const remainingAttemptsEl = document.getElementById('remaining-attempts');
         const closeModalBtn = document.getElementById('close-modal-btn');
-        const consultAiBtn = document.getElementById('consult-ai-btn');
-        const aiConsultingBox = document.getElementById('ai-consulting-box');
-        const aiConsultingResult = document.getElementById('ai-consulting-result');
         
-        // 성공 모달
         const successModal = document.getElementById('success-modal');
-        const successNextBtn = document.getElementById('success-next-btn');
+        const nextScenarioBtn = document.getElementById('next-scenario-btn');
         
-        // 힌트 모달
         const hintModal = document.getElementById('hint-modal');
-        const hintDetailsEl = document.getElementById('hint-details');
-        const closeHintModalBtn = document.getElementById('close-hint-modal-btn');
-        
-        // 최종 결과 모달
-        const resultsModal = document.getElementById('results-modal');
-        const resultStudentIdEl = document.getElementById('result-student-id');
-        const resultStudentNameEl = document.getElementById('result-student-name');
-        const totalSuccessEl = document.getElementById('total-success');
-        const totalFailureEl = document.getElementById('total-failure');
-        const resultGridEl = document.getElementById('result-grid');
-        const closeResultsModalBtn = document.getElementById('close-results-modal-btn');
-        
-        // --- 3D 시각화 함수 ---
+        const hintBcrEl = document.getElementById('hint-bcr').querySelector('span');
+        const hintFarEl = document.getElementById('hint-far').querySelector('span');
+        const hintHeightEl = document.getElementById('hint-height').querySelector('span');
+        const closeHintBtn = document.getElementById('close-hint-btn');
 
+        const finalResultModal = document.getElementById('final-result-modal');
+        const finalStudentId = document.getElementById('final-student-id');
+        const finalStudentName = document.getElementById('final-student-name');
+        const finalSuccessCount = document.getElementById('final-success-count');
+        const finalFailureCount = document.getElementById('final-failure-count');
+        const finalGridContainer = document.getElementById('final-grid-container');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+
+
+        // --- 3D 시각화 함수 ---
         /**
-         * 3D 씬 초기화 (OrbitControls 포함)
+         * 3D 씬 초기화 함수 (게임 시작 시 1회 실행)
          */
         function init3D() {
+            if (is3DInitialized) return; // 이미 초기화되었다면 중복 실행 방지
+
+            canvas = document.getElementById('three-canvas'); // 캔버스 참조
+            if (!canvas) {
+                console.error("3D 캔버스를 찾을 수 없습니다.");
+                return;
+            }
+
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf0f4f8);
 
             // 카메라
-            camera = new THREE.PerspectiveCamera(50, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
-            camera.position.set(15, 20, 25); // 더 멀리서 비스듬히
-
-            // 렌더러
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-            canvasContainer.appendChild(renderer.domElement);
+            camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            camera.position.set(15, 20, 25); // 초기 카메라 위치
+            scene.add(camera);
 
             // 조명
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
             directionalLight.position.set(10, 20, 10);
+            directionalLight.target.position.set(0, 0, 0);
             scene.add(directionalLight);
             
-            // 마우스 컨트롤 (OrbitControls) 대신 수동 컨트롤 추가
-            addManualControls();
+            // 렌더러
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialIAS: true });
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
 
-            // 렌더링 루프
+            // *** OrbitControls (마우스 컨트롤) 추가 ***
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; // 부드러운 움직임
+            controls.dampingFactor = 0.1;
+            controls.target.set(0, 5, 0); // 뷰가 바라볼 중심점 (약간 위)
+            
+            // 3D 객체 초기화
+            // 대지
+            const groundGeometry = new THREE.PlaneGeometry(1, 1);
+            const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x22c55e, side: THREE.DoubleSide });
+            ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.visible = false;
+            scene.add(ground);
+
+            // 가이드 박스 (반투명 파란색)
+            const guideGeometry = new THREE.BoxGeometry(1, 1, 1);
+            const guideMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x3b82f6, 
+                transparent: true, 
+                opacity: 0.3,
+                wireframe: false 
+            });
+            guideBox = new THREE.Mesh(guideGeometry, guideMaterial);
+            guideBox.visible = false;
+            scene.add(guideBox);
+
+            // 와이어프레임 헬퍼 추가
+            const edges = new THREE.EdgesGeometry(guideGeometry);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x1d4ed8, linewidth: 2 }));
+            guideBox.add(line); // 가이드박스에 와이어프레임 추가
+
+            // 건물
+            const buildingGeometry = new THREE.BoxGeometry(1, 1, 1);
+            const buildingMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+            currentBuilding = new THREE.Mesh(buildingGeometry, buildingMaterial);
+            currentBuilding.visible = false;
+            scene.add(currentBuilding);
+
+            is3DInitialized = true; // 초기화 완료 플래그
             animate();
         }
-        
-        /**
-         * OrbitControls 대신 수동 마우스 컨트롤 추가
-         */
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        
-        function addManualControls() {
-            canvasContainer.addEventListener('mousedown', (e) => { isDragging = true; });
-            canvasContainer.addEventListener('mouseup', () => { isDragging = false; });
-            canvasContainer.addEventListener('mouseleave', () => { isDragging = false; });
-            
-            canvasContainer.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                
-                const deltaX = e.offsetX - previousMousePosition.x;
-                const deltaY = e.offsetY - previousMousePosition.y;
-
-                // 수평 회전 (Y축 중심)
-                camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), deltaX * 0.005);
-                
-                // 씬의 중심을 바라보도록
-                camera.lookAt(scene.position);
-                
-                previousMousePosition = { x: e.offsetX, y: e.offsetY };
-            });
-            
-            canvasContainer.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                // 줌 인/아웃
-                const zoomAmount = e.deltaY * 0.01;
-                camera.position.multiplyScalar(1 + zoomAmount);
-                if (camera.position.length() < 5) camera.position.setLength(5); // 최소 줌
-                if (camera.position.length() > 100) camera.position.setLength(100); // 최대 줌
-            });
-            
-            // 터치 이벤트 추가
-            canvasContainer.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 1) {
-                    isDragging = true;
-                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                }
-            }, { passive: false });
-            
-            canvasContainer.addEventListener('touchend', () => {
-                isDragging = false;
-            });
-            
-            canvasContainer.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 1 && isDragging) {
-                    e.preventDefault();
-                    const deltaX = e.touches[0].clientX - previousMousePosition.x;
-                    
-                    camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), deltaX * 0.005);
-                    camera.lookAt(scene.position);
-                    
-                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                }
-            }, { passive: false });
-        }
 
         /**
-         * 애니메이션 루프
+         * 3D 애니메이션 루프 (뷰포트 오류 수정됨)
          */
         function animate() {
+            if (!is3DInitialized) return;
             requestAnimationFrame(animate);
+
+            // *** 컨트롤 업데이트 ***
+            if (controls) controls.update();
+            
+            // 캔버스 크기 및 뷰포트 크기 조정 로직
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+            // 렌더러의 크기가 캔버스 크기와 다른지 확인하고, 다를 경우에만 업데이트
+            if (canvas.width !== width || canvas.height !== height) {
+                renderer.setSize(width, height, false); // false는 CSS 크기 설정을 업데이트하지 않음을 의미
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            }
+            
             renderer.render(scene, camera);
         }
 
         /**
-         * 3D 씬 업데이트 (대지, 건물, 가이드)
+         * 3D 대지 업데이트 함수
+         * @param {number} landArea - 대지 면적
          */
-        function update3DScene(landArea, bcrLimit, farLimit, heightLimit, userFloorArea = 0, userFloorCount = 0, isSuccess = false) {
-            // 씬 초기화
-            if (groundMesh) scene.remove(groundMesh);
-            if (buildingMesh) scene.remove(buildingMesh);
-            if (guideMesh) scene.remove(guideMesh);
-            if (guideWireframe) scene.remove(guideWireframe); // 와이어프레임도 제거
-
-            // 1. 대지 생성 (면적에 비례한 크기)
-            const landSide = Math.sqrt(landArea); // 정사각형 가정
-            const groundGeometry = new THREE.BoxGeometry(landSide, 1, landSide);
-            const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x66cc66 });
-            groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
-            groundMesh.position.y = -0.5; // 바닥
-            scene.add(groundMesh);
-            
-            // 카메라 위치를 대지 크기에 맞게 조절
-            camera.position.set(landSide * 1.2, landSide * 1.5, landSide * 1.8);
-            camera.lookAt(scene.position);
-
-
-            // 2. 최대 허용 영역 (가이드) 생성 (파란색 투명)
-            const maxAllowedFloorArea = landArea * (bcrLimit / 100);
-            const maxAllowedFloorSide = Math.sqrt(maxAllowedFloorArea);
-            
-            // 용적률로 계산한 최대 연면적을 최대 건폐율로 나눈 층수
-            const maxFloorsByFAR = (landArea * (farLimit / 100)) / maxAllowedFloorArea;
-            
-            // 실제 적용될 최대 층수 (층수제한 vs 용적률로 계산된 층수 중 더 낮은 값)
-            // 소수점 이하는 버림 (건물은 층 단위로 지어지므로)
-            const effectiveMaxFloors = heightLimit ? Math.floor(Math.min(maxFloorsByFAR, heightLimit)) : Math.floor(maxFloorsByFAR);
-            
-            const guideHeight = effectiveMaxFloors * 3.5; // 층당 3.5미터 가정
-            
-            if (effectiveMaxFloors > 0) { // 유효한 최대 층수가 있을 때만 가이드 생성
-                const guideGeometry = new THREE.BoxGeometry(maxAllowedFloorSide, guideHeight, maxAllowedFloorSide);
-                const guideMaterial = new THREE.MeshBasicMaterial({ 
-                    color: 0x0000ff, 
-                    transparent: true, 
-                    opacity: 0.15,
-                    depthWrite: false // 다른 객체를 투과해 보이도록
-                });
-                guideMesh = new THREE.Mesh(guideGeometry, guideMaterial);
-                guideMesh.position.y = guideHeight / 2;
-                scene.add(guideMesh);
-                
-                // 가이드라인 외곽선 (Wireframe)
-                const edges = new THREE.EdgesGeometry(guideGeometry);
-                guideWireframe = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5, transparent: true }));
-                guideWireframe.position.copy(guideMesh.position);
-                scene.add(guideWireframe);
-            }
-            
-
-            // 3. 사용자 건물 생성
-            if (userFloorArea > 0 && userFloorCount > 0) {
-                const userBuildingSide = Math.sqrt(userFloorArea);
-                const userBuildingHeight = userFloorCount * 3.5; // 층당 3.5미터
-                
-                const buildingGeometry = new THREE.BoxGeometry(userBuildingSide, userBuildingHeight, userBuildingSide);
-                const buildingMaterial = new THREE.MeshLambertMaterial({ 
-                    color: isSuccess ? 0x00ff00 : 0xff0000 // 성공: 초록, 실패: 빨강
-                });
-                buildingMesh = new THREE.Mesh(buildingGeometry, buildingMaterial);
-                buildingMesh.position.y = userBuildingHeight / 2;
-                scene.add(buildingMesh);
-            }
-        }
-        
-        /**
-         * 3D 캔버스 리사이즈 처리
-         */
-        function onWindowResize() {
-            if (!renderer || !camera) return;
-            
-            // canvasContainer의 실제 크기를 가져옴
-            const width = canvasContainer.clientWidth;
-            const height = 300; // 고정 높이 유지
-
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
+        function updateGround(landArea) {
+            if (!is3DInitialized) return;
+            const side = Math.sqrt(landArea); // 대지 한 변의 길이
+            ground.scale.set(side, side, 1);
+            ground.visible = true;
         }
 
-        window.addEventListener('resize', onWindowResize, false);
+        /**
+         * 3D 최대 허용 가이드 박스 업데이트 함수
+         * @param {object} scenario - 현재 시나리오 객체
+         */
+        function updateGuideBox(scenario) {
+            if (!is3DInitialized) return;
+            // 1. 가로/세로 크기 (건폐율 기준)
+            const maxBcrArea = scenario.land * (scenario.bcrLimit / 100);
+            const bcrSide = Math.sqrt(maxBcrArea); // 건폐율 최대 한 변
 
+            // 2. 높이 (용적률과 층수제한 중 더 낮은 값 기준)
+            const farHeight = (scenario.farLimit / 100) * scenario.land; // 최대 연면적
+            const maxFloorsByFar = (maxBcrArea > 0) ? farHeight / maxBcrArea : 0; // 0으로 나누기 방지
+            const buildingHeightByFar = maxFloorsByFar * 3; // 1층 높이 3m로 가정
 
-        // --- 핵심 게임 로직 ---
+            // 2-2. 특별 층수 제한
+            const buildingHeightByLimit = scenario.heightLimit ? scenario.heightLimit * 3 : Infinity;
+
+            // 3. 최종 높이 결정 (더 낮은 값)
+            const finalHeight = Math.min(buildingHeightByFar, buildingHeightByLimit);
+
+            // 4. 가이드 박스 업데이트
+            guideBox.scale.set(bcrSide, finalHeight, bcrSide);
+            guideBox.position.set(0, finalHeight / 2, 0);
+            guideBox.visible = true;
+        }
 
         /**
-         * 시나리오 순서 섞기 (Fisher-Yates Shuffle)
+         * 3D 건물 그리기 함수
+         * @param {number} floorArea - 1층 바닥 면적
+         * @param {number} floorCount - 층수
+         * @param {number} color - 건물 색상 (hex)
+         */
+        function drawBuilding(floorArea, floorCount, color) {
+            if (!is3DInitialized) return;
+            if (floorArea <= 0 || floorCount <= 0) {
+                currentBuilding.visible = false;
+                return;
+            }
+
+            const buildingSide = Math.sqrt(floorArea);
+            const buildingHeight = floorCount * 3; // 1층 높이 3m 가정
+
+            currentBuilding.scale.set(buildingSide, buildingHeight, buildingSide);
+            currentBuilding.position.set(0, buildingHeight / 2, 0);
+            currentBuilding.material.color.setHex(color);
+            currentBuilding.visible = true;
+        }
+
+        // --- 게임 로직 함수 ---
+
+        /**
+         * 시나리오 배열을 무작위로 섞는 함수 (Fisher-Yates shuffle)
          */
         function shuffleScenarios() {
-            for (let i = scenarios.length - 1; i > 0; i--) {
+            shuffledScenarios = [...scenarios]; // 원본 복사
+            for (let i = shuffledScenarios.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [scenarios[i], scenarios[j]] = [scenarios[j], scenarios[i]];
+                [shuffledScenarios[i], shuffledScenarios[j]] = [shuffledScenarios[j], shuffledScenarios[i]];
             }
         }
         
         /**
-         * 진행률 바 UI 생성
-         */
-        function createProgressBar() {
-            progressContainer.innerHTML = ''; // 초기화
-            for (let i = 0; i < totalStages; i++) {
-                const segment = document.createElement('div');
-                segment.classList.add('progress-segment');
-                segment.id = `progress-segment-${i}`;
-                progressContainer.appendChild(segment);
-            }
-        }
-
-        /**
-         * 진행률 바 UI 업데이트
+         * 진행률 바를 초기화/업데이트하는 함수
          */
         function updateProgressBar() {
+            progressBarContainer.innerHTML = ''; // 초기화
             for (let i = 0; i < totalStages; i++) {
-                const segment = document.getElementById(`progress-segment-${i}`);
-                segment.classList.remove('current', 'success', 'failure');
-                
-                if (stageResults[i] === true) {
-                    segment.classList.add('success');
-                } else if (stageResults[i] === false) {
-                    segment.classList.add('failure');
-                }
+                const segment = document.createElement('div');
+                segment.classList.add('progress-segment', 'flex-1', 'border-r', 'border-gray-300');
+                if (i === totalStages - 1) segment.classList.remove('border-r'); // 마지막 테두리 제거
                 
                 if (i === currentStageIndex) {
-                    segment.classList.add('current');
+                    segment.classList.add('active'); // 현재 단계 활성화
                 }
+                
+                if (stageResults[i] === 1) {
+                    segment.style.backgroundColor = '#22c55e'; // 성공 (초록)
+                } else if (stageResults[i] === -1) {
+                    segment.style.backgroundColor = '#ef4444'; // 실패 (빨강)
+                }
+                
+                progressBarContainer.appendChild(segment);
             }
         }
 
         /**
-         * 새 시나리오 로드 (UI 업데이트)
+         * 새 시나리오를 로드하고 화면을 업데이트하는 함수
          */
         function loadScenario() {
             if (currentStageIndex >= totalStages) {
@@ -614,419 +542,279 @@
                 return;
             }
 
-            const currentScenario = scenarios[currentStageIndex];
+            const currentScenario = shuffledScenarios[currentStageIndex];
 
             // 화면에 시나리오 정보 표시
             landUseEl.textContent = `${currentScenario.use} (${currentScenario.desc})`;
             landAreaEl.textContent = `${currentScenario.land.toLocaleString()} ㎡`;
             bcrLimitEl.textContent = `최대 ${currentScenario.bcrLimit} %`;
             farLimitEl.textContent = `최대 ${currentScenario.farLimit} %`;
+
+            // 특별 제한 표시
             if (currentScenario.heightLimit) {
-                specialConditionEl.textContent = `최대 ${currentScenario.heightLimit}층 (${currentScenario.desc})`;
-                specialConditionEl.parentElement.classList.remove('hidden');
+                specialConditionEl.textContent = `${currentScenario.conditionDesc} (${currentScenario.heightLimit}층 이하)`;
+                specialConditionBox.classList.remove('hidden');
             } else {
-                specialConditionEl.textContent = "없음";
-                specialConditionEl.parentElement.classList.add('hidden');
+                specialConditionEl.textContent = '없음';
+                specialConditionBox.classList.add('hidden');
             }
 
             // 입력 필드 및 결과 초기화
             floorAreaInput.value = '';
             floorCountInput.value = '';
             
-            // 버튼 및 도전 횟수 초기화
-            currentAttempts = 3;
-            attemptCountEl.textContent = currentAttempts;
-            submitBtn.disabled = false;
-            nextBtn.classList.add('hidden');
-            hintBtn.classList.add('hidden'); // 힌트 버튼 숨기기
+            // 3D 뷰 업데이트
+            updateGround(currentScenario.land);
+            updateGuideBox(currentScenario);
+            drawBuilding(0, 0, 0x00ff00); // 이전 건물 제거
 
-            // 3D 씬 업데이트 (기본 대지 + 가이드)
-            update3DScene(currentScenario.land, currentScenario.bcrLimit, currentScenario.farLimit, currentScenario.heightLimit);
+            // 상태 초기화
+            stageAttempts = 3;
+            attemptCounter.textContent = `도전 횟수: ${stageAttempts} / 3`;
+            attemptCounter.classList.remove('text-red-600', 'font-bold');
+            hintBtn.classList.add('hidden');
+            submitBtn.disabled = false;
             
-            // 진행률 바 업데이트
             currentStageEl.textContent = currentStageIndex + 1;
             updateProgressBar();
-            
-            // 캔버스 크기 강제 조절 (화면 전환 시)
-            setTimeout(onWindowResize, 100);
         }
 
         /**
-         * 설계안 제출 처리
+         * 미리보기 버튼 클릭 시 3D 뷰에 건물을 회색으로 렌더링하는 함수
+         */
+        function handlePreview() {
+            const userFloorArea = parseFloat(floorAreaInput.value);
+            const userFloorCount = parseInt(floorCountInput.value);
+
+            // 유효한 숫자 입력이 있을 때만 3D 뷰 업데이트
+            if (isNaN(userFloorArea) || isNaN(userFloorCount) || userFloorArea <= 0 || userFloorCount <= 0) {
+                // 유효하지 않으면 기존 건물만 지움
+                drawBuilding(0, 0, 0x888888); 
+            } else {
+                // 유효하면 회색(0x888888)으로 건물을 그림
+                drawBuilding(userFloorArea, userFloorCount, 0x888888);
+            }
+        }
+        
+        /**
+         * 제출 버튼 클릭 시 계산 및 판정을 수행하는 함수
          */
         function handleSubmit() {
             // 1. 사용자 입력 값 가져오기
             const userFloorArea = parseFloat(floorAreaInput.value);
             const userFloorCount = parseInt(floorCountInput.value);
-            const currentScenario = scenarios[currentStageIndex];
+            const currentScenario = shuffledScenarios[currentStageIndex];
 
             // 2. 입력 값 유효성 검사
             if (isNaN(userFloorArea) || isNaN(userFloorCount) || userFloorArea <= 0 || userFloorCount <= 0) {
-                showFailureModal(["1층 면적과 층수를 올바르게 입력해 주세요."], false); // 도전 횟수 차감 안함
+                alert("1층 면적과 층수를 올바르게 입력해 주세요."); // 간단한 알림
                 return;
             }
 
-            // 3. 법규 검사
+            // 3. 건폐율, 용적률, 층수 계산
             const calculatedBCR = (userFloorArea / currentScenario.land) * 100;
             const totalFloorArea = userFloorArea * userFloorCount;
             const calculatedFAR = (totalFloorArea / currentScenario.land) * 100;
 
+            // 4. 법규 준수 여부 판정
+            let failureReasons = [];
             const isBCROk = calculatedBCR <= currentScenario.bcrLimit;
-            const isFAROk = calculatedFAR <= currentScenario.farLimit;
-            const isHeightOk = !currentScenario.heightLimit || userFloorCount <= currentScenario.heightLimit;
-
-            let errors = [];
             if (!isBCROk) {
-                errors.push(`건폐율 초과 (결과: ${calculatedBCR.toFixed(2)}% / 제한: ${currentScenario.bcrLimit}%)`);
+                failureReasons.push(`건폐율 초과 (계산: ${calculatedBCR.toFixed(1)}%, 제한: ${currentScenario.bcrLimit}%)`);
             }
+
+            const isFAROk = calculatedFAR <= currentScenario.farLimit;
             if (!isFAROk) {
-                errors.push(`용적률 초과 (결과: ${calculatedFAR.toFixed(2)}% / 제한: ${currentScenario.farLimit}%)`);
+                failureReasons.push(`용적률 초과 (계산: ${calculatedFAR.toFixed(1)}%, 제한: ${currentScenario.farLimit}%)`);
             }
+
+            const isHeightOk = !currentScenario.heightLimit || userFloorCount <= currentScenario.heightLimit;
             if (!isHeightOk) {
-                errors.push(`층수 제한 초과 (결과: ${userFloorCount}층 / 제한: ${currentScenario.heightLimit}층)`);
+                failureReasons.push(`특별 제한 위반 (입력: ${userFloorCount}층, 제한: ${currentScenario.heightLimit}층)`);
             }
-            
-            const isSuccess = errors.length === 0;
-            
-            // 4. 3D 건물 업데이트 (성공/실패 색상)
-            update3DScene(currentScenario.land, currentScenario.bcrLimit, currentScenario.farLimit, currentScenario.heightLimit, userFloorArea, userFloorCount, isSuccess);
 
-
-            // 5. 결과 처리
-            if (isSuccess) {
-                // [성공]
-                stageResults[currentStageIndex] = true; // 성공 기록
-                updateProgressBar();
-                submitBtn.disabled = true;
-                nextBtn.classList.remove('hidden');
-                
+            // 5. 최종 판정
+            if (isBCROk && isFAROk && isHeightOk) {
+                // --- 성공 ---
+                drawBuilding(userFloorArea, userFloorCount, 0x00ff00); // 초록색 건물
+                stageResults[currentStageIndex] = 1; // 성공 기록
                 showSuccessModal();
+                submitBtn.disabled = true;
 
             } else {
-                // [실패]
-                currentAttempts--;
-                attemptCountEl.textContent = currentAttempts;
+                // --- 실패 ---
+                drawBuilding(userFloorArea, userFloorCount, 0xff0000); // 빨간색 건물
+                stageAttempts--;
+                attemptCounter.textContent = `도전 횟수: ${stageAttempts} / 3`;
                 
-                if (currentAttempts > 0) {
-                    // 도전 기회 남음
-                    showFailureModal(errors, true);
-                    if (currentAttempts === 1) {
-                        hintBtn.classList.remove('hidden'); // 2번 틀리면 힌트 버튼 표시
-                    }
-                } else {
-                    // 도전 기회 모두 소진
-                    stageResults[currentStageIndex] = false; // 실패 기록
-                    updateProgressBar();
+                if (stageAttempts <= 0) {
+                    // 3회 실패 -> 다음으로
+                    failureReasons.push("3회 도전 기회를 모두 사용했습니다.");
+                    stageResults[currentStageIndex] = -1; // 실패 기록
+                    showFailureModal(failureReasons, true); // 마지막 실패
                     submitBtn.disabled = true;
-                    nextBtn.classList.remove('hidden'); // 다음으로 넘어가기
-                    showFailureModal(errors, true, true); // 마지막 실패임을 알림
-                }
-            }
-        }
-        
-        /**
-         * 다음 시나리오로 이동
-         */
-        function goToNextScenario() {
-            currentStageIndex++;
-            if (currentStageIndex >= totalStages) {
-                showGameComplete();
-            } else {
-                loadScenario();
-            }
-        }
-
-        /**
-         * 게임 완료 처리
-         */
-        function showGameComplete() {
-            // 최종 결과 팝업 표시
-            const totalSuccess = stageResults.filter(r => r === true).length;
-            const totalFailure = stageResults.filter(r => r === false).length;
-            
-            resultStudentIdEl.textContent = studentIdInput.value || "미입력";
-            resultStudentNameEl.textContent = studentNameInput.value || "미입력";
-            totalSuccessEl.textContent = totalSuccess;
-            totalFailureEl.textContent = totalFailure;
-            
-            resultGridEl.innerHTML = ''; // 그리드 초기화
-            for(let i = 0; i < totalStages; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('result-cell');
-                cell.textContent = `S-${i+1}`;
-                if (stageResults[i] === true) {
-                    cell.classList.add('success');
                 } else {
-                    cell.classList.add('failure');
+                    // 아직 기회 남음
+                    showFailureModal(failureReasons, false);
+                    if (stageAttempts === 1) {
+                        attemptCounter.classList.add('text-red-600', 'font-bold');
+                        hintBtn.classList.remove('hidden'); // 힌트 버튼 표시
+                    }
                 }
-                resultGridEl.appendChild(cell);
             }
-            
-            resultsModal.classList.remove('hidden');
-        }
-
-        /**
-         * 게임 재시작
-         */
-        function restartGame() {
-            currentStageIndex = 0;
-            stageResults = [];
-            
-            // 버튼 및 UI 초기화
-            submitBtn.disabled = false;
-            nextBtn.classList.add('hidden');
-            restartBtn.classList.add('hidden');
-            
-            // 진행률 바 초기화
             updateProgressBar();
-            
-            // 시나리오 섞고 다시 로드
-            shuffleScenarios();
-            loadScenario();
         }
-        
-        // --- 모달 관련 함수 ---
 
         /**
-         * '실패' 팝업 표시
+         * '실패' 팝업을 표시하는 함수
+         * @param {string[]} reasons - 실패 사유 배열
+         * @param {boolean} isFinalAttempt - 마지막 시도였는지 여부
          */
-        function showFailureModal(reasons, deductAttempt, isFinalFailure = false) {
-            failureReasonsEl.innerHTML = '';
+        function showFailureModal(reasons, isFinalAttempt) {
+            failureReasonsEl.innerHTML = ''; // 리스트 초기화
             reasons.forEach(reason => {
                 const li = document.createElement('li');
                 li.textContent = reason;
                 failureReasonsEl.appendChild(li);
             });
-            
-            if (deductAttempt) {
-                remainingAttemptsEl.textContent = currentAttempts;
-                failureModal.querySelector('p[id="failure-attempt-info"]').classList.remove('hidden');
-            } else {
-                // 유효성 검사 실패 시
-                failureModal.querySelector('p[id="failure-attempt-info"]').classList.add('hidden');
-            }
 
-            if (isFinalFailure) {
-                failureModal.querySelector('h2').textContent = '🚫 도전 실패 🚫';
-                failureModal.querySelector('p').textContent = '다음 시나리오로 이동합니다.';
-                closeModalBtn.textContent = '확인 (다음으로)';
-                consultAiBtn.classList.add('hidden'); // 마지막엔 AI 컨설팅 비활성화
+            if (isFinalAttempt) {
+                closeModalBtn.textContent = '다음 시나리오로';
             } else {
-                failureModal.querySelector('h2').textContent = '🚫 건축 불허 🚫';
-                failureModal.querySelector('p').textContent = '설계안이 법규를 위반했습니다.';
-                closeModalBtn.textContent = '확인 (다시 도전)';
-                consultAiBtn.classList.remove('hidden');
+                closeModalBtn.textContent = '다시 설계하기';
             }
-            
-            // AI 컨설팅 영역 초기화
-            aiConsultingBox.classList.add('hidden');
-            aiConsultingResult.textContent = "AI의 답변을 기다리는 중...";
-            consultAiBtn.disabled = false;
             
             failureModal.classList.remove('hidden');
         }
-        
+
         /**
-         * '성공' 팝업 표시
+         * '성공' 팝업을 표시하는 함수
          */
         function showSuccessModal() {
             successModal.classList.remove('hidden');
         }
 
         /**
-         * '힌트' 팝업 표시
+         * 게임 완료 시 최종 결과 팝업을 표시하는 함수
          */
-        function showHintModal() {
-            const currentScenario = scenarios[currentStageIndex];
-            hintDetailsEl.innerHTML = '';
+        function showGameComplete() {
+            let successCount = 0;
+            let failureCount = 0;
             
-            const li1 = document.createElement('li');
-            li1.textContent = `제한 건폐율: ${currentScenario.bcrLimit} %`;
-            hintDetailsEl.appendChild(li1);
+            finalGridContainer.innerHTML = ''; // 그리드 초기화
             
-            const li2 = document.createElement('li');
-            li2.textContent = `제한 용적률: ${currentScenario.farLimit} %`;
-            hintDetailsEl.appendChild(li2);
-            
-            if (currentScenario.heightLimit) {
-                const li3 = document.createElement('li');
-                li3.textContent = `특별 제한: ${currentScenario.heightLimit} 층 이하`;
-                hintDetailsEl.appendChild(li3);
-            }
-            
-            hintModal.classList.remove('hidden');
-        }
-        
-        // --- Gemini API 호출 함수 ---
-        
-        /**
-         * Gemini API 호출 (재시도 포함)
-         */
-        async function callGeminiAPI() {
-            const apiKey = apiKeyInput.value;
-            if (!apiKey) {
-                return "API 키가 입력되지 않았습니다. 상단의 노란색 상자에 API 키를 입력해 주세요.";
-            }
+            stageResults.forEach((result, index) => {
+                const gridItem = document.createElement('div');
+                gridItem.classList.add('w-full', 'h-10', 'flex', 'items-center', 'justify-center', 'font-semibold', 'rounded');
+                gridItem.textContent = index + 1; // 단계 번호
 
-            const currentScenario = scenarios[currentStageIndex];
-            const userFloorArea = parseFloat(floorAreaInput.value);
-            const userFloorCount = parseInt(floorCountInput.value);
-
-            const prompt = `
-                당신은 친절한 건축법 튜터입니다. 학생이 건축 시뮬레이션에 실패했습니다.
-                학생의 실패 원인을 구체적인 숫자를 들어 설명하고, 정답을 직접 알려주지 말고 성공을 위한 힌트를 제공해주세요.
-
-                [시나리오 조건]
-                - 토지 용도: ${currentScenario.use}
-                - 대지 면적: ${currentScenario.land} ㎡
-                - 제한 건폐율: ${currentScenario.bcrLimit} %
-                - 제한 용적률: ${currentScenario.farLimit} %
-                - 특별 제한: ${currentScenario.heightLimit ? currentScenario.heightLimit + '층 이하' : '없음'}
-
-                [학생의 실패한 설계]
-                - 1층 바닥 면적: ${userFloorArea} ㎡
-                - 총 층수: ${userFloorCount} 층
-                
-                이제 이 학생에게 왜 실패했는지, 어떻게 수정하면 좋을지 힌트를 주세요.
-            `;
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: prompt }] }],
-            };
-            
-            let attempts = 0;
-            const maxAttempts = 3;
-            let delay = 1000;
-
-            while (attempts < maxAttempts) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        if (response.status === 429) { // API 속도 제한
-                            throw new Error('Rate limit exceeded');
-                        }
-                        const errorData = await response.json();
-                        return `API 오류 발생: ${errorData.error?.message || response.statusText}`;
-                    }
-
-                    const result = await response.json();
-                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    
-                    if (text) {
-                        return text;
-                    } else {
-                        return "AI로부터 유효한 답변을 받지 못했습니다. 응답 형식이 예상과 다릅니다.";
-                    }
-
-                } catch (error) {
-                    attempts++;
-                    if (error.message === 'Rate limit exceeded' && attempts < maxAttempts) {
-                        // console.warn(`Rate limit. Retrying in ${delay / 1000}s...`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; // Exponential backoff
-                    } else {
-                        // console.error('API call failed:', error);
-                        return `AI 컨설팅 호출 중 오류가 발생했습니다: ${error.message}`;
-                    }
+                if (result === 1) {
+                    successCount++;
+                    gridItem.classList.add('bg-green-500', 'text-white');
+                } else if (result === -1) {
+                    failureCount++;
+                    gridItem.classList.add('bg-red-500', 'text-white');
+                } else {
+                    gridItem.classList.add('bg-gray-300', 'text-gray-700'); // 미도전 (이론상 없어야 함)
                 }
-            }
-            
-            return "API 호출에 여러 번 실패했습니다. 네트워크 연결이나 API 키를 확인해 주세요.";
+                finalGridContainer.appendChild(gridItem);
+            });
+
+            finalSuccessCount.textContent = successCount;
+            finalFailureCount.textContent = failureCount;
+            finalStudentId.textContent = studentIdInput.value || '미입력';
+            finalStudentName.textContent = studentNameInput.value || '미입력';
+
+            finalResultModal.classList.remove('hidden');
         }
 
-        
+        /**
+         * 게임 재시작 함수
+         */
+        function restartGame() {
+            currentStageIndex = 0;
+            stageResults.fill(0);
+            stageAttempts = 3;
+            shuffleScenarios();
+            // loadScenario는 3D가 초기화 된 후에 호출되어야 함
+            // init3D(); // init3D는 이미 로드됨
+            loadScenario();
+            finalResultModal.classList.add('hidden');
+            
+            // 로비 화면으로 돌아감
+            gameScreen.classList.add('hidden');
+            lobbyScreen.classList.remove('hidden');
+        }
+
         // --- 이벤트 리스너 ---
         
-        // DOM 로드 완료 시
-        document.addEventListener('DOMContentLoaded', () => {
-            // 로비/게임 화면 전환 로직만 남김
-            // 3D 초기화 등은 '게임 시작' 버튼 클릭 시로 이동
-        });
-        
-        // '게임 시작' 버튼
+        // 게임 시작
         startGameBtn.addEventListener('click', () => {
             if (!studentIdInput.value || !studentNameInput.value) {
-                alert("학번과 이름을 모두 입력해 주세요.");
-                return;
+                if (!confirm('학번이나 이름이 입력되지 않았습니다. 그래도 시작하시겠습니까?')) {
+                    return;
+                }
             }
-            
             lobbyScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
             
-            // 게임 시작 시 3D 씬 초기화
-            if (!renderer) {
+            // ** 여기가 중요: 게임 화면이 표시된 *후에* 3D 초기화 **
+            if (!is3DInitialized) {
                 init3D();
             }
             
-            // 게임 시작 시 시나리오 섞기 및 로드
-            stageResults = []; // 결과 초기화
+            // 게임 상태 초기화 및 시작
             currentStageIndex = 0;
+            stageResults.fill(0);
+            stageAttempts = 3;
             shuffleScenarios();
-            createProgressBar();
             loadScenario();
         });
 
-        // '설계안 제출' 버튼
+        // 미리보기 버튼
+        previewBtn.addEventListener('click', handlePreview);
+        
+        // 제출 버튼
         submitBtn.addEventListener('click', handleSubmit);
 
-        // '다음 시나리오' 버튼
-        nextBtn.addEventListener('click', () => {
-            goToNextScenario();
-        });
-        
-        // '게임 다시 시작' 버튼 (게임 완료 후)
-        restartBtn.addEventListener('click', () => {
-            restartGame();
-        });
-        
-        // 'AI 컨설팅 받기' 버튼
-        consultAiBtn.addEventListener('click', async () => {
-            consultAiBtn.disabled = true;
-            aiConsultingBox.classList.remove('hidden');
-            aiConsultingResult.textContent = "AI 튜터가 답변을 생성 중입니다... (최대 30초)";
-            
-            const result = await callGeminiAPI();
-            
-            aiConsultingResult.textContent = result;
-            consultAiBtn.disabled = false; // 다시 질문할 수 있도록
-        });
-
-        // '실패' 모달 닫기 버튼
+        // 실패 팝업 닫기
         closeModalBtn.addEventListener('click', () => {
             failureModal.classList.add('hidden');
-            if (currentAttempts === 0) { // 마지막 실패였으면
-                goToNextScenario();
+            if (stageAttempts <= 0) {
+                // 다음 단계로
+                currentStageIndex++;
+                loadScenario();
             }
         });
 
-        // '성공' 모달 닫기 버튼
-        successNextBtn.addEventListener('click', () => {
+        // 성공 팝업 닫기 (다음으로)
+        nextScenarioBtn.addEventListener('click', () => {
             successModal.classList.add('hidden');
-            goToNextScenario();
+            currentStageIndex++;
+            loadScenario();
+        });
+
+        // 힌트 버튼
+        hintBtn.addEventListener('click', () => {
+            const currentScenario = shuffledScenarios[currentStageIndex];
+            hintBcrEl.textContent = `${currentScenario.bcrLimit} % 이하`;
+            hintFarEl.textContent = `${currentScenario.farLimit} % 이하`;
+            hintHeightEl.textContent = currentScenario.heightLimit ? `${currentScenario.heightLimit} 층 이하` : '없음';
+            hintModal.classList.remove('hidden');
         });
         
-        // '힌트' 모달 닫기 버튼
-        closeHintModalBtn.addEventListener('click', () => {
+        // 힌트 팝업 닫기
+        closeHintBtn.addEventListener('click', () => {
             hintModal.classList.add('hidden');
         });
-        
-        // '힌트 보기' 버튼
-        hintBtn.addEventListener('click', showHintModal);
-        
-        // '최종 결과' 모달 닫기 (게임 재시작)
-        closeResultsModalBtn.addEventListener('click', () => {
-            resultsModal.classList.add('hidden');
-            // 로비로 돌아가기
-            gameScreen.classList.add('hidden');
-            lobbyScreen.classList.remove('hidden');
-            // 3D 씬 정리 (필요 시)
-            // renderer.dispose(); ...
+
+        // 게임 재시작
+        restartGameBtn.addEventListener('click', restartGame);
+
+        // 프로그레스 바 초기 생성 (DOM 로드 시)
+        document.addEventListener('DOMContentLoaded', () => {
+            // 초기 프로그레스 바 생성 (내용 없이)
+            updateProgressBar();
         });
 
     </script>
