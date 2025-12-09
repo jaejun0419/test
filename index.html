@@ -1,328 +1,424 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Coffee, Brain, Armchair, Settings, X } from 'lucide-react';
-
-const App = () => {
-  // --- 상태 관리 ---
-  // 사용자 설정 시간 (분 단위)
-  const [customTimes, setCustomTimes] = useState({
-    focus: 25,
-    shortBreak: 5,
-    longBreak: 15
-  });
-  
-  // 설정 모달 상태
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  // 설정 변경 중 임시 저장값
-  const [tempTimes, setTempTimes] = useState(customTimes);
-
-  const [mode, setMode] = useState('focus'); // focus, shortBreak, longBreak
-  const [timeLeft, setTimeLeft] = useState(customTimes.focus * 60);
-  const [isActive, setIsActive] = useState(false);
-  
-  // 모드별 설정
-  const modes = {
-    focus: { 
-      label: '집중 모드', 
-      time: customTimes.focus * 60, 
-      color: 'text-red-500', 
-      strokeColor: 'text-red-500', 
-      bgColor: 'bg-red-500',
-      lightBg: 'bg-red-50',
-      icon: <Brain className="w-5 h-5" />
-    },
-    shortBreak: { 
-      label: '짧은 휴식', 
-      time: customTimes.shortBreak * 60, 
-      color: 'text-teal-500', 
-      strokeColor: 'text-teal-500',
-      bgColor: 'bg-teal-500',
-      lightBg: 'bg-teal-50',
-      icon: <Coffee className="w-5 h-5" />
-    },
-    longBreak: { 
-      label: '긴 휴식', 
-      time: customTimes.longBreak * 60, 
-      color: 'text-indigo-500', 
-      strokeColor: 'text-indigo-500',
-      bgColor: 'bg-indigo-500',
-      lightBg: 'bg-indigo-50',
-      icon: <Armchair className="w-5 h-5" />
-    }
-  };
-
-  const timerRef = useRef(null);
-
-  // --- 오디오 (비프음) ---
-  const playNotificationSound = () => {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      
-      const ctx = new AudioContext();
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(ctx.destination);
-
-      oscillator.type = 'sine';
-      oscillator.frequency.value = 880; 
-      gainNode.gain.value = 0.1;
-
-      oscillator.start();
-      setTimeout(() => {
-        oscillator.stop();
-        ctx.close();
-      }, 500);
-    } catch (e) {
-      console.error("Audio play failed", e);
-    }
-  };
-
-  // --- 타이머 로직 ---
-  useEffect(() => {
-    if (isActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
-      clearInterval(timerRef.current);
-      playNotificationSound();
-    }
-
-    return () => clearInterval(timerRef.current);
-  }, [isActive, timeLeft]);
-
-  // 모드 변경 핸들러
-  const switchMode = (newMode) => {
-    setMode(newMode);
-    setIsActive(false);
-    setTimeLeft(modes[newMode].time); 
-  };
-
-  // 타이머 제어
-  const toggleTimer = () => setIsActive(!isActive);
-  const resetTimer = () => {
-    setIsActive(false);
-    setTimeLeft(modes[mode].time);
-  };
-
-  // 설정 관련 핸들러
-  const openSettings = () => {
-    setTempTimes(customTimes);
-    setIsSettingsOpen(true);
-  };
-
-  const handleTimeChange = (e) => {
-    const { name, value } = e.target;
-    setTempTimes(prev => ({
-      ...prev,
-      [name]: parseInt(value) || 1 
-    }));
-  };
-
-  const saveSettings = () => {
-    setCustomTimes(tempTimes);
-    setIsSettingsOpen(false);
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
     
-    if (!isActive) {
-      const newTimeForCurrentMode = tempTimes[mode] * 60;
-      setTimeLeft(newTimeForCurrentMode);
-    }
-  };
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (JSX 변환용) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  // 시간 포맷 (MM:SS)
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+    <style>
+        /* 커스텀 스크롤바 등 추가 스타일 */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
 
-  // --- SVG 원형 타이머 설정 ---
-  const radius = 120;
-  const strokeWidth = 40; // 두께를 40으로 증가시켜 더 굵은 라인 표현
-  const normalizedRadius = radius - strokeWidth / 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  
-  const currentTotalTime = modes[mode].time;
-  const progressRatio = timeLeft / currentTotalTime;
-  const strokeDashoffset = circumference - progressRatio * circumference;
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-  return (
-    <div className={`h-screen w-screen overflow-hidden transition-colors duration-500 ease-in-out ${modes[mode].lightBg} font-sans text-slate-800`}>
-      
-      {/* 모바일 최적화 컨테이너 */}
-      <div className="flex flex-col h-full max-w-lg mx-auto bg-white/50 sm:bg-transparent shadow-none sm:shadow-2xl sm:rounded-[3rem] sm:h-[90vh] sm:my-[5vh] sm:overflow-hidden relative">
-        
-        {/* 1. 상단 바 (헤더 & 설정) */}
-        <div className="flex justify-between items-center px-6 pt-8 pb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-700 tracking-tight">Pomodoro</h1>
-            <p className="text-xs text-slate-500 font-medium opacity-80">FOCUS & RELAX</p>
-          </div>
-          <button 
-            onClick={openSettings}
-            className="p-3 text-slate-400 hover:text-slate-600 hover:bg-slate-100/80 rounded-full transition-all active:scale-95"
-          >
-            <Settings className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* 2. 모드 탭 */}
-        <div className="px-6 mb-4">
-          <div className="flex justify-between bg-slate-100/80 backdrop-blur-sm rounded-2xl p-1.5">
-            {Object.keys(modes).map((m) => (
-              <button
-                key={m}
-                onClick={() => switchMode(m)}
-                className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  mode === m 
-                    ? 'bg-white text-slate-800 shadow-sm' 
-                    : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                {modes[m].icon}
-                <span className="hidden sm:inline">{modes[m].label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 3. 타이머 디스플레이 (단순 원형) */}
-        <div className="flex-1 flex flex-col items-center justify-center min-h-0 py-6">
-          <div className="relative aspect-square w-full max-w-[320px] px-6 flex items-center justify-center">
-            <svg
-              className="transform -rotate-90 w-full h-full"
-              viewBox={`0 0 ${radius * 2} ${radius * 2}`}
+        // --- 아이콘 컴포넌트 (Lucide 대체) ---
+        const IconBase = ({ children, className }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
             >
-              <circle
-                className="text-slate-200"
-                strokeWidth={strokeWidth}
-                stroke="currentColor"
-                fill="transparent"
-                r={normalizedRadius}
-                cx={radius}
-                cy={radius}
-              />
-              <circle
-                className={`${modes[mode].strokeColor} transition-all duration-500 ease-linear`}
-                strokeWidth={strokeWidth}
-                strokeDasharray={circumference + ' ' + circumference}
-                style={{ strokeDashoffset }}
-                strokeLinecap="round"
-                stroke="currentColor"
-                fill="transparent"
-                r={normalizedRadius}
-                cx={radius}
-                cy={radius}
-              />
+                {children}
             </svg>
+        );
+
+        const Play = ({ className }) => (
+            <IconBase className={className}><polygon points="5 3 19 12 5 21 5 3"></polygon></IconBase>
+        );
+        const Pause = ({ className }) => (
+            <IconBase className={className}><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></IconBase>
+        );
+        const RotateCcw = ({ className }) => (
+            <IconBase className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"></path><path d="M3 3v9h9"></path></IconBase>
+        );
+        const Settings = ({ className }) => (
+            <IconBase className={className}>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </IconBase>
+        );
+        const X = ({ className }) => (
+            <IconBase className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconBase>
+        );
+        const Brain = ({ className }) => (
+            <IconBase className={className}>
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
+            </IconBase>
+        );
+        const Coffee = ({ className }) => (
+            <IconBase className={className}>
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path>
+                <line x1="6" y1="1" x2="6" y2="4"></line>
+                <line x1="10" y1="1" x2="10" y2="4"></line>
+                <line x1="14" y1="1" x2="14" y2="4"></line>
+            </IconBase>
+        );
+        const Armchair = ({ className }) => (
+            <IconBase className={className}>
+                <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"></path>
+                <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z"></path>
+                <path d="M5 18v2"></path>
+                <path d="M19 18v2"></path>
+            </IconBase>
+        );
+
+        const App = () => {
+            // --- 상태 관리 ---
+            // 사용자 설정 시간 (분 단위)
+            const [customTimes, setCustomTimes] = useState({
+                focus: 25,
+                shortBreak: 5,
+                longBreak: 15
+            });
             
-            {/* 중앙 텍스트 */}
-            <div className="absolute flex flex-col items-center justify-center">
-              <div className={`text-5xl sm:text-6xl font-bold tracking-tight ${modes[mode].color} tabular-nums`}>
-                {formatTime(timeLeft)}
-              </div>
-              <div className="text-sm text-slate-400 font-medium mt-2 uppercase tracking-wider">
-                {isActive ? 'RUNNING' : 'PAUSED'}
-              </div>
-            </div>
-          </div>
-        </div>
+            // 설정 모달 상태
+            const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+            // 설정 변경 중 임시 저장값
+            const [tempTimes, setTempTimes] = useState(customTimes);
 
-        {/* 4. 하단 컨트롤 바 */}
-        <div className="px-8 pb-12 pt-4">
-          <div className="flex gap-4 h-20">
-            <button
-              onClick={toggleTimer}
-              className={`flex-[3] rounded-3xl flex items-center justify-center text-white text-xl font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95 active:shadow-md ${modes[mode].bgColor}`}
-            >
-              {isActive ? (
-                <>
-                  <Pause className="mr-2 w-7 h-7" fill="currentColor" />
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2 w-7 h-7" fill="currentColor" />
-                  START
-                </>
-              )}
-            </button>
-            <button
-              onClick={resetTimer}
-              className="flex-1 rounded-3xl flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:bg-slate-50 hover:text-slate-600 shadow-lg hover:shadow-xl transition-all active:scale-95"
-              aria-label="리셋"
-            >
-              <RotateCcw className="w-7 h-7" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 설정 모달 (모바일 풀스크린 스타일) */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-t-[2rem] sm:rounded-3xl shadow-2xl p-6 w-full max-w-sm animate-in slide-in-from-bottom duration-300">
-            <div className="flex justify-between items-center mb-8 pt-2">
-              <h2 className="text-xl font-bold text-slate-700 ml-2">타이머 설정</h2>
-              <button 
-                onClick={() => setIsSettingsOpen(false)}
-                className="p-2 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            const [mode, setMode] = useState('focus'); // focus, shortBreak, longBreak
+            const [timeLeft, setTimeLeft] = useState(customTimes.focus * 60);
+            const [isActive, setIsActive] = useState(false);
             
-            <div className="space-y-5 mb-8">
-              <div>
-                <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">집중 모드 (분)</label>
-                <input
-                  type="number"
-                  name="focus"
-                  min="1"
-                  value={tempTimes.focus}
-                  onChange={handleTimeChange}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-red-400 focus:bg-white transition-colors"
-                />
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">짧은 휴식</label>
-                  <input
-                    type="number"
-                    name="shortBreak"
-                    min="1"
-                    value={tempTimes.shortBreak}
-                    onChange={handleTimeChange}
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-teal-400 focus:bg-white transition-colors"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">긴 휴식</label>
-                  <input
-                    type="number"
-                    name="longBreak"
-                    min="1"
-                    value={tempTimes.longBreak}
-                    onChange={handleTimeChange}
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-indigo-400 focus:bg-white transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
+            // 모드별 설정
+            const modes = {
+                focus: { 
+                label: '집중 모드', 
+                time: customTimes.focus * 60, 
+                color: 'text-red-500', 
+                strokeColor: 'text-red-500', 
+                bgColor: 'bg-red-500',
+                lightBg: 'bg-red-50',
+                icon: <Brain className="w-5 h-5" />
+                },
+                shortBreak: { 
+                label: '짧은 휴식', 
+                time: customTimes.shortBreak * 60, 
+                color: 'text-teal-500', 
+                strokeColor: 'text-teal-500', 
+                bgColor: 'bg-teal-500',
+                lightBg: 'bg-teal-50',
+                icon: <Coffee className="w-5 h-5" />
+                },
+                longBreak: { 
+                label: '긴 휴식', 
+                time: customTimes.longBreak * 60, 
+                color: 'text-indigo-500', 
+                strokeColor: 'text-indigo-500', 
+                bgColor: 'bg-indigo-500',
+                lightBg: 'bg-indigo-50',
+                icon: <Armchair className="w-5 h-5" />
+                }
+            };
 
-            <button
-              onClick={saveSettings}
-              className="w-full bg-slate-900 text-white font-bold text-lg py-4 rounded-2xl hover:bg-slate-800 active:scale-95 transition-all shadow-xl mb-4"
-            >
-              설정 저장
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+            const timerRef = useRef(null);
 
-export default App;
+            // --- 오디오 (비프음) ---
+            const playNotificationSound = () => {
+                try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                
+                const ctx = new AudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 880; 
+                gainNode.gain.value = 0.1;
+
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                    ctx.close();
+                }, 500);
+                } catch (e) {
+                console.error("Audio play failed", e);
+                }
+            };
+
+            // --- 타이머 로직 ---
+            useEffect(() => {
+                if (isActive && timeLeft > 0) {
+                timerRef.current = setInterval(() => {
+                    setTimeLeft((prev) => prev - 1);
+                }, 1000);
+                } else if (timeLeft === 0) {
+                setIsActive(false);
+                clearInterval(timerRef.current);
+                playNotificationSound();
+                }
+
+                return () => clearInterval(timerRef.current);
+            }, [isActive, timeLeft]);
+
+            // 모드 변경 핸들러
+            const switchMode = (newMode) => {
+                setMode(newMode);
+                setIsActive(false);
+                setTimeLeft(modes[newMode].time); 
+            };
+
+            // 타이머 제어
+            const toggleTimer = () => setIsActive(!isActive);
+            const resetTimer = () => {
+                setIsActive(false);
+                setTimeLeft(modes[mode].time);
+            };
+
+            // 설정 관련 핸들러
+            const openSettings = () => {
+                setTempTimes(customTimes);
+                setIsSettingsOpen(true);
+            };
+
+            const handleTimeChange = (e) => {
+                const { name, value } = e.target;
+                setTempTimes(prev => ({
+                ...prev,
+                [name]: parseInt(value) || 1 
+                }));
+            };
+
+            const saveSettings = () => {
+                setCustomTimes(tempTimes);
+                setIsSettingsOpen(false);
+                
+                if (!isActive) {
+                const newTimeForCurrentMode = tempTimes[mode] * 60;
+                setTimeLeft(newTimeForCurrentMode);
+                }
+            };
+
+            // 시간 포맷 (MM:SS)
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            // --- SVG 원형 타이머 설정 ---
+            const radius = 120;
+            const strokeWidth = 40; // 두께
+            const normalizedRadius = radius - strokeWidth / 2;
+            const circumference = normalizedRadius * 2 * Math.PI;
+            
+            const currentTotalTime = modes[mode].time;
+            const progressRatio = timeLeft / currentTotalTime;
+            const strokeDashoffset = circumference - progressRatio * circumference;
+
+            return (
+                <div className={`h-screen w-screen overflow-hidden transition-colors duration-500 ease-in-out ${modes[mode].lightBg} font-sans text-slate-800`}>
+                
+                {/* 모바일 최적화 컨테이너 */}
+                <div className="flex flex-col h-full max-w-lg mx-auto bg-white/50 sm:bg-transparent shadow-none sm:shadow-2xl sm:rounded-[3rem] sm:h-[90vh] sm:my-[5vh] sm:overflow-hidden relative">
+                    
+                    {/* 1. 상단 바 (헤더 & 설정) */}
+                    <div className="flex justify-between items-center px-6 pt-8 pb-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-700 tracking-tight">Pomodoro</h1>
+                        <p className="text-xs text-slate-500 font-medium opacity-80">FOCUS & RELAX</p>
+                    </div>
+                    <button 
+                        onClick={openSettings}
+                        className="p-3 text-slate-400 hover:text-slate-600 hover:bg-slate-100/80 rounded-full transition-all active:scale-95"
+                    >
+                        <Settings className="w-6 h-6" />
+                    </button>
+                    </div>
+
+                    {/* 2. 모드 탭 */}
+                    <div className="px-6 mb-4">
+                    <div className="flex justify-between bg-slate-100/80 backdrop-blur-sm rounded-2xl p-1.5">
+                        {Object.keys(modes).map((m) => (
+                        <button
+                            key={m}
+                            onClick={() => switchMode(m)}
+                            className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                            mode === m 
+                                ? 'bg-white text-slate-800 shadow-sm' 
+                                : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                        >
+                            {modes[m].icon}
+                            <span className="hidden sm:inline">{modes[m].label}</span>
+                        </button>
+                        ))}
+                    </div>
+                    </div>
+
+                    {/* 3. 타이머 디스플레이 (단순 원형) */}
+                    <div className="flex-1 flex flex-col items-center justify-center min-h-0 py-6">
+                    <div className="relative aspect-square w-full max-w-[320px] px-6 flex items-center justify-center">
+                        <svg
+                        className="transform -rotate-90 w-full h-full"
+                        viewBox={`0 0 ${radius * 2} ${radius * 2}`}
+                        >
+                        <circle
+                            className="text-slate-200"
+                            strokeWidth={strokeWidth}
+                            stroke="currentColor"
+                            fill="transparent"
+                            r={normalizedRadius}
+                            cx={radius}
+                            cy={radius}
+                        />
+                        <circle
+                            className={`${modes[mode].strokeColor} transition-all duration-500 ease-linear`}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={circumference + ' ' + circumference}
+                            style={{ strokeDashoffset }}
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="transparent"
+                            r={normalizedRadius}
+                            cx={radius}
+                            cy={radius}
+                        />
+                        </svg>
+                        
+                        {/* 중앙 텍스트 */}
+                        <div className="absolute flex flex-col items-center justify-center">
+                        <div className={`text-5xl sm:text-6xl font-bold tracking-tight ${modes[mode].color} tabular-nums`}>
+                            {formatTime(timeLeft)}
+                        </div>
+                        <div className="text-sm text-slate-400 font-medium mt-2 uppercase tracking-wider">
+                            {isActive ? 'RUNNING' : 'PAUSED'}
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    {/* 4. 하단 컨트롤 바 */}
+                    <div className="px-8 pb-12 pt-4">
+                    <div className="flex gap-4 h-20">
+                        <button
+                        onClick={toggleTimer}
+                        className={`flex-[3] rounded-3xl flex items-center justify-center text-white text-xl font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95 active:shadow-md ${modes[mode].bgColor}`}
+                        >
+                        {isActive ? (
+                            <div className="flex items-center">
+                                <Pause className="mr-2 w-7 h-7" />
+                            </div>
+                        ) : (
+                            <div className="flex items-center">
+                                <Play className="mr-2 w-7 h-7" />
+                                <span>START</span>
+                            </div>
+                        )}
+                        </button>
+                        <button
+                        onClick={resetTimer}
+                        className="flex-1 rounded-3xl flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:bg-slate-50 hover:text-slate-600 shadow-lg hover:shadow-xl transition-all active:scale-95"
+                        aria-label="리셋"
+                        >
+                        <RotateCcw className="w-7 h-7" />
+                        </button>
+                    </div>
+                    </div>
+                </div>
+
+                {/* 설정 모달 (모바일 풀스크린 스타일) */}
+                {isSettingsOpen && (
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-t-[2rem] sm:rounded-3xl shadow-2xl p-6 w-full max-w-sm animate-in slide-in-from-bottom duration-300">
+                        <div className="flex justify-between items-center mb-8 pt-2">
+                        <h2 className="text-xl font-bold text-slate-700 ml-2">타이머 설정</h2>
+                        <button 
+                            onClick={() => setIsSettingsOpen(false)}
+                            className="p-2 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        </div>
+                        
+                        <div className="space-y-5 mb-8">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">집중 모드 (분)</label>
+                            <input
+                            type="number"
+                            name="focus"
+                            min="1"
+                            value={tempTimes.focus}
+                            onChange={handleTimeChange}
+                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-red-400 focus:bg-white transition-colors"
+                            />
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                            <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">짧은 휴식</label>
+                            <input
+                                type="number"
+                                name="shortBreak"
+                                min="1"
+                                value={tempTimes.shortBreak}
+                                onChange={handleTimeChange}
+                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-teal-400 focus:bg-white transition-colors"
+                            />
+                            </div>
+                            <div className="flex-1">
+                            <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">긴 휴식</label>
+                            <input
+                                type="number"
+                                name="longBreak"
+                                min="1"
+                                value={tempTimes.longBreak}
+                                onChange={handleTimeChange}
+                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-indigo-400 focus:bg-white transition-colors"
+                            />
+                            </div>
+                        </div>
+                        </div>
+
+                        <button
+                        onClick={saveSettings}
+                        className="w-full bg-slate-900 text-white font-bold text-lg py-4 rounded-2xl hover:bg-slate-800 active:scale-95 transition-all shadow-xl mb-4"
+                        >
+                        설정 저장
+                        </button>
+                    </div>
+                    </div>
+                )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
