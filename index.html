@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pomodoro Timer</title>
     
     <!-- Tailwind CSS -->
@@ -29,8 +29,8 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div id="root"></div>
+<body class="bg-gray-50 overflow-hidden fixed w-full h-full">
+    <div id="root" class="w-full h-full"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -57,7 +57,6 @@
         const Pause = ({ className }) => (
             <IconBase className={className}><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></IconBase>
         );
-        // 재시작 아이콘 변경 (새로고침 스타일)
         const RefreshCw = ({ className }) => (
             <IconBase className={className}>
                 <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
@@ -90,10 +89,10 @@
                 <line x1="14" y1="1" x2="14" y2="4"></line>
             </IconBase>
         );
-        // Armchair 아이콘 삭제됨 (긴 휴식 제거)
 
         const App = () => {
             // --- 상태 관리 ---
+            // 긴 휴식(longBreak) 제거
             const [customTimes, setCustomTimes] = useState({
                 focus: 25,
                 shortBreak: 5
@@ -106,7 +105,7 @@
             const [timeLeft, setTimeLeft] = useState(customTimes.focus * 60);
             const [isActive, setIsActive] = useState(false);
             
-            // 60분 고정 기준 상수 (초 단위)
+            // 60분 고정 스케일을 위한 상수 (초 단위)
             const MAX_SECONDS = 3600;
 
             const modes = {
@@ -128,7 +127,6 @@
                     lightBg: 'bg-teal-50',
                     icon: <Coffee className="w-5 h-5" />
                 }
-                // Long Break 제거됨
             };
 
             const timerRef = useRef(null);
@@ -194,7 +192,6 @@
 
             const handleTimeChange = (e) => {
                 const { name, value } = e.target;
-                // 최대 60분으로 제한
                 const numValue = Math.min(parseInt(value) || 1, 60);
                 setTempTimes(prev => ({
                     ...prev,
@@ -219,7 +216,6 @@
             };
 
             // --- 시계 다이얼 및 타이머 SVG 설정 ---
-            // svgSize를 340 -> 400으로 키워 전체 해상도 및 크기 증가
             const svgSize = 400;
             const center = svgSize / 2;
             
@@ -230,38 +226,72 @@
             const renderWidth = timerRadius;
             const circumference = renderRadius * 2 * Math.PI;
 
-            // [변경 핵심] 기준 시간을 항상 60분(MAX_SECONDS)으로 고정
-            // 설정 시간이 25분이면 25/60 만큼만 채워진 상태로 시작
+            // 60분을 기준으로 한 진행률 계산
             const progressRatio = timeLeft / MAX_SECONDS;
-            
-            // strokeDasharray 설정: [채워질 길이, 빈 공간 길이]
-            // SVG는 시작점(12시)에서 시계방향으로 그려지므로, 
-            // 25분 남았을 때 0~25분 구간이 칠해지고, 시간이 줄면 25분 지점이 0쪽으로 줄어듦
             const strokeDasharray = `${circumference * progressRatio} ${circumference}`;
 
             // 외부 숫자 및 눈금 설정
-            const dialRadius = 170; 
-            const tickRadius = 150; 
+            const dialRadius = 170; // 숫자 배치 반지름
+            const tickRadius = 150; // 눈금 배치 반지름
             const numbers = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
             return (
-                <div className={`h-screen w-screen overflow-hidden transition-colors duration-500 ease-in-out ${modes[mode].lightBg} font-sans text-slate-800`}>
+                <div className={`h-full w-full flex flex-col transition-colors duration-500 ease-in-out ${modes[mode].lightBg} font-sans text-slate-800`}>
                 
-                <div className="flex flex-col h-full max-w-lg mx-auto bg-white/50 sm:bg-transparent shadow-none sm:shadow-2xl sm:rounded-[3rem] sm:h-[90vh] sm:my-[5vh] sm:overflow-hidden relative">
+                <div className="flex flex-col h-full w-full max-w-lg mx-auto bg-white/50 sm:bg-transparent shadow-none sm:shadow-2xl sm:rounded-[3rem] sm:h-[90vh] sm:my-[5vh] sm:overflow-hidden relative">
                     
-                    {/* 상단 탭 영역 */}
-                    {/* ... existing code ... */}
+                    {/* 상단 탭 영역: 상단 여백 대폭 감소 (mt-16 -> mt-6) */}
+                    <div className="px-6 mt-6 mb-2 flex-shrink-0">
+                        <div className="flex justify-between bg-slate-100/80 backdrop-blur-sm rounded-2xl p-1.5 shadow-inner">
+                            {/* Focus Mode Button */}
+                            <button
+                                onClick={() => switchMode('focus')}
+                                className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                mode === 'focus' 
+                                    ? 'bg-white text-slate-800 shadow-sm' 
+                                    : 'text-slate-400 hover:text-slate-600'
+                                }`}
+                            >
+                                <Brain className="w-4 h-4" />
+                                <span className="hidden sm:inline">집중 모드</span>
+                            </button>
 
-                    {/* 메인 컨텐츠 영역 */}
-                    <div className="flex-1 flex flex-col items-center justify-center min-h-0 relative">
+                            {/* Short Break Button */}
+                            <button
+                                onClick={() => switchMode('shortBreak')}
+                                className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                mode === 'shortBreak' 
+                                    ? 'bg-white text-slate-800 shadow-sm' 
+                                    : 'text-slate-400 hover:text-slate-600'
+                                }`}
+                            >
+                                <Coffee className="w-4 h-4" />
+                                <span className="hidden sm:inline">짧은 휴식</span>
+                            </button>
+
+                            {/* Settings Button (탭 영역으로 이동) */}
+                            <button
+                                onClick={openSettings}
+                                className="flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-white/50 transition-all duration-300"
+                            >
+                                <Settings className="w-4 h-4" />
+                                <span className="hidden sm:inline">설정</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 메인 컨텐츠 영역 - justify-center로 중앙 정렬 및 gap으로 안전 거리 확보 */}
+                    <div className="flex-1 flex flex-col items-center justify-center min-h-0 relative px-4 gap-6">
                         
-                        {/* 아날로그 타이머 */}
-                        <div className="relative aspect-square w-full max-w-[400px] px-2 flex items-center justify-center translate-y-4">
+                        {/* 아날로그 타이머 
+                            - max-h-[45vh] 추가: 화면 높이가 작으면 타이머도 작아짐
+                            - width는 반응형 유지
+                        */}
+                        <div className="relative aspect-square w-full max-w-[340px] max-h-[45vh] flex items-center justify-center flex-shrink">
                             <svg
-                                width={svgSize}
-                                height={svgSize}
                                 viewBox={`0 0 ${svgSize} ${svgSize}`}
                                 className="w-full h-full"
+                                preserveAspectRatio="xMidYMid meet"
                             >
                                 {/* 배경 원 */}
                                 <circle cx={center} cy={center} r={timerRadius + 25} fill="white" className="shadow-sm drop-shadow-md" />
@@ -334,8 +364,8 @@
                             </svg>
                         </div>
                         
-                        {/* 디지털 시간 표시 */}
-                        <div className="flex flex-col items-center justify-center mt-0 mb-4">
+                        {/* 디지털 시간 표시 - 유연한 간격 */}
+                        <div className="flex flex-col items-center justify-center flex-shrink-0">
                             <div className={`text-6xl font-bold tracking-tighter ${modes[mode].color} tabular-nums`}>
                                 {formatTime(timeLeft)}
                             </div>
@@ -346,8 +376,8 @@
                     </div>
 
                     {/* 하단 컨트롤 바 */}
-                    <div className="px-8 pb-12 pt-4">
-                        <div className="flex gap-4 h-20">
+                    <div className="px-8 pb-8 pt-2 flex-shrink-0">
+                        <div className="flex gap-4 h-16 sm:h-20">
                             {/* Start/Pause Button */}
                             <button
                                 onClick={toggleTimer}
@@ -408,6 +438,8 @@
                                     <span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-medium">분</span>
                                 </div>
                             </div>
+                            
+                            {/* 짧은 휴식 (긴 휴식 제거됨) */}
                             <div>
                                 <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">짧은 휴식 (최대 60분)</label>
                                 <div className="relative">
@@ -443,3 +475,4 @@
     </script>
 </body>
 </html>
+
