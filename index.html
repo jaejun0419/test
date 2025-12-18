@@ -1,478 +1,119 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pomodoro Timer</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel (JSX 변환용) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+import React from 'react';
+import { motion } from 'framer-motion';
+import { FileDown } from 'lucide-react';
 
-    <style>
-        /* 커스텀 스크롤바 등 추가 스타일 */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 20px;
-        }
-    </style>
-</head>
-<body class="bg-gray-50 overflow-hidden fixed w-full h-full">
-    <div id="root" class="w-full h-full"></div>
+// 로고 컴포넌트 (SVG) - 실제 이미지 파일이 있다면 <img src="..." />로 대체 가능합니다.
+const Logo = () => (
+  <svg viewBox="0 0 600 120" className="w-full h-full overflow-visible" xmlns="http://www.w3.org/2000/svg" aria-label="아난티 앳 순천 로고">
+    <text 
+      x="50%" 
+      y="55%" 
+      textAnchor="middle" 
+      dominantBaseline="middle" 
+      fill="white" 
+      fontSize="72" 
+      fontFamily="serif" 
+      fontWeight="bold" 
+      letterSpacing="0.05em"
+      className="drop-shadow-lg"
+    >
+      아난티 앳 순천
+    </text>
+  </svg>
+);
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+export default function AnantiSuncheonSimple() {
+  
+  // 실제 환경에서는 업로드된 PDF 파일의 경로를 여기에 입력해야 합니다.
+  const pdfFileName = "경제성분석_아난티최종(판넬).pdf";
+  const handleDownload = () => {
+    // 데모용 알림입니다. 실제 배포 시에는 <a> 태그의 download 속성을 사용합니다.
+    alert(`'${pdfFileName}' 다운로드를 시작합니다.`);
+  };
 
-        // --- 아이콘 컴포넌트 ---
-        const IconBase = ({ children, className }) => (
-            <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className={className}
-            >
-                {children}
-            </svg>
-        );
+  return (
+    <div className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-center bg-[#111] text-white font-sans selection:bg-[#E05A00] selection:text-white">
+      
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        {/* [변경됨] 배경 이미지를 '배경.png'로 설정했습니다.
+          이 파일(배경.png)을 프로젝트의 public 폴더나 이미지가 호스팅된 경로에 위치시켜주세요.
+        */}
+        <img 
+          src="배경.png" 
+          onError={(e) => {
+            // 이미지가 없을 경우를 대비한 대체 이미지 (에러 방지용)
+            e.target.onerror = null; 
+            e.target.src = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop";
+          }}
+          alt="Suncheon Bay Background" 
+          className="w-full h-full object-cover opacity-60 filter grayscale-[30%]"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
 
-        const Play = ({ className }) => (
-            <IconBase className={className}><polygon points="5 3 19 12 5 21 5 3"></polygon></IconBase>
-        );
-        const Pause = ({ className }) => (
-            <IconBase className={className}><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></IconBase>
-        );
-        const RefreshCw = ({ className }) => (
-            <IconBase className={className}>
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
-                <path d="M21 3v5h-5"></path>
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
-                <path d="M8 16H3v5"></path>
-            </IconBase>
-        );
-        const Settings = ({ className }) => (
-            <IconBase className={className}>
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-            </IconBase>
-        );
-        const X = ({ className }) => (
-            <IconBase className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconBase>
-        );
-        const Brain = ({ className }) => (
-            <IconBase className={className}>
-                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
-                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
-            </IconBase>
-        );
-        const Coffee = ({ className }) => (
-            <IconBase className={className}>
-                <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
-                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path>
-                <line x1="6" y1="1" x2="6" y2="4"></line>
-                <line x1="10" y1="1" x2="10" y2="4"></line>
-                <line x1="14" y1="1" x2="14" y2="4"></line>
-            </IconBase>
-        );
+      {/* Main Content */}
+      <div className="relative z-10 text-center px-4 flex flex-col items-center w-full max-w-4xl">
+        
+        {/* Small Tagline */}
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 1, delay: 0.5 }}
+          className="text-xs md:text-sm lg:text-base tracking-[0.1em] mb-8 text-white/90 font-light"
+        >
+          대한민국 생태수도 순천, 럭셔리 웰니스 리조트의 등장
+        </motion.p>
 
-        const App = () => {
-            // --- 상태 관리 ---
-            // 긴 휴식(longBreak) 제거
-            const [customTimes, setCustomTimes] = useState({
-                focus: 25,
-                shortBreak: 5
-            });
-            
-            const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-            const [tempTimes, setTempTimes] = useState(customTimes);
+        {/* Logo Replacement */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }} 
+          animate={{ opacity: 1, scale: 1 }} 
+          transition={{ duration: 1, delay: 0.8 }}
+          className="w-full max-w-[600px] h-auto mb-10 md:mb-12"
+        >
+          <Logo />
+        </motion.div>
 
-            const [mode, setMode] = useState('focus'); 
-            const [timeLeft, setTimeLeft] = useState(customTimes.focus * 60);
-            const [isActive, setIsActive] = useState(false);
-            
-            // 60분 고정 스케일을 위한 상수 (초 단위)
-            const MAX_SECONDS = 3600;
+        {/* Divider */}
+        <motion.div
+           initial={{ height: 0 }} 
+           animate={{ height: "4rem" }} 
+           transition={{ duration: 1, delay: 1.2 }}
+           className="w-[1px] bg-white/50 mb-12"
+        />
 
-            const modes = {
-                focus: { 
-                    label: '집중 모드', 
-                    time: customTimes.focus * 60, 
-                    color: 'text-red-500', 
-                    strokeColor: 'text-red-500', 
-                    bgColor: 'bg-red-500',
-                    lightBg: 'bg-red-50',
-                    icon: <Brain className="w-5 h-5" />
-                },
-                shortBreak: { 
-                    label: '짧은 휴식', 
-                    time: customTimes.shortBreak * 60, 
-                    color: 'text-teal-500', 
-                    strokeColor: 'text-teal-500', 
-                    bgColor: 'bg-teal-500',
-                    lightBg: 'bg-teal-50',
-                    icon: <Coffee className="w-5 h-5" />
-                }
-            };
+        {/* Download Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.5 }}
+          whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleDownload}
+          className="group flex items-center gap-3 px-8 py-4 border border-white/30 backdrop-blur-sm bg-white/5 hover:border-white transition-all duration-500 rounded-sm"
+        >
+          <FileDown className="w-5 h-5 text-[#E05A00] group-hover:text-white transition-colors duration-300" />
+          <span className="font-serif tracking-widest text-sm md:text-base">
+            PROJECT ANALYSIS PDF
+          </span>
+        </motion.button>
 
-            const timerRef = useRef(null);
+        <motion.p
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           transition={{ duration: 1, delay: 2.0 }}
+           className="mt-4 text-[10px] text-white/40 tracking-wider font-light"
+        >
+          경제성 분석 보고서 (2025-2)
+        </motion.p>
 
-            // --- 오디오 ---
-            const playNotificationSound = () => {
-                try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioContext) return;
-                    
-                    const ctx = new AudioContext();
-                    const oscillator = ctx.createOscillator();
-                    const gainNode = ctx.createGain();
+      </div>
 
-                    oscillator.connect(gainNode);
-                    gainNode.connect(ctx.destination);
-
-                    oscillator.type = 'sine';
-                    oscillator.frequency.value = 880; 
-                    gainNode.gain.value = 0.1;
-
-                    oscillator.start();
-                    setTimeout(() => {
-                        oscillator.stop();
-                        ctx.close();
-                    }, 500);
-                } catch (e) {
-                    console.error("Audio play failed", e);
-                }
-            };
-
-            // --- 타이머 로직 ---
-            useEffect(() => {
-                if (isActive && timeLeft > 0) {
-                    timerRef.current = setInterval(() => {
-                        setTimeLeft((prev) => prev - 1);
-                    }, 1000);
-                } else if (timeLeft === 0) {
-                    setIsActive(false);
-                    clearInterval(timerRef.current);
-                    playNotificationSound();
-                }
-
-                return () => clearInterval(timerRef.current);
-            }, [isActive, timeLeft]);
-
-            const switchMode = (newMode) => {
-                setMode(newMode);
-                setIsActive(false);
-                setTimeLeft(modes[newMode].time); 
-            };
-
-            const toggleTimer = () => setIsActive(!isActive);
-            const resetTimer = () => {
-                setIsActive(false);
-                setTimeLeft(modes[mode].time);
-            };
-
-            const openSettings = () => {
-                setTempTimes(customTimes);
-                setIsSettingsOpen(true);
-            };
-
-            const handleTimeChange = (e) => {
-                const { name, value } = e.target;
-                const numValue = Math.min(parseInt(value) || 1, 60);
-                setTempTimes(prev => ({
-                    ...prev,
-                    [name]: numValue
-                }));
-            };
-
-            const saveSettings = () => {
-                setCustomTimes(tempTimes);
-                setIsSettingsOpen(false);
-                // 현재 모드인 경우 시간 즉시 반영
-                if (!isActive) {
-                    const newTime = tempTimes[mode] * 60;
-                    setTimeLeft(newTime);
-                }
-            };
-
-            const formatTime = (seconds) => {
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            };
-
-            // --- 시계 다이얼 및 타이머 SVG 설정 ---
-            const svgSize = 400;
-            const center = svgSize / 2;
-            
-            // 반지름 비율 조정
-            const timerRadius = 120; // 빨간 원의 실제 보이는 반지름
-            const strokeWidth = timerRadius * 2; 
-            const renderRadius = timerRadius / 2;
-            const renderWidth = timerRadius;
-            const circumference = renderRadius * 2 * Math.PI;
-
-            // 60분을 기준으로 한 진행률 계산
-            const progressRatio = timeLeft / MAX_SECONDS;
-            const strokeDasharray = `${circumference * progressRatio} ${circumference}`;
-
-            // 외부 숫자 및 눈금 설정
-            const dialRadius = 170; // 숫자 배치 반지름
-            const tickRadius = 150; // 눈금 배치 반지름
-            const numbers = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-
-            return (
-                <div className={`h-full w-full flex flex-col transition-colors duration-500 ease-in-out ${modes[mode].lightBg} font-sans text-slate-800`}>
-                
-                <div className="flex flex-col h-full w-full max-w-lg mx-auto bg-white/50 sm:bg-transparent shadow-none sm:shadow-2xl sm:rounded-[3rem] sm:h-[90vh] sm:my-[5vh] sm:overflow-hidden relative">
-                    
-                    {/* 상단 탭 영역: 상단 여백 대폭 감소 (mt-16 -> mt-6) */}
-                    <div className="px-6 mt-6 mb-2 flex-shrink-0">
-                        <div className="flex justify-between bg-slate-100/80 backdrop-blur-sm rounded-2xl p-1.5 shadow-inner">
-                            {/* Focus Mode Button */}
-                            <button
-                                onClick={() => switchMode('focus')}
-                                className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                                mode === 'focus' 
-                                    ? 'bg-white text-slate-800 shadow-sm' 
-                                    : 'text-slate-400 hover:text-slate-600'
-                                }`}
-                            >
-                                <Brain className="w-4 h-4" />
-                                <span className="hidden sm:inline">집중 모드</span>
-                            </button>
-
-                            {/* Short Break Button */}
-                            <button
-                                onClick={() => switchMode('shortBreak')}
-                                className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                                mode === 'shortBreak' 
-                                    ? 'bg-white text-slate-800 shadow-sm' 
-                                    : 'text-slate-400 hover:text-slate-600'
-                                }`}
-                            >
-                                <Coffee className="w-4 h-4" />
-                                <span className="hidden sm:inline">짧은 휴식</span>
-                            </button>
-
-                            {/* Settings Button (탭 영역으로 이동) */}
-                            <button
-                                onClick={openSettings}
-                                className="flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-white/50 transition-all duration-300"
-                            >
-                                <Settings className="w-4 h-4" />
-                                <span className="hidden sm:inline">설정</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* 메인 컨텐츠 영역 - justify-center로 중앙 정렬 및 gap으로 안전 거리 확보 */}
-                    <div className="flex-1 flex flex-col items-center justify-center min-h-0 relative px-4 gap-6">
-                        
-                        {/* 아날로그 타이머 
-                            - max-h-[45vh] 추가: 화면 높이가 작으면 타이머도 작아짐
-                            - width는 반응형 유지
-                        */}
-                        <div className="relative aspect-square w-full max-w-[340px] max-h-[45vh] flex items-center justify-center flex-shrink">
-                            <svg
-                                viewBox={`0 0 ${svgSize} ${svgSize}`}
-                                className="w-full h-full"
-                                preserveAspectRatio="xMidYMid meet"
-                            >
-                                {/* 배경 원 */}
-                                <circle cx={center} cy={center} r={timerRadius + 25} fill="white" className="shadow-sm drop-shadow-md" />
-
-                                {/* 눈금 */}
-                                {Array.from({ length: 60 }).map((_, i) => {
-                                    const isMajor = i % 5 === 0;
-                                    const angle = (i * 6 - 90) * (Math.PI / 180);
-                                    const innerR = isMajor ? tickRadius - 5 : tickRadius - 2;
-                                    const x1 = center + innerR * Math.cos(angle);
-                                    const y1 = center + innerR * Math.sin(angle);
-                                    const x2 = center + tickRadius * Math.cos(angle);
-                                    const y2 = center + tickRadius * Math.sin(angle);
-                                    return (
-                                        <line 
-                                            key={i} 
-                                            x1={x1} y1={y1} x2={x2} y2={y2} 
-                                            stroke={isMajor ? "#94a3b8" : "#cbd5e1"} 
-                                            strokeWidth={isMajor ? 2 : 1} 
-                                        />
-                                    );
-                                })}
-
-                                {/* 숫자 */}
-                                {numbers.map((num, i) => {
-                                    const angle = (i * 30 - 90) * (Math.PI / 180);
-                                    const x = center + dialRadius * Math.cos(angle);
-                                    const y = center + dialRadius * Math.sin(angle);
-                                    return (
-                                        <text
-                                            key={num}
-                                            x={x}
-                                            y={y}
-                                            textAnchor="middle"
-                                            dominantBaseline="middle"
-                                            className="font-bold fill-slate-500"
-                                            style={{ fontSize: '16px' }}
-                                        >
-                                            {num}
-                                        </text>
-                                    );
-                                })}
-
-                                {/* 타이머 배경 (연한 회색 원) */}
-                                <circle
-                                    cx={center}
-                                    cy={center}
-                                    r={renderRadius}
-                                    strokeWidth={renderWidth}
-                                    stroke="#f1f5f9"
-                                    fill="none"
-                                />
-
-                                {/* 실제 타이머 (빨간 부채꼴) */}
-                                <circle
-                                    cx={center}
-                                    cy={center}
-                                    r={renderRadius}
-                                    strokeWidth={renderWidth}
-                                    stroke="currentColor"
-                                    fill="none"
-                                    strokeDasharray={strokeDasharray}
-                                    strokeLinecap="butt"
-                                    className={`${modes[mode].strokeColor} transition-all duration-500 ease-linear`}
-                                    transform={`rotate(-90 ${center} ${center})`}
-                                />
-                                
-                                {/* 중앙 흰색 노브 */}
-                                <circle cx={center} cy={center} r={18} fill="white" className="drop-shadow-sm" />
-                            </svg>
-                        </div>
-                        
-                        {/* 디지털 시간 표시 - 유연한 간격 */}
-                        <div className="flex flex-col items-center justify-center flex-shrink-0">
-                            <div className={`text-6xl font-bold tracking-tighter ${modes[mode].color} tabular-nums`}>
-                                {formatTime(timeLeft)}
-                            </div>
-                            <div className="text-sm text-slate-400 font-bold mt-2 uppercase tracking-wider">
-                                {isActive ? '집중하는 중' : '일시정지됨'}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 하단 컨트롤 바 */}
-                    <div className="px-8 pb-8 pt-2 flex-shrink-0">
-                        <div className="flex gap-4 h-16 sm:h-20">
-                            {/* Start/Pause Button */}
-                            <button
-                                onClick={toggleTimer}
-                                className={`flex-[3] rounded-3xl flex items-center justify-center text-white text-xl font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95 active:shadow-md ${modes[mode].bgColor}`}
-                            >
-                                {isActive ? (
-                                    <div className="flex items-center gap-2">
-                                        <Pause className="w-8 h-8 fill-current" />
-                                        <span>일시정지</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2">
-                                        <Play className="w-8 h-8 fill-current" />
-                                        <span>시작</span>
-                                    </div>
-                                )}
-                            </button>
-                            
-                            {/* Reset Button */}
-                            <button
-                                onClick={resetTimer}
-                                className="flex-1 rounded-3xl flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:bg-slate-50 hover:text-slate-600 shadow-lg hover:shadow-xl transition-all active:scale-95 group"
-                                aria-label="리셋"
-                            >
-                                <RefreshCw className="w-7 h-7 group-active:-rotate-180 transition-transform duration-500" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 설정 모달 */}
-                {isSettingsOpen && (
-                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-t-[2rem] sm:rounded-3xl shadow-2xl p-6 w-full max-w-sm animate-in slide-in-from-bottom duration-300">
-                        <div className="flex justify-between items-center mb-8 pt-2">
-                        <h2 className="text-xl font-bold text-slate-700 ml-2">타이머 설정</h2>
-                        <button 
-                            onClick={() => setIsSettingsOpen(false)}
-                            className="p-2 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition-colors"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                        </div>
-                        
-                        <div className="space-y-6 mb-8">
-                            <div>
-                                <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">집중 모드 (최대 60분)</label>
-                                <div className="relative">
-                                    <input
-                                    type="number"
-                                    name="focus"
-                                    min="1"
-                                    max="60"
-                                    value={tempTimes.focus}
-                                    onChange={handleTimeChange}
-                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-red-400 focus:bg-white transition-colors"
-                                    />
-                                    <span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-medium">분</span>
-                                </div>
-                            </div>
-                            
-                            {/* 짧은 휴식 (긴 휴식 제거됨) */}
-                            <div>
-                                <label className="block text-sm font-bold text-slate-400 mb-2 ml-1">짧은 휴식 (최대 60분)</label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        name="shortBreak"
-                                        min="1"
-                                        max="60"
-                                        value={tempTimes.shortBreak}
-                                        onChange={handleTimeChange}
-                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl text-slate-800 font-bold focus:outline-none focus:border-teal-400 focus:bg-white transition-colors"
-                                    />
-                                    <span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-medium">분</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                        onClick={saveSettings}
-                        className="w-full bg-slate-900 text-white font-bold text-lg py-4 rounded-2xl hover:bg-slate-800 active:scale-95 transition-all shadow-xl mb-4"
-                        >
-                        설정 저장
-                        </button>
-                    </div>
-                    </div>
-                )}
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
-
+      {/* Footer / Copyright minimal */}
+      <div className="absolute bottom-8 text-[10px] text-white/30 tracking-widest">
+        COPYRIGHT © ANANTI AT SUNCHEON.
+      </div>
+    </div>
+  );
+}
