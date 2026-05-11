@@ -1,119 +1,235 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FileDown } from 'lucide-react';
-
-// 로고 컴포넌트 (SVG) - 실제 이미지 파일이 있다면 <img src="..." />로 대체 가능합니다.
-const Logo = () => (
-  <svg viewBox="0 0 600 120" className="w-full h-full overflow-visible" xmlns="http://www.w3.org/2000/svg" aria-label="아난티 앳 순천 로고">
-    <text 
-      x="50%" 
-      y="55%" 
-      textAnchor="middle" 
-      dominantBaseline="middle" 
-      fill="white" 
-      fontSize="72" 
-      fontFamily="serif" 
-      fontWeight="bold" 
-      letterSpacing="0.05em"
-      className="drop-shadow-lg"
-    >
-      아난티 앳 순천
-    </text>
-  </svg>
-);
-
-export default function AnantiSuncheonSimple() {
-  
-  // 실제 환경에서는 업로드된 PDF 파일의 경로를 여기에 입력해야 합니다.
-  const pdfFileName = "경제성분석_아난티최종(판넬).pdf";
-  const handleDownload = () => {
-    // 데모용 알림입니다. 실제 배포 시에는 <a> 태그의 download 속성을 사용합니다.
-    alert(`'${pdfFileName}' 다운로드를 시작합니다.`);
-  };
-
-  return (
-    <div className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-center bg-[#111] text-white font-sans selection:bg-[#E05A00] selection:text-white">
-      
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        {/* [변경됨] 배경 이미지를 '배경.png'로 설정했습니다.
-          이 파일(배경.png)을 프로젝트의 public 폴더나 이미지가 호스팅된 경로에 위치시켜주세요.
-        */}
-        <img 
-          src="배경.png" 
-          onError={(e) => {
-            // 이미지가 없을 경우를 대비한 대체 이미지 (에러 방지용)
-            e.target.onerror = null; 
-            e.target.src = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop";
-          }}
-          alt="Suncheon Bay Background" 
-          className="w-full h-full object-cover opacity-60 filter grayscale-[30%]"
-        />
-        <div className="absolute inset-0 bg-black/40" />
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 text-center px-4 flex flex-col items-center w-full max-w-4xl">
-        
-        {/* Small Tagline */}
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 1, delay: 0.5 }}
-          className="text-xs md:text-sm lg:text-base tracking-[0.1em] mb-8 text-white/90 font-light"
-        >
-          대한민국 생태수도 순천, 럭셔리 웰니스 리조트의 등장
-        </motion.p>
-
-        {/* Logo Replacement */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 1, delay: 0.8 }}
-          className="w-full max-w-[600px] h-auto mb-10 md:mb-12"
-        >
-          <Logo />
-        </motion.div>
-
-        {/* Divider */}
-        <motion.div
-           initial={{ height: 0 }} 
-           animate={{ height: "4rem" }} 
-           transition={{ duration: 1, delay: 1.2 }}
-           className="w-[1px] bg-white/50 mb-12"
-        />
-
-        {/* Download Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.5 }}
-          whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleDownload}
-          className="group flex items-center gap-3 px-8 py-4 border border-white/30 backdrop-blur-sm bg-white/5 hover:border-white transition-all duration-500 rounded-sm"
-        >
-          <FileDown className="w-5 h-5 text-[#E05A00] group-hover:text-white transition-colors duration-300" />
-          <span className="font-serif tracking-widest text-sm md:text-base">
-            PROJECT ANALYSIS PDF
-          </span>
-        </motion.button>
-
-        <motion.p
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           transition={{ duration: 1, delay: 2.0 }}
-           className="mt-4 text-[10px] text-white/40 tracking-wider font-light"
-        >
-          경제성 분석 보고서 (2025-2)
-        </motion.p>
-
-      </div>
-
-      {/* Footer / Copyright minimal */}
-      <div className="absolute bottom-8 text-[10px] text-white/30 tracking-widest">
-        COPYRIGHT © ANANTI AT SUNCHEON.
-      </div>
-    </div>
-  );
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>퍼실리테이션 투표 시스템</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f0f2f5;min-height:100vh;color:#111827;}
+.page{min-height:100vh;display:flex;flex-direction:column;}
+.center{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;}
+.card{background:#fff;border-radius:16px;padding:1.75rem;box-shadow:0 2px 16px rgba(0,0,0,.07);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;line-height:1;}
+.btn:hover{filter:brightness(.92);}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.38;cursor:not-allowed;filter:none;transform:none;}
+.btn-primary{background:#4f46e5;color:#fff;}
+.btn-green{background:#059669;color:#fff;}
+.btn-red{background:#ef4444;color:#fff;}
+.btn-gray{background:#f3f4f6;color:#374151;}
+.btn-block{width:100%;}
+.btn-lg{padding:16px 20px;font-size:16px;}
+textarea{width:100%;padding:11px 13px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;background:#fafafa;color:#111827;resize:vertical;}
+textarea:focus{border-color:#4f46e5;background:#fff;}
+.tab-wrap{display:flex;gap:3px;background:#f3f4f6;padding:4px;border-radius:10px;}
+.tab{flex:1;padding:8px 14px;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;background:transparent;color:#6b7280;transition:all .15s;}
+.tab.on{background:#fff;color:#111827;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+.badge-live{background:#dcfce7;color:#15803d;}
+.badge-end{background:#f3f4f6;color:#6b7280;}
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.preset-btn{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;cursor:pointer;text-align:left;font-family:inherit;transition:all .15s;line-height:1.4;}
+.preset-btn.on{border-color:#4f46e5;background:#eef2ff;color:#3730a3;font-weight:700;}
+.bar-wrap{height:44px;background:#f3f4f6;border-radius:10px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:10px;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;transition:width .7s ease;}
+.bar-pct{color:#fff;font-size:13px;font-weight:700;}
+.stat{border-radius:12px;padding:14px;text-align:center;flex:1;min-width:90px;}
+.stat-num{font-size:44px;font-weight:800;line-height:1;}
+.stat-label{font-size:13px;margin-top:5px;font-weight:600;}
+.stat-sub{font-size:12px;margin-top:2px;}
+.vote-btn{width:100%;padding:18px;border:none;border-radius:13px;font-size:19px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;transition:all .2s;display:block;margin-bottom:12px;}
+.vote-btn:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.vote-btn:active{transform:translateY(0);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse{animation:pulse 2s ease-in-out infinite;}
+@media(max-width:600px){
+  .preset-grid{grid-template-columns:1fr;}
+  .stat-num{font-size:36px;}
+  .stat-row{flex-wrap:wrap!important;}
 }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const DB='https://test01-53af5-default-rtdb.asia-southeast1.firebasedatabase.app';
+const C=['#4f46e5','#22c55e','#ef4444','#f59e0b','#8b5cf6','#0ea5e9'];
+const PRESETS=[
+  {label:'찬성 / 반대 / 중립',opts:['찬성','반대','중립']},
+  {label:'찬성 / 반대',opts:['찬성','반대']},
+  {label:'매우찬성 / 찬성 / 반대 / 매우반대',opts:['매우 찬성','찬성','반대','매우 반대']},
+  {label:'동의 / 불동의 / 보류',opts:['동의','불동의','보류']},
+];
+
+async function fbGet(p){try{const r=await fetch(`${DB}/${p}.json`);return await r.json();}catch{return null;}}
+async function fbSet(p,d){try{await fetch(`${DB}/${p}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch{}}
+async function fbDel(p){try{await fetch(`${DB}/${p}.json`,{method:'DELETE'});}catch{}}
+
+const st={view:'home',tab:'setup',qText:'',preset:0,q:null,votes:{},myVote:null,pid:'p'+Math.random().toString(36).substr(2,9)};
+let timer=null;
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function render(){
+  const app=document.getElementById('app');
+  if(st.view==='home')app.innerHTML=homeHTML();
+  else if(st.view==='fac'){app.innerHTML=facHTML();bindFac();}
+  else{app.innerHTML=parHTML();bindPar();}
+}
+
+function homeHTML(){return`
+<div class="page" style="background:#f0f2f5">
+  <div class="center">
+    <div class="card" style="max-width:400px;width:100%;text-align:center;padding:2.5rem">
+      <div style="font-size:52px;margin-bottom:12px">🎯</div>
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:8px">퍼실리테이션 투표 시스템</h1>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:32px">역할을 선택해주세요</p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <button class="btn btn-primary btn-block btn-lg" id="goFac">📊 퍼실리테이터 (강의자용)</button>
+        <button class="btn btn-green btn-block btn-lg" id="goPar">🙋 참가자 (투표하기)</button>
+      </div>
+      <p style="font-size:12px;color:#9ca3af;margin-top:24px">같은 링크에서 역할만 다르게 선택하면 됩니다</p>
+    </div>
+  </div>
+</div>`;}
+
+function facHTML(){
+  const status=st.q?(st.q.active?'live':'ended'):'idle';
+  const badge=status==='live'?'<span class="badge badge-live">● 진행 중</span>':status==='ended'?'<span class="badge badge-end">■ 종료됨</span>':'';
+  return`
+<div class="page" style="background:#f0f2f5">
+  <div style="background:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.07);flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-gray" id="backBtn" style="padding:8px 12px;font-size:13px">← 뒤로</button>
+      <span style="font-weight:800;font-size:15px">퍼실리테이터 대시보드</span>
+      ${badge}
+    </div>
+    <div class="tab-wrap">
+      <button class="tab ${st.tab==='setup'?'on':''}" id="tabSetup">질문 설정</button>
+      <button class="tab ${st.tab==='monitor'?'on':''}" id="tabMonitor">실시간 모니터</button>
+    </div>
+  </div>
+  <div style="flex:1;padding:20px;max-width:900px;margin:0 auto;width:100%">
+    ${st.tab==='setup'?setupHTML():monitorHTML()}
+  </div>
+</div>`;}
+
+function setupHTML(){
+  const presetsHtml=PRESETS.map((p,i)=>`<button class="preset-btn ${st.preset===i?'on':''}" data-preset="${i}">${p.label}</button>`).join('');
+  const pillsHtml=PRESETS[st.preset].opts.map((o,i)=>`<span style="padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700;background:${C[i]}20;color:${C[i]};border:1px solid ${C[i]}40">${o}</span>`).join('');
+  const hasQ=st.qText.trim().length>0;
+  const hasActive=st.q!==null;
+  return`
+<div class="card">
+  <h3 style="font-size:16px;font-weight:800;margin-bottom:16px">질문 작성</h3>
+  <textarea id="qInput" rows="3" placeholder="참가자에게 보여줄 질문을 입력하세요...">${esc(st.qText)}</textarea>
+  <div style="margin-top:16px">
+    <p style="font-size:13px;color:#6b7280;margin-bottom:8px">답변 선택지 형태</p>
+    <div class="preset-grid">${presetsHtml}</div>
+  </div>
+  <div style="margin-top:16px">
+    <p style="font-size:13px;color:#6b7280;margin-bottom:8px">선택지 미리보기</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${pillsHtml}</div>
+  </div>
+  <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-primary" id="startBtn" style="flex:1;min-width:120px" ${hasQ?'':'disabled'}>▶ 투표 시작</button>
+    ${hasActive?'<button class="btn btn-red" id="endBtn">■ 종료</button>':''}
+    ${hasActive?'<button class="btn btn-gray" id="resetBtn">↺ 초기화</button>':''}
+  </div>
+</div>`;}
+
+function monitorHTML(){
+  if(!st.q)return`
+<div class="card" style="text-align:center;padding:3rem">
+  <div style="font-size:48px;margin-bottom:12px">📊</div>
+  <p style="color:#6b7280">아직 진행 중인 투표가 없습니다</p>
+  <p style="font-size:13px;color:#9ca3af;margin-top:8px">질문 설정 탭에서 투표를 시작하세요</p>
+</div>`;
+  const counts={};
+  st.q.opts.forEach(o=>counts[o]=0);
+  let total=0;
+  Object.values(st.votes||{}).forEach(v=>{if(v&&v.questionId===st.q.id&&counts[v.choice]!==undefined){counts[v.choice]++;total++;}});
+  const statCards=[`<div class="stat" style="background:#eef2ff"><div class="stat-num" style="color:#4f46e5">${total}</div><div class="stat-label" style="color:#6b7280">전체 참여</div></div>`]
+    .concat(st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;return`<div class="stat" style="background:${C[i]}15;border:1px solid ${C[i]}30"><div class="stat-num" style="color:${C[i]}">${cnt}</div><div class="stat-label" style="color:${C[i]}">${o}</div><div class="stat-sub" style="color:${C[i]}90">${pct}%</div></div>`;})).join('');
+  const barsHtml=st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;return`<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:15px;font-weight:700">${esc(o)}</span><span style="color:#6b7280;font-size:14px">${cnt}명 (${pct}%)</span></div><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${C[i]}">${pct>12?`<span class="bar-pct">${pct}%</span>`:''}</div></div></div>`;}).join('');
+  const isLive=st.q.active;
+  return`
+<div style="display:flex;flex-direction:column;gap:14px">
+  <div class="card" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div><p style="font-size:12px;color:#9ca3af;margin-bottom:4px">현재 질문</p><p style="font-size:18px;font-weight:800">${esc(st.q.text)}</p></div>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      ${isLive?'<button class="btn btn-red" id="endBtn">투표 종료</button>':''}
+      <button class="btn btn-gray" id="resetBtn">↺ 초기화</button>
+    </div>
+  </div>
+  <div class="stat-row" style="display:flex;gap:12px">${statCards}</div>
+  <div class="card">${barsHtml}</div>
+</div>`;}
+
+function parHTML(){
+  const back=`<button class="btn btn-gray" id="parBack" style="position:fixed;top:16px;left:16px;font-size:13px;z-index:99">← 뒤로</button>`;
+  if(st.myVote){
+    const idx=st.q?st.q.opts.indexOf(st.myVote):0;
+    const col=C[Math.max(0,idx)%C.length];
+    return`<div class="page center" style="background:#f0f2f5">${back}<div style="text-align:center"><div style="width:84px;height:84px;background:${col}20;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:40px">✅</div><h2 style="font-size:24px;font-weight:800;margin-bottom:10px">투표 완료!</h2><div style="background:${col}15;border:2px solid ${col}40;border-radius:12px;padding:10px 28px;display:inline-block;margin-bottom:10px"><span style="color:${col};font-weight:800;font-size:20px">${esc(st.myVote)}</span></div><p style="color:#9ca3af;font-size:13px">응답이 기록되었습니다</p></div></div>`;}
+  if(!st.q||!st.q.active){
+    return`<div class="page center" style="background:#f0f2f5">${back}<div style="text-align:center"><div class="pulse" style="font-size:52px;margin-bottom:16px">⏳</div><h2 style="font-size:20px;font-weight:800;margin-bottom:8px">질문을 기다리는 중...</h2><p style="color:#6b7280;font-size:14px">퍼실리테이터가 투표를 시작하면<br>여기에 나타납니다</p>${st.q&&!st.q.active?'<p style="color:#9ca3af;font-size:13px;margin-top:14px;background:#f3f4f6;padding:8px 18px;border-radius:8px;display:inline-block">투표가 종료되었습니다</p>':''}</div></div>`;}
+  const btnHtml=st.q.opts.map((o,i)=>`<button class="vote-btn" data-choice="${esc(o)}" style="background:${C[i%C.length]}">${esc(o)}</button>`).join('');
+  return`<div class="page" style="background:#f0f2f5">${back}<div class="center"><div style="width:100%;max-width:480px"><div class="card" style="margin-bottom:24px;text-align:center"><p style="font-size:11px;color:#9ca3af;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase">질문</p><p style="font-size:20px;font-weight:800;line-height:1.5">${esc(st.q.text)}</p></div><div>${btnHtml}</div></div></div></div>`;}
+
+function bindFac(){
+  document.getElementById('backBtn')?.addEventListener('click',()=>{stopPoll();st.view='home';render();});
+  document.getElementById('tabSetup')?.addEventListener('click',()=>{st.tab='setup';render();});
+  document.getElementById('tabMonitor')?.addEventListener('click',()=>{st.tab='monitor';render();});
+  document.getElementById('qInput')?.addEventListener('input',e=>{st.qText=e.target.value;const btn=document.getElementById('startBtn');if(btn)btn.disabled=!e.target.value.trim();});
+  document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',()=>{st.preset=+b.dataset.preset;render();}));
+  document.getElementById('startBtn')?.addEventListener('click',startVote);
+  document.getElementById('endBtn')?.addEventListener('click',endVote);
+  document.getElementById('resetBtn')?.addEventListener('click',resetAll);
+}
+
+function bindPar(){
+  document.getElementById('parBack')?.addEventListener('click',()=>{stopPoll();st.myVote=null;st.view='home';render();});
+  document.querySelectorAll('.vote-btn').forEach(b=>b.addEventListener('click',()=>submitVote(b.dataset.choice)));
+}
+
+async function startVote(){
+  const text=st.qText.trim();if(!text)return;
+  const q={id:Date.now().toString(),text,opts:PRESETS[st.preset].opts,active:true};
+  await fbDel('votes');await fbSet('session/q',q);
+  st.q=q;st.votes={};st.tab='monitor';render();
+}
+async function endVote(){if(!st.q)return;const q={...st.q,active:false};await fbSet('session/q',q);st.q=q;render();}
+async function resetAll(){await fbDel('session');await fbDel('votes');st.q=null;st.votes={};st.tab='setup';st.qText='';render();}
+async function submitVote(choice){if(!st.q||st.myVote)return;await fbSet(`votes/${st.pid}`,{questionId:st.q.id,choice,pid:st.pid});st.myVote=choice;render();}
+
+function startPoll(role){
+  stopPoll();
+  const tick=async()=>{
+    const q=await fbGet('session/q');
+    if(role==='fac'){
+      const v=await fbGet('votes');
+      const changed=JSON.stringify(q)!==JSON.stringify(st.q)||JSON.stringify(v)!==JSON.stringify(st.votes);
+      st.q=q;st.votes=v||{};
+      if(changed&&st.tab==='monitor')render();
+    } else {
+      if(q?.id!==st.q?.id)st.myVote=null;
+      const changed=JSON.stringify(q)!==JSON.stringify(st.q);
+      st.q=q;
+      if(changed&&!st.myVote)render();
+    }
+  };
+  tick();timer=setInterval(tick,2000);
+}
+function stopPoll(){if(timer){clearInterval(timer);timer=null;}}
+
+document.getElementById('app').addEventListener('click',e=>{
+  if(e.target.id==='goFac'){st.view='fac';render();startPoll('fac');}
+  if(e.target.id==='goPar'){st.view='par';render();startPoll('par');}
+});
+
+render();
+</script>
+</body>
+</html>
