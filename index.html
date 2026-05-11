@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>퍼실리테이션 투표 시스템</title>
+<title>TEAM Gyeonggye-neomeo 퍼실리테이션</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f0f2f5;min-height:100vh;color:#111827;}
 .page{min-height:100vh;display:flex;flex-direction:column;}
 .center{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;}
-.card{background:#fff;border-radius:16px;padding:1.75rem;box-shadow:0 2px 16px rgba(0,0,0,.07);}
+.card{background:#fff;border-radius:16px;padding:1.75rem;box-shadow:0 4px 20px rgba(0,0,0,.05);}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;line-height:1;}
 .btn:hover{filter:brightness(.92);}
 .btn:active{transform:scale(.97);}
@@ -20,32 +20,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .btn-gray{background:#f3f4f6;color:#374151;}
 .btn-block{width:100%;}
 .btn-lg{padding:16px 20px;font-size:16px;}
-textarea{width:100%;padding:11px 13px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;background:#fafafa;color:#111827;resize:vertical;}
+textarea{width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s;background:#fafafa;color:#111827;resize:vertical;}
 textarea:focus{border-color:#4f46e5;background:#fff;}
 .tab-wrap{display:flex;gap:3px;background:#f3f4f6;padding:4px;border-radius:10px;}
-.tab{flex:1;padding:8px 14px;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;background:transparent;color:#6b7280;transition:all .15s;}
-.tab.on{background:#fff;color:#111827;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1);}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+.tab{flex:1;padding:8px 14px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6b7280;transition:all .15s;}
+.tab.on{background:#fff;color:#111827;font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;}
 .badge-live{background:#dcfce7;color:#15803d;}
-.badge-end{background:#f3f4f6;color:#6b7280;}
+.badge-end{background:#fee2e2;color:#b91c1c;}
 .preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.preset-btn{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;cursor:pointer;text-align:left;font-family:inherit;transition:all .15s;line-height:1.4;}
-.preset-btn.on{border-color:#4f46e5;background:#eef2ff;color:#3730a3;font-weight:700;}
-.bar-wrap{height:44px;background:#f3f4f6;border-radius:10px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:10px;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;transition:width .7s ease;}
-.bar-pct{color:#fff;font-size:13px;font-weight:700;}
-.stat{border-radius:12px;padding:14px;text-align:center;flex:1;min-width:90px;}
-.stat-num{font-size:44px;font-weight:800;line-height:1;}
-.stat-label{font-size:13px;margin-top:5px;font-weight:600;}
-.stat-sub{font-size:12px;margin-top:2px;}
-.vote-btn{width:100%;padding:18px;border:none;border-radius:13px;font-size:19px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;transition:all .2s;display:block;margin-bottom:12px;}
-.vote-btn:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.preset-btn{padding:12px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;cursor:pointer;text-align:left;font-family:inherit;transition:all .15s;line-height:1.4;}
+.preset-btn.on{border-color:#4f46e5;background:#eef2ff;color:#3730a3;font-weight:800;}
+.bar-wrap{height:48px;background:#f3f4f6;border-radius:10px;overflow:hidden;margin-top:4px;}
+.bar-fill{height:100%;border-radius:10px;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1);}
+.bar-pct{color:#fff;font-size:14px;font-weight:800;}
+.stat{border-radius:12px;padding:16px;text-align:center;flex:1;min-width:90px;}
+.stat-num{font-size:40px;font-weight:800;line-height:1;}
+.stat-label{font-size:13px;margin-top:6px;font-weight:700;}
+.stat-sub{font-size:12px;margin-top:4px;font-weight:600;}
+.vote-btn{width:100%;padding:20px;border:none;border-radius:14px;font-size:18px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;transition:all .2s;display:block;margin-bottom:14px;box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+.vote-btn:hover{transform:translateY(-3px);box-shadow:0 8px 15px rgba(0,0,0,.15);}
 .vote-btn:active{transform:translateY(0);}
+.header-brand { font-weight:900; font-size:16px; color:#4f46e5; letter-spacing:-0.5px; }
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .pulse{animation:pulse 2s ease-in-out infinite;}
 @media(max-width:600px){
   .preset-grid{grid-template-columns:1fr;}
-  .stat-num{font-size:36px;}
+  .stat-num{font-size:32px;}
   .stat-row{flex-wrap:wrap!important;}
 }
 </style>
@@ -53,20 +54,23 @@ textarea:focus{border-color:#4f46e5;background:#fff;}
 <body>
 <div id="app"></div>
 <script>
+// 기존 파이어베이스 DB 주소 유지
 const DB='https://test01-53af5-default-rtdb.asia-southeast1.firebasedatabase.app';
 const C=['#4f46e5','#22c55e','#ef4444','#f59e0b','#8b5cf6','#0ea5e9'];
+
+// 실전 상황에 맞춘 커스텀 프리셋 세팅
 const PRESETS=[
-  {label:'찬성 / 반대 / 중립',opts:['찬성','반대','중립']},
-  {label:'찬성 / 반대',opts:['찬성','반대']},
-  {label:'매우찬성 / 찬성 / 반대 / 매우반대',opts:['매우 찬성','찬성','반대','매우 반대']},
-  {label:'동의 / 불동의 / 보류',opts:['동의','불동의','보류']},
+  {label:'기본: 찬성 / 반대 / 중립',opts:['찬성','반대','보류(중립)']},
+  {label:'역할극: 이해관계자 입장',opts:['아난티 측 (사업자)','지자체 측 (인허가)','지역주민 측','환경단체 측']},
+  {label:'우선순위: 서둔동 자치계획',opts:['인프라 확충','상권 활성화','주거환경 개선','공동체 회복']},
+  {label:'분석: SWOT 요소 투표',opts:['강점 (Strength)','약점 (Weakness)','기회 (Opportunity)','위협 (Threat)']}
 ];
 
 async function fbGet(p){try{const r=await fetch(`${DB}/${p}.json`);return await r.json();}catch{return null;}}
 async function fbSet(p,d){try{await fetch(`${DB}/${p}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch{}}
 async function fbDel(p){try{await fetch(`${DB}/${p}.json`,{method:'DELETE'});}catch{}}
 
-const st={view:'home',tab:'setup',qText:'',preset:0,q:null,votes:{},myVote:null,pid:'p'+Math.random().toString(36).substr(2,9)};
+const st={view:'home',tab:'setup',qText:'',preset:0,blindMode:true,q:null,votes:{},myVote:null,pid:'p'+Math.random().toString(36).substr(2,9)};
 let timer=null;
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -81,15 +85,15 @@ function render(){
 function homeHTML(){return`
 <div class="page" style="background:#f0f2f5">
   <div class="center">
-    <div class="card" style="max-width:400px;width:100%;text-align:center;padding:2.5rem">
-      <div style="font-size:52px;margin-bottom:12px">🎯</div>
-      <h1 style="font-size:22px;font-weight:800;margin-bottom:8px">퍼실리테이션 투표 시스템</h1>
-      <p style="color:#6b7280;font-size:14px;margin-bottom:32px">역할을 선택해주세요</p>
-      <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="card" style="max-width:420px;width:100%;text-align:center;padding:3rem 2rem">
+      <div style="font-size:48px;margin-bottom:16px">🎙️</div>
+      <div class="header-brand" style="margin-bottom:8px">TEAM Gyeonggye-neomeo</div>
+      <h1 style="font-size:24px;font-weight:800;margin-bottom:8px">디지털 퍼실리테이션</h1>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:36px">진행할 역할을 선택해주세요</p>
+      <div style="display:flex;flex-direction:column;gap:14px">
         <button class="btn btn-primary btn-block btn-lg" id="goFac">📊 퍼실리테이터 (강의자용)</button>
         <button class="btn btn-green btn-block btn-lg" id="goPar">🙋 참가자 (투표하기)</button>
       </div>
-      <p style="font-size:12px;color:#9ca3af;margin-top:24px">같은 링크에서 역할만 다르게 선택하면 됩니다</p>
     </div>
   </div>
 </div>`;}
@@ -99,94 +103,139 @@ function facHTML(){
   const badge=status==='live'?'<span class="badge badge-live">● 진행 중</span>':status==='ended'?'<span class="badge badge-end">■ 종료됨</span>':'';
   return`
 <div class="page" style="background:#f0f2f5">
-  <div style="background:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.07);flex-wrap:wrap;gap:8px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <button class="btn btn-gray" id="backBtn" style="padding:8px 12px;font-size:13px">← 뒤로</button>
-      <span style="font-weight:800;font-size:15px">퍼실리테이터 대시보드</span>
+  <div style="background:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.05);flex-wrap:wrap;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn btn-gray" id="backBtn" style="padding:8px 12px;font-size:13px">← 나가기</button>
+      <span class="header-brand">대시보드</span>
       ${badge}
     </div>
     <div class="tab-wrap">
-      <button class="tab ${st.tab==='setup'?'on':''}" id="tabSetup">질문 설정</button>
-      <button class="tab ${st.tab==='monitor'?'on':''}" id="tabMonitor">실시간 모니터</button>
+      <button class="tab ${st.tab==='setup'?'on':''}" id="tabSetup">1. 안건 설정</button>
+      <button class="tab ${st.tab==='monitor'?'on':''}" id="tabMonitor">2. 실시간 모니터링</button>
     </div>
   </div>
-  <div style="flex:1;padding:20px;max-width:900px;margin:0 auto;width:100%">
+  <div style="flex:1;padding:24px;max-width:900px;margin:0 auto;width:100%">
     ${st.tab==='setup'?setupHTML():monitorHTML()}
   </div>
 </div>`;}
 
 function setupHTML(){
   const presetsHtml=PRESETS.map((p,i)=>`<button class="preset-btn ${st.preset===i?'on':''}" data-preset="${i}">${p.label}</button>`).join('');
-  const pillsHtml=PRESETS[st.preset].opts.map((o,i)=>`<span style="padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700;background:${C[i]}20;color:${C[i]};border:1px solid ${C[i]}40">${o}</span>`).join('');
+  const pillsHtml=PRESETS[st.preset].opts.map((o,i)=>`<span style="padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;background:${C[i]}15;color:${C[i]};border:1px solid ${C[i]}30">${o}</span>`).join('');
   const hasQ=st.qText.trim().length>0;
   const hasActive=st.q!==null;
   return`
 <div class="card">
-  <h3 style="font-size:16px;font-weight:800;margin-bottom:16px">질문 작성</h3>
-  <textarea id="qInput" rows="3" placeholder="참가자에게 보여줄 질문을 입력하세요...">${esc(st.qText)}</textarea>
-  <div style="margin-top:16px">
-    <p style="font-size:13px;color:#6b7280;margin-bottom:8px">답변 선택지 형태</p>
+  <h3 style="font-size:18px;font-weight:800;margin-bottom:16px">새로운 안건 등록</h3>
+  <textarea id="qInput" rows="3" placeholder="예: 현재 제시된 리조트 개발안에 대한 각 이해관계자 그룹의 최종 입장은 무엇입니까?">${esc(st.qText)}</textarea>
+  
+  <div style="margin-top:20px">
+    <p style="font-size:14px;font-weight:700;color:#374151;margin-bottom:10px">선택지 템플릿</p>
     <div class="preset-grid">${presetsHtml}</div>
   </div>
-  <div style="margin-top:16px">
-    <p style="font-size:13px;color:#6b7280;margin-bottom:8px">선택지 미리보기</p>
+  
+  <div style="margin-top:16px; background:#f9fafb; padding:16px; border-radius:10px;">
+    <p style="font-size:13px;color:#6b7280;margin-bottom:10px">현재 참가자 화면 미리보기</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">${pillsHtml}</div>
   </div>
-  <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn btn-primary" id="startBtn" style="flex:1;min-width:120px" ${hasQ?'':'disabled'}>▶ 투표 시작</button>
-    ${hasActive?'<button class="btn btn-red" id="endBtn">■ 종료</button>':''}
-    ${hasActive?'<button class="btn btn-gray" id="resetBtn">↺ 초기화</button>':''}
+
+  <div style="margin-top:24px; display:flex; align-items:center; gap:8px; padding:12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff;">
+    <input type="checkbox" id="blindToggle" ${st.blindMode ? 'checked' : ''} style="width:18px; height:18px; accent-color:#4f46e5;">
+    <label for="blindToggle" style="font-size:14px; font-weight:700; cursor:pointer;">블라인드 모드로 시작 (투표 중 결과 비공개)</label>
+    <span style="font-size:12px; color:#6b7280; margin-left:auto;">군중심리를 방지합니다.</span>
+  </div>
+
+  <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-primary btn-lg" id="startBtn" style="flex:1;min-width:140px" ${hasQ?'':'disabled'}>🚀 안건 상정 및 투표 시작</button>
+    ${hasActive?'<button class="btn btn-red btn-lg" id="endBtn">■ 투표 마감</button>':''}
+    ${hasActive?'<button class="btn btn-gray btn-lg" id="resetBtn">↺ 완전 초기화</button>':''}
   </div>
 </div>`;}
 
 function monitorHTML(){
   if(!st.q)return`
-<div class="card" style="text-align:center;padding:3rem">
-  <div style="font-size:48px;margin-bottom:12px">📊</div>
-  <p style="color:#6b7280">아직 진행 중인 투표가 없습니다</p>
-  <p style="font-size:13px;color:#9ca3af;margin-top:8px">질문 설정 탭에서 투표를 시작하세요</p>
+<div class="card" style="text-align:center;padding:4rem 2rem">
+  <div style="font-size:54px;margin-bottom:16px">📊</div>
+  <p style="color:#4b5563; font-size:18px; font-weight:700;">대기 중인 안건이 없습니다.</p>
+  <p style="font-size:14px;color:#9ca3af;margin-top:8px">안건 설정 탭에서 투표를 시작해주세요.</p>
 </div>`;
+  
   const counts={};
   st.q.opts.forEach(o=>counts[o]=0);
   let total=0;
   Object.values(st.votes||{}).forEach(v=>{if(v&&v.questionId===st.q.id&&counts[v.choice]!==undefined){counts[v.choice]++;total++;}});
-  const statCards=[`<div class="stat" style="background:#eef2ff"><div class="stat-num" style="color:#4f46e5">${total}</div><div class="stat-label" style="color:#6b7280">전체 참여</div></div>`]
-    .concat(st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;return`<div class="stat" style="background:${C[i]}15;border:1px solid ${C[i]}30"><div class="stat-num" style="color:${C[i]}">${cnt}</div><div class="stat-label" style="color:${C[i]}">${o}</div><div class="stat-sub" style="color:${C[i]}90">${pct}%</div></div>`;})).join('');
-  const barsHtml=st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;return`<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:15px;font-weight:700">${esc(o)}</span><span style="color:#6b7280;font-size:14px">${cnt}명 (${pct}%)</span></div><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${C[i]}">${pct>12?`<span class="bar-pct">${pct}%</span>`:''}</div></div></div>`;}).join('');
+  
+  const statCards=[`<div class="stat" style="background:#f3f4f6"><div class="stat-num" style="color:#374151">${total}</div><div class="stat-label" style="color:#6b7280">총 응답자</div></div>`]
+    .concat(st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;return`<div class="stat" style="background:${C[i]}10;border:1px solid ${C[i]}25"><div class="stat-num" style="color:${C[i]}">${cnt}</div><div class="stat-label" style="color:${C[i]}">${o}</div><div class="stat-sub" style="color:${C[i]}90">${pct}%</div></div>`;})).join('');
+  
+  const barsHtml=st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;return`<div style="margin-bottom:20px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:16px;font-weight:800">${esc(o)}</span><span style="color:#4b5563;font-size:15px;font-weight:700">${cnt}명 <span style="color:#9ca3af;font-size:13px;font-weight:500">(${pct}%)</span></span></div><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${C[i]}">${pct>10?`<span class="bar-pct">${pct}%</span>`:''}</div></div></div>`;}).join('');
+  
   const isLive=st.q.active;
+  const isHidden=st.q.showResults === false;
+
+  const chartContent = isHidden 
+    ? `<div style="padding:50px 20px; text-align:center; background:#f9fafb; border:2px dashed #e5e7eb; border-radius:12px;">
+        <div style="font-size:40px; margin-bottom:16px;">🙈</div>
+        <h3 style="font-size:18px; font-weight:800; color:#374151;">결과 블라인드 모드 작동 중</h3>
+        <p style="font-size:14px; color:#6b7280; margin-top:8px;">참여자들의 독립적인 의사결정을 위해 통계를 숨기고 있습니다.</p>
+        <button class="btn btn-primary btn-lg" id="revealBtn" style="margin-top:24px; padding:14px 28px; font-size:16px; box-shadow:0 4px 10px rgba(79,70,229,0.3);">👀 짠! 전체 결과 공개하기</button>
+       </div>`
+    : `<div class="stat-row" style="display:flex;gap:12px;margin-bottom:20px">${statCards}</div><div class="card" style="box-shadow:none; border:1px solid #e5e7eb;">${barsHtml}</div>`;
+
   return`
-<div style="display:flex;flex-direction:column;gap:14px">
-  <div class="card" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
-    <div><p style="font-size:12px;color:#9ca3af;margin-bottom:4px">현재 질문</p><p style="font-size:18px;font-weight:800">${esc(st.q.text)}</p></div>
+<div style="display:flex;flex-direction:column;gap:16px">
+  <div class="card" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap; border-left:5px solid #4f46e5;">
+    <div><p style="font-size:13px;color:#6b7280;margin-bottom:6px;font-weight:700;">현재 논의 중인 안건</p><p style="font-size:20px;font-weight:800;line-height:1.4">${esc(st.q.text)}</p></div>
     <div style="display:flex;gap:8px;flex-shrink:0">
-      ${isLive?'<button class="btn btn-red" id="endBtn">투표 종료</button>':''}
-      <button class="btn btn-gray" id="resetBtn">↺ 초기화</button>
+      ${isLive?'<button class="btn btn-red" id="endBtn">투표 마감하기</button>':''}
     </div>
   </div>
-  <div class="stat-row" style="display:flex;gap:12px">${statCards}</div>
-  <div class="card">${barsHtml}</div>
+  ${chartContent}
 </div>`;}
 
 function parHTML(){
-  const back=`<button class="btn btn-gray" id="parBack" style="position:fixed;top:16px;left:16px;font-size:13px;z-index:99">← 뒤로</button>`;
+  const back=`<button class="btn btn-gray" id="parBack" style="position:fixed;top:16px;left:16px;font-size:13px;z-index:99;box-shadow:0 2px 4px rgba(0,0,0,.1);">← 나가기</button>`;
+  
   if(st.myVote){
     const idx=st.q?st.q.opts.indexOf(st.myVote):0;
     const col=C[Math.max(0,idx)%C.length];
-    return`<div class="page center" style="background:#f0f2f5">${back}<div style="text-align:center"><div style="width:84px;height:84px;background:${col}20;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:40px">✅</div><h2 style="font-size:24px;font-weight:800;margin-bottom:10px">투표 완료!</h2><div style="background:${col}15;border:2px solid ${col}40;border-radius:12px;padding:10px 28px;display:inline-block;margin-bottom:10px"><span style="color:${col};font-weight:800;font-size:20px">${esc(st.myVote)}</span></div><p style="color:#9ca3af;font-size:13px">응답이 기록되었습니다</p></div></div>`;}
+    return`<div class="page center" style="background:#f0f2f5">${back}<div style="text-align:center"><div style="width:90px;height:90px;background:${col}15;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:44px">✅</div><h2 style="font-size:26px;font-weight:800;margin-bottom:12px;color:#111827;">의견 제출 완료!</h2><div style="background:#fff;border:2px solid ${col}40;border-radius:12px;padding:14px 32px;display:inline-block;margin-bottom:16px;box-shadow:0 4px 10px rgba(0,0,0,.05);"><span style="color:${col};font-weight:900;font-size:22px">${esc(st.myVote)}</span></div><p style="color:#6b7280;font-size:15px;font-weight:600;">앞의 스크린을 주시해 주세요.</p></div></div>`;}
+  
   if(!st.q||!st.q.active){
-    return`<div class="page center" style="background:#f0f2f5">${back}<div style="text-align:center"><div class="pulse" style="font-size:52px;margin-bottom:16px">⏳</div><h2 style="font-size:20px;font-weight:800;margin-bottom:8px">질문을 기다리는 중...</h2><p style="color:#6b7280;font-size:14px">퍼실리테이터가 투표를 시작하면<br>여기에 나타납니다</p>${st.q&&!st.q.active?'<p style="color:#9ca3af;font-size:13px;margin-top:14px;background:#f3f4f6;padding:8px 18px;border-radius:8px;display:inline-block">투표가 종료되었습니다</p>':''}</div></div>`;}
+    return`<div class="page center" style="background:#f0f2f5">${back}<div style="text-align:center"><div class="pulse" style="font-size:60px;margin-bottom:20px">⏳</div><h2 style="font-size:22px;font-weight:800;margin-bottom:10px;color:#374151;">진행자의 지시를 기다려주세요.</h2><p style="color:#6b7280;font-size:15px;line-height:1.5">새로운 안건이 상정되면<br>자동으로 투표 화면이 나타납니다.</p>${st.q&&!st.q.active?'<div style="margin-top:24px;"><span style="color:#b91c1c;font-size:14px;font-weight:700;background:#fee2e2;padding:10px 20px;border-radius:999px;">현재 안건의 투표가 마감되었습니다.</span></div>':''}</div></div>`;}
+  
   const btnHtml=st.q.opts.map((o,i)=>`<button class="vote-btn" data-choice="${esc(o)}" style="background:${C[i%C.length]}">${esc(o)}</button>`).join('');
-  return`<div class="page" style="background:#f0f2f5">${back}<div class="center"><div style="width:100%;max-width:480px"><div class="card" style="margin-bottom:24px;text-align:center"><p style="font-size:11px;color:#9ca3af;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase">질문</p><p style="font-size:20px;font-weight:800;line-height:1.5">${esc(st.q.text)}</p></div><div>${btnHtml}</div></div></div></div>`;}
+  
+  return`<div class="page" style="background:#f0f2f5">${back}<div class="center"><div style="width:100%;max-width:500px"><div class="card" style="margin-bottom:24px;text-align:center;border-top:4px solid #4f46e5;"><p style="font-size:13px;color:#4f46e5;font-weight:800;margin-bottom:10px;letter-spacing:.05em;">Q. 현재 안건</p><p style="font-size:22px;font-weight:800;line-height:1.4;word-break:keep-all;">${esc(st.q.text)}</p></div><div>${btnHtml}</div></div></div></div>`;}
 
 function bindFac(){
   document.getElementById('backBtn')?.addEventListener('click',()=>{stopPoll();st.view='home';render();});
   document.getElementById('tabSetup')?.addEventListener('click',()=>{st.tab='setup';render();});
   document.getElementById('tabMonitor')?.addEventListener('click',()=>{st.tab='monitor';render();});
-  document.getElementById('qInput')?.addEventListener('input',e=>{st.qText=e.target.value;const btn=document.getElementById('startBtn');if(btn)btn.disabled=!e.target.value.trim();});
+  
+  const qInput = document.getElementById('qInput');
+  if(qInput) {
+      qInput.addEventListener('input',e=>{st.qText=e.target.value;const btn=document.getElementById('startBtn');if(btn)btn.disabled=!e.target.value.trim();});
+  }
+
+  const blindToggle = document.getElementById('blindToggle');
+  if(blindToggle) {
+      blindToggle.addEventListener('change', e => { st.blindMode = e.target.checked; });
+  }
+
   document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',()=>{st.preset=+b.dataset.preset;render();}));
   document.getElementById('startBtn')?.addEventListener('click',startVote);
   document.getElementById('endBtn')?.addEventListener('click',endVote);
   document.getElementById('resetBtn')?.addEventListener('click',resetAll);
+  
+  // 결과 공개 버튼 로직 추가
+  document.getElementById('revealBtn')?.addEventListener('click', async () => {
+    if(!st.q) return;
+    const q = { ...st.q, showResults: true };
+    await fbSet('session/q', q);
+    st.q = q;
+    render();
+  });
 }
 
 function bindPar(){
@@ -196,11 +245,18 @@ function bindPar(){
 
 async function startVote(){
   const text=st.qText.trim();if(!text)return;
-  const q={id:Date.now().toString(),text,opts:PRESETS[st.preset].opts,active:true};
+  const q={
+      id:Date.now().toString(),
+      text,
+      opts:PRESETS[st.preset].opts,
+      active:true,
+      showResults: !st.blindMode // 블라인드 모드 체크 여부에 따라 결과 숨김 처리
+  };
   await fbDel('votes');await fbSet('session/q',q);
   st.q=q;st.votes={};st.tab='monitor';render();
 }
-async function endVote(){if(!st.q)return;const q={...st.q,active:false};await fbSet('session/q',q);st.q=q;render();}
+
+async function endVote(){if(!st.q)return;const q={...st.q,active:false, showResults:true};await fbSet('session/q',q);st.q=q;render();}
 async function resetAll(){await fbDel('session');await fbDel('votes');st.q=null;st.votes={};st.tab='setup';st.qText='';render();}
 async function submitVote(choice){if(!st.q||st.myVote)return;await fbSet(`votes/${st.pid}`,{questionId:st.q.id,choice,pid:st.pid});st.myVote=choice;render();}
 
