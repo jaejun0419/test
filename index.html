@@ -6,227 +6,141 @@
   <title>퍼실리테이션 프로그램</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
       background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
       min-height: 100vh; color: #1a1a1a;
       -webkit-font-smoothing: antialiased;
     }
-
     .view { display: none; min-height: 100vh; padding: 2rem 1.5rem; }
     .view.active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
     #participant-view.active { justify-content: center; }
 
     /* ---------- 카드 공통 ---------- */
-    .card {
-      background: #ffffff; border-radius: 20px;
-      padding: 3rem 2.5rem;
-      box-shadow: 0 10px 40px rgba(0, 64, 151, 0.08);
-      width: 100%; max-width: 560px;
-    }
-
+    .card { background: #fff; border-radius: 20px; padding: 3rem 2.5rem; box-shadow: 0 10px 40px rgba(0,64,151,0.08); width: 100%; max-width: 560px; }
     .logo-wrap { margin-bottom: 2.5rem; display: flex; justify-content: center; }
     .logo-wrap svg { width: 100%; max-width: 340px; height: auto; }
-
     h1.title { font-size: 1.5rem; font-weight: 700; color: #004097; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center; }
     .subtitle { font-size: 0.95rem; color: #6b7684; margin-bottom: 2rem; text-align: center; }
-
     .input-group { display: flex; flex-direction: column; gap: 0.75rem; }
-
-    input[type="text"] {
+    input[type="text"], input[type="number"] {
       width: 100%; padding: 0.95rem 1.1rem; font-size: 1rem;
-      border: 2px solid #e5e8ec; border-radius: 12px;
-      background: #fafbfc; transition: border-color 0.15s, background 0.15s;
+      border: 2px solid #e5e8ec; border-radius: 12px; background: #fafbfc;
       font-family: inherit;
     }
-    input[type="text"]:focus { outline: none; border-color: #009991; background: #ffffff; }
-
+    input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: #009991; background: #fff; }
     .btn-primary {
       width: 100%; padding: 0.95rem 1.1rem; font-size: 1rem; font-weight: 600;
       border: none; border-radius: 12px;
       background: linear-gradient(135deg, #004097 0%, #009991 100%);
-      color: white; cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.2s; font-family: inherit;
+      color: white; cursor: pointer; font-family: inherit;
     }
-    .btn-primary:hover { box-shadow: 0 6px 20px rgba(0, 64, 151, 0.25); }
-    .btn-primary:active { transform: translateY(1px); }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(0,64,151,0.25); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
-    /* ---------- 등록 완료 / 대기 ---------- */
+    /* ---------- 대기 화면 ---------- */
     .joined-box { text-align: center; }
-    .joined-box .check {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: #009991; color: white;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 1.25rem; font-size: 2rem;
-    }
+    .joined-box .check { width: 64px; height: 64px; border-radius: 50%; background: #009991; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 2rem; }
     .joined-box h2 { font-size: 1.35rem; font-weight: 700; color: #004097; margin-bottom: 0.5rem; }
     .joined-box p { color: #6b7684; font-size: 0.95rem; }
-    .joined-box .name-tag {
-      display: inline-block; margin-top: 1.25rem;
-      padding: 0.5rem 1rem; background: #f0f6f5; color: #009991;
-      border-radius: 999px; font-weight: 600;
-    }
-    .team-tag {
-      display: inline-block; margin-left: 0.5rem;
-      padding: 0.5rem 1rem; border-radius: 999px; font-weight: 600;
-    }
+    .joined-box .name-tag { display: inline-block; margin-top: 1.25rem; padding: 0.5rem 1rem; background: #f0f6f5; color: #009991; border-radius: 999px; font-weight: 600; }
+    .team-tag { display: inline-block; margin-left: 0.5rem; padding: 0.5rem 1rem; border-radius: 999px; font-weight: 600; }
     .team-tag.t1 { background: #eef2f9; color: #004097; }
     .team-tag.t2 { background: #e8f5f4; color: #009991; }
     .team-tag.t3 { background: #fff4e6; color: #c97a1f; }
-
-    .btn-leave {
-      margin-top: 1.5rem;
-      background: none; border: none;
-      color: #aaa; font-size: 0.8rem;
-      cursor: pointer; text-decoration: underline;
-      font-family: inherit;
-    }
+    .btn-leave { margin-top: 1.5rem; background: none; border: none; color: #aaa; font-size: 0.8rem; cursor: pointer; text-decoration: underline; font-family: inherit; }
     .btn-leave:hover { color: #d4537e; }
 
-    /* ---------- 활동(선지) 폼 ---------- */
-    .choice-card .team-banner {
-      border-radius: 16px;
-      padding: 1.5rem 1rem;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: white;
-    }
+    /* ---------- 선지 선택 ---------- */
+    .choice-card .team-banner { border-radius: 16px; padding: 1.5rem 1rem; text-align: center; margin-bottom: 1.5rem; color: white; }
     .choice-card .team-banner.t1 { background: linear-gradient(135deg, #003478 0%, #004097 100%); }
     .choice-card .team-banner.t2 { background: linear-gradient(135deg, #007a73 0%, #009991 100%); }
     .choice-card .team-banner.t3 { background: linear-gradient(135deg, #a55f17 0%, #c97a1f 100%); }
-    .choice-card .team-banner .team-label {
-      font-size: 0.78rem; letter-spacing: 0.15em;
-      text-transform: uppercase;
-      opacity: 0.85; margin-bottom: 0.4rem;
-    }
-    .choice-card .team-banner .team-name {
-      font-size: 1.8rem; font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    .choice-card .instruction {
-      text-align: center; color: #6b7684;
-      margin-bottom: 1.25rem;
-      font-size: 0.95rem;
-    }
+    .choice-card .team-banner .team-label { font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.85; margin-bottom: 0.4rem; }
+    .choice-card .team-banner .team-name { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+    .choice-card .instruction { text-align: center; color: #6b7684; margin-bottom: 1.25rem; font-size: 0.95rem; }
     .choice-options { display: flex; flex-direction: column; gap: 0.6rem; }
-    .choice-btn {
-      width: 100%; text-align: left;
-      padding: 1rem 1.2rem;
-      background: white; border: 2px solid #e5e8ec;
-      border-radius: 12px;
-      font-size: 0.95rem; font-family: inherit;
-      color: #1a1a1a; cursor: pointer;
-      transition: all 0.15s;
-      line-height: 1.5;
-      display: flex; gap: 0.75rem; align-items: flex-start;
-    }
-    .choice-btn .choice-num {
-      flex-shrink: 0;
-      width: 26px; height: 26px; border-radius: 50%;
-      background: #f0f2f4; color: #6b7684;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; font-weight: 700;
-      margin-top: 0.1rem;
-    }
-    .choice-btn:hover { transform: translateY(-1px); }
-    .choice-btn.t1:hover { border-color: #004097; background: #eef2f9; }
+    .choice-btn { width: 100%; text-align: left; padding: 1rem 1.2rem; background: #fff; border: 2px solid #e5e8ec; border-radius: 12px; font-size: 0.95rem; font-family: inherit; color: #1a1a1a; cursor: pointer; transition: all 0.15s; line-height: 1.5; display: flex; gap: 0.75rem; align-items: flex-start; }
+    .choice-btn .choice-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: #f0f2f4; color: #6b7684; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; margin-top: 0.1rem; }
+    .choice-btn.t1:hover { border-color: #004097; background: #eef2f9; transform: translateY(-1px); }
     .choice-btn.t1:hover .choice-num { background: #004097; color: white; }
-    .choice-btn.t2:hover { border-color: #009991; background: #e8f5f4; }
+    .choice-btn.t2:hover { border-color: #009991; background: #e8f5f4; transform: translateY(-1px); }
     .choice-btn.t2:hover .choice-num { background: #009991; color: white; }
-    .choice-btn.t3:hover { border-color: #c97a1f; background: #fff4e6; }
+    .choice-btn.t3:hover { border-color: #c97a1f; background: #fff4e6; transform: translateY(-1px); }
     .choice-btn.t3:hover .choice-num { background: #c97a1f; color: white; }
-
     .submitted-box { text-align: center; padding: 1rem 0; }
-    .submitted-box .check {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: #009991; color: white;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 1rem; font-size: 1.5rem;
-    }
-    .submitted-box .my-choice {
-      margin-top: 1.25rem; padding: 1rem;
-      background: #fafbfc; border-radius: 12px;
-      color: #444; font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    .submitted-box .my-choice .lbl {
-      font-size: 0.75rem; color: #6b7684;
-      font-weight: 600; margin-bottom: 0.3rem;
-    }
+    .submitted-box .check { width: 56px; height: 56px; border-radius: 50%; background: #009991; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; }
+    .submitted-box .my-choice { margin-top: 1.25rem; padding: 1rem; background: #fafbfc; border-radius: 12px; color: #444; font-size: 0.9rem; line-height: 1.5; }
+    .submitted-box .my-choice .lbl { font-size: 0.75rem; color: #6b7684; font-weight: 600; margin-bottom: 0.3rem; }
+
+    /* ---------- 비대표 회색 대기 / 종료 메시지 / 풀스크린 메시지 ---------- */
+    .fullscreen-msg { width: 100%; max-width: 600px; padding: 4rem 2rem; text-align: center; border-radius: 24px; }
+    .fullscreen-msg.grey { background: #e5e8ec; color: #6b7684; }
+    .fullscreen-msg.blue { background: linear-gradient(135deg, #2c5cb8 0%, #1d4498 100%); color: white; }
+    .fullscreen-msg.red { background: linear-gradient(135deg, #d44856 0%, #b3303e 100%); color: white; }
+    .fullscreen-msg.thanks { background: linear-gradient(135deg, #004097 0%, #009991 100%); color: white; }
+    .fullscreen-msg .big { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+    .fullscreen-msg .sub { font-size: 1rem; opacity: 0.85; }
+    .fullscreen-msg .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* ---------- 마을 매수 (대표 화면) ---------- */
+    .market-card { max-width: 720px; }
+    .market-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #eef0f3; flex-wrap: wrap; gap: 0.75rem; }
+    .market-header .team-info { display: flex; gap: 0.5rem; align-items: center; }
+    .market-header .balance { font-weight: 700; font-size: 1.1rem; color: #009991; }
+    .market-header .balance .lbl { font-size: 0.75rem; color: #6b7684; font-weight: 500; display: block; }
+    .stock-list { display: flex; flex-direction: column; gap: 0.65rem; max-height: 60vh; overflow-y: auto; padding-right: 0.25rem; }
+    .stock-row { background: #fafbfc; border: 1px solid #eef0f3; border-radius: 12px; padding: 0.85rem 1rem; display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; }
+    .stock-info { min-width: 0; }
+    .stock-info .nm { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; word-break: keep-all; }
+    .stock-info .meta { font-size: 0.75rem; color: #6b7684; display: flex; gap: 0.6rem; }
+    .stock-info .meta .holding { color: #009991; font-weight: 600; }
+    .stock-controls { display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; justify-content: flex-end; }
+    .qty-wrap { display: flex; align-items: center; gap: 0.2rem; }
+    .qty-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid #d5dae0; background: #fff; cursor: pointer; font-weight: 700; color: #6b7684; font-family: inherit; }
+    .qty-btn:hover { border-color: #009991; color: #009991; }
+    .qty-input { width: 55px; text-align: center; padding: 0.35rem 0.2rem; font-size: 0.9rem; border: 1px solid #d5dae0; border-radius: 6px; font-family: inherit; }
+    .stock-controls .b { padding: 0.35rem 0.7rem; font-size: 0.78rem; font-weight: 600; border-radius: 6px; border: 1px solid; cursor: pointer; font-family: inherit; background: #fff; }
+    .stock-controls .b.buy { color: #2c5cb8; border-color: #2c5cb8; }
+    .stock-controls .b.buy:hover:not(:disabled) { background: #2c5cb8; color: white; }
+    .stock-controls .b.sell { color: #d4537e; border-color: #d4537e; }
+    .stock-controls .b.sell:hover:not(:disabled) { background: #d4537e; color: white; }
+    .stock-controls .b:disabled { opacity: 0.35; cursor: not-allowed; }
+    .market-bottom { margin-top: 1.5rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn-submit-portfolio { flex: 1; padding: 0.85rem; border: none; border-radius: 12px; background: linear-gradient(135deg, #004097 0%, #009991 100%); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit; }
+    .btn-withdraw { padding: 0.85rem 1.5rem; border: 1px solid #d5dae0; border-radius: 12px; background: #fff; color: #6b7684; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-withdraw:hover { border-color: #d4537e; color: #d4537e; }
+
+    .market-submitted { text-align: center; padding: 2rem 1rem; }
+    .market-submitted .check { width: 56px; height: 56px; border-radius: 50%; background: #009991; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; }
 
     /* ---------- 대시보드 / 관리자 공통 ---------- */
-    .panel { width: 100%; max-width: 1200px; }
-
-    .panel-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 1.5rem; background: white; border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0, 64, 151, 0.06); margin-bottom: 1.5rem;
-    }
+    .panel { width: 100%; max-width: 1280px; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,64,151,0.06); margin-bottom: 1.5rem; }
     .panel-header h1 { font-size: 1.25rem; font-weight: 700; color: #004097; }
-
     .badge { padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
     .badge-dashboard { background: #e8f5f4; color: #009991; }
     .badge-admin { background: #fff4e6; color: #c97a1f; }
-
-    .panel-body {
-      background: white; border-radius: 16px;
-      padding: 2rem; min-height: 60vh;
-      box-shadow: 0 4px 16px rgba(0, 64, 151, 0.06);
-    }
-
-    .btn-back {
-      padding: 0.5rem 1rem; font-size: 0.85rem;
-      border: 1px solid #e5e8ec; border-radius: 8px;
-      background: white; color: #6b7684; cursor: pointer; font-family: inherit;
-    }
+    .badge-step { background: #eef2f9; color: #004097; margin-left: 0.5rem; }
+    .panel-body { background: white; border-radius: 16px; padding: 2rem; min-height: 60vh; box-shadow: 0 4px 16px rgba(0,64,151,0.06); }
+    .btn-back { padding: 0.5rem 1rem; font-size: 0.85rem; border: 1px solid #e5e8ec; border-radius: 8px; background: white; color: #6b7684; cursor: pointer; font-family: inherit; }
     .btn-back:hover { border-color: #009991; color: #009991; }
 
-    /* ---------- 카드 그리드 ---------- */
-    .panel-info {
-      color: #6b7684; font-size: 0.95rem;
-      margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: 0.75rem;
-    }
+    /* ---------- 대시보드: 참가자 카드 그리드 / 팀 그리드 ---------- */
+    .panel-info { color: #6b7684; font-size: 0.95rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
     .panel-info strong { color: #004097; font-size: 1.1rem; }
-
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 0.85rem;
-    }
-    .name-card {
-      background: white; border: 2px solid #e5e8ec;
-      border-radius: 12px; padding: 1rem 0.75rem;
-      text-align: center; font-weight: 600;
-      font-size: 1rem; color: #444;
-      transition: transform 0.15s, box-shadow 0.15s;
-      word-break: keep-all;
-    }
-    .name-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.85rem; }
+    .name-card { background: white; border: 2px solid #e5e8ec; border-radius: 12px; padding: 1rem 0.75rem; text-align: center; font-weight: 600; font-size: 1rem; color: #444; word-break: keep-all; }
     .name-card.team-1 { border-color: #004097; background: #eef2f9; color: #004097; }
     .name-card.team-2 { border-color: #009991; background: #e8f5f4; color: #009991; }
     .name-card.team-3 { border-color: #c97a1f; background: #fff4e6; color: #c97a1f; }
-
-    .teams-container {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
-    }
-    @media (max-width: 900px) {
-      .teams-container { grid-template-columns: 1fr; }
-    }
-    .team-column {
-      background: #fafbfc; border-radius: 16px;
-      padding: 1.25rem; min-height: 200px;
-    }
+    .teams-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    @media (max-width: 900px) { .teams-container { grid-template-columns: 1fr; } }
+    .team-column { background: #fafbfc; border-radius: 16px; padding: 1.25rem; min-height: 200px; }
     .team-column.t1 { border-top: 6px solid #004097; }
     .team-column.t2 { border-top: 6px solid #009991; }
     .team-column.t3 { border-top: 6px solid #c97a1f; }
-    .team-header {
-      font-size: 1.1rem; font-weight: 700;
-      margin-bottom: 1rem; padding-bottom: 0.6rem;
-      border-bottom: 2px solid; text-align: center;
-    }
+    .team-header { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 2px solid; text-align: center; }
     .team-header.t1 { color: #004097; border-color: #004097; }
     .team-header.t2 { color: #009991; border-color: #009991; }
     .team-header.t3 { color: #c97a1f; border-color: #c97a1f; }
@@ -234,11 +148,68 @@
     .team-column .name-card { font-size: 0.95rem; padding: 0.75rem; }
     .team-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; }
 
+    /* ---------- 대시보드: 투표 결과 ---------- */
+    .vote-teams { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    @media (max-width: 900px) { .vote-teams { grid-template-columns: 1fr; } }
+    .vote-team-card { background: #fafbfc; border-radius: 16px; padding: 1.5rem 1.25rem; border-top: 6px solid; }
+    .vote-team-card.t1 { border-top-color: #004097; }
+    .vote-team-card.t2 { border-top-color: #009991; }
+    .vote-team-card.t3 { border-top-color: #c97a1f; }
+    .vote-team-name { font-size: 1.15rem; font-weight: 700; text-align: center; margin-bottom: 0.4rem; }
+    .vote-team-card.t1 .vote-team-name { color: #004097; }
+    .vote-team-card.t2 .vote-team-name { color: #009991; }
+    .vote-team-card.t3 .vote-team-name { color: #c97a1f; }
+    .vote-team-meta { text-align: center; font-size: 0.8rem; color: #6b7684; margin-bottom: 1.25rem; }
+    .vote-options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .vote-option { background: white; border-radius: 10px; padding: 0.85rem 1rem; border: 1px solid #eef0f3; }
+    .vote-option .opt-text { font-size: 0.85rem; line-height: 1.45; margin-bottom: 0.55rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+    .vote-option .opt-num { flex-shrink: 0; font-weight: 700; font-size: 0.75rem; color: #6b7684; }
+    .vote-bar-wrap { height: 8px; background: #f0f2f4; border-radius: 4px; overflow: hidden; }
+    .vote-bar { height: 100%; transition: width 0.5s ease; }
+    .vote-bar.t1 { background: #004097; }
+    .vote-bar.t2 { background: #009991; }
+    .vote-bar.t3 { background: #c97a1f; }
+    .vote-count { display: flex; justify-content: space-between; font-size: 0.75rem; color: #6b7684; margin-top: 0.35rem; font-weight: 600; }
+
+    /* ---------- 대시보드: 포트폴리오 ---------- */
+    .portfolios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    @media (max-width: 900px) { .portfolios { grid-template-columns: 1fr; } }
+    .portfolio { background: #fafbfc; border-radius: 16px; padding: 1.5rem 1.25rem; border-top: 6px solid; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .portfolio:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,64,151,0.08); }
+    .portfolio.t1 { border-top-color: #004097; }
+    .portfolio.t2 { border-top-color: #009991; }
+    .portfolio.t3 { border-top-color: #c97a1f; }
+    .portfolio .p-team { text-align: center; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; margin-bottom: 0.4rem; }
+    .portfolio.t1 .p-team { color: #004097; }
+    .portfolio.t2 .p-team { color: #009991; }
+    .portfolio.t3 .p-team { color: #c97a1f; }
+    .portfolio .p-rep { text-align: center; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+    .portfolio .p-cash { background: white; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+    .portfolio .p-cash .lbl { font-size: 0.78rem; color: #6b7684; }
+    .portfolio .p-cash .val { font-size: 1.05rem; font-weight: 700; color: #1a1a1a; }
+    .portfolio.t1 .p-cash .val { color: #004097; }
+    .portfolio.t2 .p-cash .val { color: #009991; }
+    .portfolio.t3 .p-cash .val { color: #c97a1f; }
+    .portfolio .p-holdings { display: flex; flex-direction: column; gap: 0.35rem; }
+    .portfolio .ph-item { display: flex; justify-content: space-between; gap: 0.5rem; background: white; border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.85rem; }
+    .portfolio .ph-item .ph-nm { color: #444; flex: 1; }
+    .portfolio .ph-item .ph-qty { font-weight: 700; }
+    .portfolio.t1 .ph-item .ph-qty { color: #004097; }
+    .portfolio.t2 .ph-item .ph-qty { color: #009991; }
+    .portfolio.t3 .ph-item .ph-qty { color: #c97a1f; }
+    .portfolio .p-status { text-align: center; font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 999px; margin-top: 0.85rem; display: inline-block; }
+    .portfolio .p-status.live { background: #fffaf0; color: #c97a1f; }
+    .portfolio .p-status.submitted { background: #e8f5f4; color: #009991; }
+
+    /* 단일 팀 전체화면 */
+    .portfolio-full { display: none; }
+    .portfolio-full.active { display: block; }
+    .portfolio-full .portfolio { cursor: default; transform: none; }
+    .portfolio-full .portfolio:hover { transform: none; box-shadow: none; }
+    .btn-portfolio-back { padding: 0.5rem 1rem; font-size: 0.85rem; border: 1px solid #d5dae0; border-radius: 8px; background: white; color: #6b7684; cursor: pointer; font-family: inherit; margin-bottom: 1rem; }
+
     /* ---------- 통계 ---------- */
-    .stats-bar {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 0.85rem; margin-bottom: 1.5rem;
-    }
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
     @media (max-width: 640px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
     .stat-card { background: #fafbfc; padding: 1rem; border-radius: 12px; text-align: center; }
     .stat-number { font-size: 1.5rem; font-weight: 700; color: #004097; line-height: 1; }
@@ -248,23 +219,11 @@
     .stat-label { font-size: 0.75rem; color: #6b7684; margin-top: 0.5rem; word-break: keep-all; }
 
     /* ---------- 관리자 컨트롤 ---------- */
-    .admin-section {
-      margin-bottom: 1.5rem; padding-bottom: 1.5rem;
-      border-bottom: 1px solid #eef0f3;
-    }
+    .admin-section { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eef0f3; }
     .admin-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .section-title {
-      font-weight: 700; color: #004097;
-      font-size: 1rem; margin-bottom: 0.85rem;
-    }
-    .admin-controls {
-      display: flex; gap: 0.6rem; flex-wrap: wrap;
-    }
-    .btn-action {
-      padding: 0.7rem 1.2rem; border: none; border-radius: 10px;
-      font-weight: 600; cursor: pointer; font-size: 0.9rem; font-family: inherit;
-      transition: opacity 0.15s, box-shadow 0.15s;
-    }
+    .section-title { font-weight: 700; color: #004097; font-size: 1rem; margin-bottom: 0.85rem; }
+    .admin-controls { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn-action { padding: 0.7rem 1.2rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; font-family: inherit; }
     .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-action-primary { background: linear-gradient(135deg, #004097 0%, #009991 100%); color: white; }
     .btn-action-primary:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(0,64,151,0.25); }
@@ -273,254 +232,91 @@
     .btn-action-danger { background: white; border: 1px solid #f3c7d5; color: #d4537e; }
     .btn-action-danger:hover:not(:disabled) { background: #fef1f5; }
 
-    .participant-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 35vh; overflow-y: auto; }
-    .participant-row {
-      display: flex; align-items: center; gap: 0.6rem;
-      padding: 0.6rem 0.85rem;
-      background: #fafbfc; border-radius: 8px;
-    }
+    /* 진행 단계 인디케이터 */
+    .step-flow { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .step-pill { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; background: #f0f2f4; color: #aaa; }
+    .step-pill.active { background: linear-gradient(135deg, #004097 0%, #009991 100%); color: white; }
+    .step-pill.done { background: #e8f5f4; color: #009991; }
+
+    /* 참가자 목록 */
+    .participant-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 30vh; overflow-y: auto; }
+    .participant-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.85rem; background: #fafbfc; border-radius: 8px; }
     .participant-row .pname { flex: 1; font-weight: 500; }
     .team-pill { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
     .team-pill.t1 { background: #eef2f9; color: #004097; }
     .team-pill.t2 { background: #e8f5f4; color: #009991; }
     .team-pill.t3 { background: #fff4e6; color: #c97a1f; }
     .team-pill.none { background: #f0f0f0; color: #999; }
-
-    .btn-mini {
-      padding: 0.25rem 0.6rem; font-size: 0.75rem;
-      border: 1px solid #d5dae0;
-      background: white; border-radius: 6px;
-      color: #6b7684; cursor: pointer; font-family: inherit;
-      font-weight: 500;
-    }
+    .rep-mark { font-size: 0.65rem; padding: 0.15rem 0.45rem; border-radius: 4px; background: #fff4e6; color: #c97a1f; font-weight: 700; }
+    .btn-mini { padding: 0.25rem 0.6rem; font-size: 0.75rem; border: 1px solid #d5dae0; background: white; border-radius: 6px; color: #6b7684; cursor: pointer; font-family: inherit; font-weight: 500; }
     .btn-mini:hover { border-color: #009991; color: #009991; }
     .btn-mini.danger { color: #d4537e; border-color: #f3c7d5; }
     .btn-mini.danger:hover { background: #fef1f5; }
-
-    .empty-state {
-      text-align: center; color: #aaa;
-      padding: 3rem 1rem; font-size: 0.95rem;
-    }
+    .empty-state { text-align: center; color: #aaa; padding: 3rem 1rem; font-size: 0.95rem; }
     .empty-state .icon { font-size: 2.5rem; opacity: 0.5; margin-bottom: 0.75rem; }
 
-    /* ---------- 대시보드: 투표 결과 ---------- */
-    .vote-teams {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-    }
-    @media (max-width: 900px) { .vote-teams { grid-template-columns: 1fr; } }
-
-    .vote-team-card {
-      background: #fafbfc;
-      border-radius: 16px;
-      padding: 1.5rem 1.25rem;
-      border-top: 6px solid;
-    }
-    .vote-team-card.t1 { border-top-color: #004097; }
-    .vote-team-card.t2 { border-top-color: #009991; }
-    .vote-team-card.t3 { border-top-color: #c97a1f; }
-
-    .vote-team-name {
-      font-size: 1.15rem; font-weight: 700;
-      text-align: center; margin-bottom: 0.4rem;
-    }
-    .vote-team-card.t1 .vote-team-name { color: #004097; }
-    .vote-team-card.t2 .vote-team-name { color: #009991; }
-    .vote-team-card.t3 .vote-team-name { color: #c97a1f; }
-    .vote-team-meta {
-      text-align: center; font-size: 0.8rem;
-      color: #6b7684; margin-bottom: 1.25rem;
-    }
-
-    .vote-options { display: flex; flex-direction: column; gap: 0.75rem; }
-    .vote-option {
-      background: white; border-radius: 10px;
-      padding: 0.85rem 1rem;
-      border: 1px solid #eef0f3;
-    }
-    .vote-option .opt-text {
-      font-size: 0.85rem; color: #1a1a1a;
-      line-height: 1.45; margin-bottom: 0.55rem;
-      display: flex; gap: 0.5rem; align-items: flex-start;
-    }
-    .vote-option .opt-num {
-      flex-shrink: 0;
-      font-weight: 700; font-size: 0.75rem;
-      color: #6b7684;
-    }
-    .vote-bar-wrap {
-      height: 8px; background: #f0f2f4;
-      border-radius: 4px; overflow: hidden;
-      position: relative;
-    }
-    .vote-bar {
-      height: 100%;
-      transition: width 0.5s ease;
-      border-radius: 4px;
-    }
-    .vote-bar.t1 { background: #004097; }
-    .vote-bar.t2 { background: #009991; }
-    .vote-bar.t3 { background: #c97a1f; }
-    .vote-count {
-      display: flex; justify-content: space-between;
-      font-size: 0.75rem; color: #6b7684;
-      margin-top: 0.35rem;
-      font-weight: 600;
-    }
-
-    /* ---------- 관리자: 투표 응답 관리 ---------- */
-    .response-teams {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
+    /* 관리자: 응답 관리 */
+    .response-teams { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     @media (max-width: 900px) { .response-teams { grid-template-columns: 1fr; } }
-
-    .response-team-block {
-      background: #fafbfc;
-      border-radius: 12px; padding: 1rem;
-      border-top: 4px solid;
-    }
+    .response-team-block { background: #fafbfc; border-radius: 12px; padding: 1rem; border-top: 4px solid; }
     .response-team-block.t1 { border-top-color: #004097; }
     .response-team-block.t2 { border-top-color: #009991; }
     .response-team-block.t3 { border-top-color: #c97a1f; }
-    .response-team-title {
-      font-weight: 700; font-size: 0.95rem;
-      margin-bottom: 0.75rem;
-      text-align: center;
-    }
+    .response-team-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.75rem; text-align: center; }
     .response-team-block.t1 .response-team-title { color: #004097; }
     .response-team-block.t2 .response-team-title { color: #009991; }
     .response-team-block.t3 .response-team-title { color: #c97a1f; }
-
-    .response-radio-list {
-      display: flex; flex-direction: column; gap: 0.4rem;
-      max-height: 280px; overflow-y: auto;
-    }
-    .response-radio-item {
-      display: flex; align-items: flex-start;
-      gap: 0.5rem;
-      padding: 0.55rem 0.7rem;
-      background: white; border: 1px solid #eef0f3;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
+    .response-radio-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 280px; overflow-y: auto; }
+    .response-radio-item { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.55rem 0.7rem; background: white; border: 1px solid #eef0f3; border-radius: 8px; cursor: pointer; }
     .response-radio-item:hover { border-color: #009991; }
     .response-radio-item.selected { border-color: #009991; background: #f0f6f5; }
-    .response-radio-item input[type="radio"] { margin-top: 0.25rem; cursor: pointer; }
     .response-radio-item .ri-body { flex: 1; }
     .response-radio-item .ri-name { font-weight: 600; font-size: 0.88rem; }
-    .response-radio-item .ri-choice {
-      font-size: 0.78rem; color: #6b7684;
-      margin-top: 0.2rem; line-height: 1.4;
-    }
-    .response-empty {
-      text-align: center; color: #aaa;
-      padding: 1.5rem 0.5rem;
-      font-size: 0.85rem; font-style: italic;
-    }
+    .response-radio-item .ri-choice { font-size: 0.78rem; color: #6b7684; margin-top: 0.2rem; line-height: 1.4; }
+    .response-empty { text-align: center; color: #aaa; padding: 1.5rem 0.5rem; font-size: 0.85rem; font-style: italic; }
 
-    /* ---------- 송출 모달 ---------- */
-    .modal-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(0, 20, 50, 0.6);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center; justify-content: center;
-      z-index: 1000;
-      padding: 2rem 1rem;
-      overflow-y: auto;
-    }
+    /* 관리자: 주식 관리 */
+    .market-admin-info { background: #f0f6f5; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; font-size: 0.85rem; color: #444; line-height: 1.5; }
+    .market-admin-info b { color: #009991; }
+    .add-stock-form { display: flex; gap: 0.5rem; margin-bottom: 0.85rem; }
+    .add-stock-form input { flex: 1; padding: 0.55rem 0.8rem; }
+    .stock-admin-list { display: flex; flex-direction: column; gap: 0.35rem; max-height: 30vh; overflow-y: auto; }
+    .stock-admin-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: #fafbfc; border-radius: 8px; font-size: 0.85rem; }
+    .stock-admin-row .sa-nm { flex: 1; font-weight: 500; }
+    .stock-admin-row .sa-stat { color: #6b7684; font-size: 0.78rem; }
+
+    /* ---------- 송출 모달 (선지) / 발표자 모달 ---------- */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,20,50,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 2rem 1rem; overflow-y: auto; }
     .modal-backdrop.active { display: flex; }
-    .modal-content {
-      background: white; border-radius: 24px;
-      padding: 2.5rem 2rem;
-      width: 100%; max-width: 900px;
-      box-shadow: 0 20px 60px rgba(0, 64, 151, 0.3);
-      animation: modal-pop 0.3s ease;
-    }
-    @keyframes modal-pop {
-      from { opacity: 0; transform: scale(0.92); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .modal-header {
-      text-align: center; margin-bottom: 2rem;
-    }
-    .modal-header .modal-title {
-      font-size: 1.5rem; font-weight: 800;
-      color: #004097; letter-spacing: -0.02em;
-      margin-bottom: 0.4rem;
-    }
-    .modal-header .modal-sub {
-      color: #6b7684; font-size: 0.95rem;
-    }
-    .modal-persons {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
+    .modal-content { background: white; border-radius: 24px; padding: 2.5rem 2rem; width: 100%; max-width: 900px; box-shadow: 0 20px 60px rgba(0,64,151,0.3); animation: modal-pop 0.3s ease; position: relative; }
+    @keyframes modal-pop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    .modal-header { text-align: center; margin-bottom: 2rem; }
+    .modal-header .modal-title { font-size: 1.5rem; font-weight: 800; color: #004097; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    .modal-header .modal-sub { color: #6b7684; font-size: 0.95rem; }
+    .modal-persons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
     @media (max-width: 900px) { .modal-persons { grid-template-columns: 1fr; } }
-
-    .modal-person {
-      background: #fafbfc;
-      border-radius: 16px;
-      padding: 1.5rem 1.25rem;
-      border-top: 6px solid;
-    }
+    .modal-person { background: #fafbfc; border-radius: 16px; padding: 1.5rem 1.25rem; border-top: 6px solid; }
     .modal-person.t1 { border-top-color: #004097; }
     .modal-person.t2 { border-top-color: #009991; }
     .modal-person.t3 { border-top-color: #c97a1f; }
-
-    .modal-person .mp-team {
-      font-size: 0.78rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      margin-bottom: 0.4rem;
-    }
+    .modal-person .mp-team { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
     .modal-person.t1 .mp-team { color: #004097; }
     .modal-person.t2 .mp-team { color: #009991; }
     .modal-person.t3 .mp-team { color: #c97a1f; }
-    .modal-person .mp-name {
-      font-size: 1.5rem; font-weight: 800;
-      color: #1a1a1a; margin-bottom: 1rem;
-      letter-spacing: -0.02em;
-    }
-    .modal-person .mp-choice {
-      background: white; border-radius: 10px;
-      padding: 0.9rem 1rem;
-      font-size: 0.95rem; line-height: 1.55;
-      color: #1a1a1a;
-    }
+    .modal-person .mp-name { font-size: 1.5rem; font-weight: 800; color: #1a1a1a; margin-bottom: 1rem; letter-spacing: -0.02em; }
+    .modal-person .mp-choice { background: white; border-radius: 10px; padding: 0.9rem 1rem; font-size: 0.95rem; line-height: 1.55; color: #1a1a1a; }
     .modal-person.t1 .mp-choice { border-left: 3px solid #004097; }
     .modal-person.t2 .mp-choice { border-left: 3px solid #009991; }
     .modal-person.t3 .mp-choice { border-left: 3px solid #c97a1f; }
-
-    .modal-actions {
-      text-align: center;
-    }
-    .modal-close-btn {
-      padding: 0.7rem 2rem;
-      background: #f0f2f4;
-      border: none; border-radius: 10px;
-      color: #6b7684; font-weight: 600; font-size: 0.9rem;
-      cursor: pointer; font-family: inherit;
-    }
+    .modal-actions { text-align: center; }
+    .modal-close-btn { padding: 0.7rem 2rem; background: #f0f2f4; border: none; border-radius: 10px; color: #6b7684; font-weight: 600; font-size: 0.9rem; cursor: pointer; font-family: inherit; }
     .modal-close-btn:hover { background: #e5e8ec; }
-    .modal-admin-note {
-      font-size: 0.8rem; color: #aaa;
-      margin-top: 0.8rem;
-    }
+    .modal-admin-note { font-size: 0.8rem; color: #aaa; margin-top: 0.8rem; }
+    .modal-close-x { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border-radius: 50%; border: none; background: #f0f2f4; color: #6b7684; cursor: pointer; font-size: 1.1rem; font-family: inherit; }
+    .modal-close-x:hover { background: #e5e8ec; }
 
-    /* 연결 상태 표시 */
-    .conn-status {
-      position: fixed; bottom: 1rem; right: 1rem;
-      padding: 0.4rem 0.8rem; border-radius: 999px;
-      font-size: 0.75rem; font-weight: 500;
-      background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      display: flex; align-items: center; gap: 0.4rem; z-index: 100;
-    }
+    /* 연결 상태 */
+    .conn-status { position: fixed; bottom: 1rem; right: 1rem; padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.75rem; font-weight: 500; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 0.4rem; z-index: 100; }
     .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e0; }
     .conn-status.online .conn-dot { background: #009991; }
     .conn-status.online { color: #009991; }
@@ -531,8 +327,7 @@
 
   <!-- ============ 참가자 화면 ============ -->
   <div id="participant-view" class="view active">
-
-    <!-- (1) 등록 -->
+    <!-- 등록 -->
     <div class="card" id="participant-card">
       <div class="logo-wrap">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 413.76 52.34" aria-label="대학로고">
@@ -549,35 +344,7 @@
               <path fill="#004097" d="M308.79,15.95h-5.99V4.76h-7.5v33.51h-13.84V10.76h8.9v-5.04h-16.6v31.93c0,1.88.5,3.3,1.51,4.23,1.11,1.03,2.81,1.54,5.1,1.54h14.93v6.59h7.5v-28.17h5.99v28.18h7.5V4.76h-7.5v11.19Z"/>
             </g>
             <g>
-              <polygon fill="#009991" points="12.18 18.32 8.56 15.42 8.57 15.4 13.8 16.3 14.63 15.26 9.53 11.18 8.76 12.14 12.31 14.98 12.3 14.99 7.19 14.11 6.31 15.21 11.41 19.29 12.18 18.32"/>
-              <polygon fill="#009991" points="17.77 6.07 20.44 10.72 21.59 10.06 18.92 5.4 20.49 4.49 19.91 3.49 15.62 5.94 16.2 6.95 17.77 6.07"/>
-              <rect fill="#009991" x="22.03" y="2.55" width="1.33" height="6.53" transform="translate(-.46 9.4) rotate(-23.18)"/>
-              <path fill="#009991" d="M26.22,7.46c.6.24,1.24.27,1.92.09.67-.18,1.21-.52,1.61-1.02.62-.77.76-1.79.43-3.06-.34-1.28-.97-2.1-1.89-2.46-.6-.23-1.23-.25-1.9-.07-.67.18-1.22.52-1.62,1.01-.62.77-.76,1.79-.42,3.07.34,1.28.96,2.09,1.89,2.45ZM25.71,2.79c.21-.36.53-.61.97-.72.43-.11.82-.06,1.18.15.48.27.82.8,1.03,1.59.21.78.17,1.41-.11,1.89-.2.37-.52.61-.95.72-.43.12-.83.06-1.2-.15-.47-.28-.81-.8-1.02-1.59-.21-.79-.17-1.42.1-1.89Z"/>
-              <path fill="#009991" d="M15.94,14.14l-.5-1.34,1.86-1.51,1.18.78,1.12-.91-5.89-3.62-1.18.97,2.34,6.51,1.08-.88ZM14.03,9.17l2.26,1.49-1.27,1.04-1-2.52h.01Z"/>
-              <polygon fill="#009991" points="63.09 27.29 64.16 26.86 63.04 24.07 64.59 23.39 65.58 25.83 66.64 25.41 65.67 22.97 66.92 22.45 68.01 25.16 69.09 24.73 67.52 20.74 61.5 23.29 63.09 27.29"/>
-              <polygon fill="#009991" points="32.77 6.71 32.55 2.07 32.57 2.07 35.36 6.59 36.68 6.52 36.36 0 35.14 .06 35.36 4.6 35.34 4.6 32.62 .18 31.21 .25 31.53 6.77 32.77 6.71"/>
-              <path fill="#009991" d="M68.62,37.24l-.04,1.24c.52.01.97-.14,1.37-.47.51-.42.78-1.06.81-1.93.03-.91-.19-1.58-.67-2.02-.34-.31-.76-.47-1.25-.48-.34-.01-.62.03-.86.14-.21.09-.4.24-.55.44-.12.16-.23.37-.33.63-.06.16-.13.41-.22.75l-.2.67c-.11.4-.21.67-.29.81-.13.21-.31.31-.54.31-.3-.01-.52-.16-.65-.45-.1-.23-.15-.52-.14-.89.02-.52.16-.88.42-1.1.18-.14.39-.21.66-.21l.04-1.28c-.54-.02-1.01.13-1.4.44-.54.44-.83,1.17-.86,2.2-.02.54.08,1.03.29,1.46.34.71.92,1.08,1.74,1.1.54.02.95-.14,1.25-.47.22-.24.4-.61.54-1.13l.45-1.53c.06-.2.12-.35.19-.44.12-.15.29-.22.5-.21.27,0,.46.14.6.39.1.2.15.45.14.75-.02.5-.15.85-.41,1.06-.15.12-.36.2-.6.22Z"/>
-              <rect fill="#009991" x="57.34" y="15.06" width="6.53" height="1.33" transform="translate(3.07 40.44) rotate(-37.79)"/>
-              <path fill="#009991" d="M63.42,29.27l2.49-.58.22,1.16c.08.45.08.75-.08.92-.11.13-.41.25-.89.36-.31.07-.56.14-.76.21-.17.06-.33.13-.49.22l.34,1.43.17-.04c.02-.15.11-.26.27-.33.12-.05.43-.14.92-.25.55-.13.92-.29,1.12-.49.15-.13.25-.36.31-.67.17.27.42.46.73.57.31.11.64.11,1,.03.42-.1.76-.3,1.03-.62.38-.45.48-1.03.33-1.74l-.64-2.95-6.36,1.49.3,1.27ZM68.68,28.04l.28,1.44c.06.33.04.59-.11.78-.12.15-.29.25-.51.3-.31.07-.55.04-.73-.08-.17-.12-.31-.35-.38-.7l-.26-1.34,1.71-.4Z"/>
-              <polygon fill="#009991" points="60.3 21.17 67.05 19.3 66.3 18.15 61.3 19.8 61.29 19.8 64.84 15.9 64.06 14.71 59.61 20.11 60.3 21.17"/>
-              <polygon fill="#009991" points="47.43 7.88 44.87 6.9 46.77 1.91 45.53 1.44 43.2 7.53 47.01 8.98 47.43 7.88"/>
-              <path fill="#009991" d="M38.86,5.5l2.36.38.2,1.41,1.42.23-1.2-6.81-1.51-.24-3.32,6.08,1.38.22.67-1.26ZM40.63,2.03h.02l.38,2.68-1.62-.26,1.22-2.42Z"/>
-              <polygon fill="#009991" points="54.16 13.6 57.36 10.23 57.37 10.24 56.03 15.38 56.99 16.3 61.49 11.57 60.6 10.72 57.47 14.01 57.46 14 58.77 8.98 57.75 8.01 53.25 12.74 54.16 13.6"/>
-              <path fill="#009991" d="M49.53,10.18c.2.27.44.51.75.73.67.48,1.3.69,1.88.63.63-.06,1.18-.43,1.67-1.11l2.46-3.42-1.09-.79-2.49,3.46c-.24.33-.5.52-.78.57-.3.05-.62-.05-.98-.31-.28-.2-.44-.45-.48-.74-.05-.31.06-.64.31-.99l2.45-3.41-1.1-.8-2.51,3.49c-.19.27-.33.53-.41.78-.09.27-.12.53-.1.79.03.38.18.75.43,1.11Z"/>
-              <path fill="#009991" d="M28.94,21.43l.29,6.76c1.72,1.17,3.37,2.76,4.31,4.76-.16-5.09-1.23-10.56-4.59-11.52Z"/>
-              <path fill="#009991" d="M37.13,32.95c.93-2,2.59-3.59,4.31-4.76l.29-6.76c-3.36.96-4.44,6.42-4.59,11.52Z"/>
-              <path fill="#009991" d="M44.01,47.25c-.15-.09-.35-.14-.61-.14s-.47.05-.63.15c-.16.1-.23.23-.23.39s.07.3.23.39c.15.1.36.14.62.14s.46-.05.61-.14c.15-.09.23-.22.23-.39s-.07-.3-.22-.39Z"/>
-              <polygon fill="#009991" points="68.41 43.8 63.21 42.46 62.88 43.75 68.08 45.08 67.71 46.63 68.84 46.92 70 42.47 68.87 42.17 68.41 43.8"/>
-              <rect fill="#009991" x="66.41" y="37.04" width="1.33" height="6.53" transform="translate(16.83 100.3) rotate(-81.06)"/>
-              <path fill="#009991" d="M4.6,25.49c1.21.52,2.24.52,3.09.01.56-.33.97-.81,1.24-1.46.27-.64.33-1.27.19-1.9-.22-.96-.94-1.7-2.15-2.22-1.22-.52-2.25-.53-3.1-.02-.55.33-.95.82-1.23,1.46-.27.64-.34,1.27-.2,1.9.22.96.94,1.7,2.16,2.22ZM3.71,21.82c.17-.4.46-.68.85-.84.51-.21,1.14-.15,1.89.16.75.31,1.22.73,1.42,1.24.17.39.16.79-.01,1.19-.17.41-.46.7-.86.85-.51.21-1.13.15-1.88-.17-.75-.32-1.23-.73-1.43-1.24-.16-.39-.15-.79.02-1.21Z"/>
-              <path fill="#009991" d="M35.33,8.83c-14.62,0-26.54,11.92-26.54,26.54,0,5.97,1.99,11.49,5.33,15.93h42.41c3.45-4.59,5.33-10.18,5.33-15.93,0-14.62-11.92-26.54-26.54-26.54ZM27.11,48.96h-1.86v-2.3h-1.43v-.82c.59,0,1.03-.08,1.31-.2.28-.13.46-.34.54-.63h1.44v3.96ZM33.18,48.51c-.51.37-1.21.55-2.11.55-.67,0-1.23-.09-1.67-.29-.44-.19-.72-.46-.83-.81l1.74-.04c.05.1.15.18.27.24.13.06.29.08.48.08.31,0,.55-.08.72-.23.17-.15.26-.38.29-.69-.16.09-.37.17-.61.21-.24.05-.51.07-.81.07-.67,0-1.2-.12-1.6-.35-.4-.24-.6-.55-.6-.95,0-.44.23-.78.7-1.04.47-.25,1.11-.38,1.93-.38.95,0,1.67.17,2.15.52.48.35.72.86.72,1.55s-.25,1.17-.76,1.54ZM40,48.14h-.75v.82h-1.81v-.82h-2.92v-.96l2.97-2.17h1.77v2.24h.75v.9ZM45.4,48.68c-.47.26-1.1.38-1.92.38-.95,0-1.67-.17-2.15-.52-.48-.35-.72-.87-.72-1.55s.25-1.17.76-1.54c.5-.37,1.21-.55,2.11-.55.67,0,1.23.09,1.67.29.44.19.72.46.84.81l-1.76.04c-.05-.1-.14-.18-.26-.24-.12-.06-.29-.08-.48-.08-.31,0-.56.08-.72.23-.17.15-.26.38-.29.69.17-.09.37-.16.61-.21.24-.05.51-.07.81-.07.67,0,1.2.12,1.6.35.4.23.59.55.59.95,0,.44-.23.79-.7,1.04ZM53.72,43.56h-4.12v-14.14c-1.14.04-2.49.35-3.88.95v13.01h-4.28v-10.02c-2.84,2.71-4.4,6.1-4.44,10.02h-3.33c-.04-3.93-1.6-7.31-4.44-10.02v10.02s-4.28,0-4.28,0v-13.01c-1.39-.6-2.74-.92-3.88-.95v14.14h-4.12v-18.57c3.01-.1,5.68.25,8,.99v-.13l-.2-10.14c5.06,0,9.69,2.85,10.61,7.92.88-5.05,5.49-7.92,10.56-7.92l-.2,10.14v.13c2.33-.75,5-1.09,8-.99v18.57Z"/>
-              <polygon fill="#009991" points="61.95 46.48 61.39 47.69 63.61 48.72 66.42 52.34 67.05 50.99 64.99 48.66 68.16 48.62 68.82 47.2 64.18 47.52 61.95 46.48"/>
-              <path fill="#009991" d="M4.37,44.21c1.3-.23,2.16-.79,2.6-1.67.29-.58.37-1.21.25-1.9-.12-.68-.41-1.25-.88-1.69-.71-.68-1.71-.91-3.01-.68-1.3.23-2.17.79-2.61,1.67-.28.58-.35,1.21-.23,1.89.12.69.41,1.25.87,1.7.71.69,1.72.91,3.02.68ZM1.63,41.62c-.08-.43,0-.82.25-1.16.31-.45.87-.75,1.67-.89.8-.14,1.42-.05,1.87.27.35.24.56.57.64,1.01.08.44,0,.84-.25,1.18-.32.45-.87.74-1.67.88-.8.14-1.43.05-1.87-.26-.35-.24-.56-.58-.64-1.03Z"/>
-              <polygon fill="#009991" points="6.55 35.92 4.34 35.88 3.69 35.24 6.6 33.35 6.64 31.64 2.73 34.29 .11 31.66 .07 33.37 2.69 35.84 .03 35.79 0 37.11 6.53 37.24 6.55 35.92"/>
-              <path fill="#009991" d="M7.03,29.88l-2.33-.36.22-1.45c.11-.73-.08-1.31-.56-1.75-.34-.3-.73-.48-1.18-.56-.64-.1-1.17,0-1.59.29-.42.29-.68.74-.78,1.33l-.43,2.83,6.45.99.2-1.31ZM3.78,28.19l-.18,1.17-1.91-.29.15-.99c.06-.41.18-.69.34-.85.17-.16.41-.21.73-.17.26.04.46.12.59.22.24.2.33.5.27.92Z"/>
-              <polygon fill="#009991" points="5.11 50.55 5.1 50.54 9.32 47.49 8.81 46.3 3.69 47.2 3.68 47.19 8.35 45.21 7.86 44.07 1.85 46.62 2.6 48.38 7.57 47.49 7.57 47.49 3.5 50.49 4.25 52.27 10.26 49.72 9.77 48.57 5.11 50.55"/>
-              <path fill="#009991" d="M31.64,45.83c-.15-.09-.36-.14-.62-.14s-.46.05-.61.14c-.15.1-.22.22-.22.39s.07.3.22.39c.14.09.35.14.6.14s.47-.05.62-.14c.16-.1.23-.22.23-.39s-.07-.3-.22-.39Z"/>
-              <polygon fill="#009991" points="37.48 47.24 37.48 46.08 35.94 47.24 37.48 47.24"/>
+              <path fill="#009991" d="M35.33,8.83c-14.62,0-26.54,11.92-26.54,26.54,0,5.97,1.99,11.49,5.33,15.93h42.41c3.45-4.59,5.33-10.18,5.33-15.93,0-14.62-11.92-26.54-26.54-26.54ZM53.72,43.56h-4.12v-14.14c-1.14.04-2.49.35-3.88.95v13.01h-4.28v-10.02c-2.84,2.71-4.4,6.1-4.44,10.02h-3.33c-.04-3.93-1.6-7.31-4.44-10.02v10.02s-4.28,0-4.28,0v-13.01c-1.39-.6-2.74-.92-3.88-.95v14.14h-4.12v-18.57c3.01-.1,5.68.25,8,.99v-.13l-.2-10.14c5.06,0,9.69,2.85,10.61,7.92.88-5.05,5.49-7.92,10.56-7.92l-.2,10.14v.13c2.33-.75,5-1.09,8-.99v18.57Z"/>
             </g>
           </g>
         </svg>
@@ -585,13 +352,12 @@
       <h1 class="title">퍼실리테이션 프로그램</h1>
       <p class="subtitle">이름을 입력하고 등록해 주세요</p>
       <div class="input-group">
-        <input type="text" id="participant-name" placeholder="이름"
-          autocomplete="off" autocapitalize="off" spellcheck="false">
+        <input type="text" id="participant-name" placeholder="이름" autocomplete="off">
         <button id="register-btn" class="btn-primary">등록</button>
       </div>
     </div>
 
-    <!-- (2) 대기 -->
+    <!-- 대기 -->
     <div class="card joined-box" id="waiting-card" style="display:none;">
       <div class="check">✓</div>
       <h2>참가 대기중</h2>
@@ -603,7 +369,7 @@
       <button class="btn-leave" id="btn-leave">다른 이름으로 다시 등록</button>
     </div>
 
-    <!-- (3) 선지 선택 -->
+    <!-- 선지 선택 -->
     <div class="card choice-card" id="choice-card" style="display:none;">
       <div class="team-banner" id="choice-banner">
         <div class="team-label">우리 팀</div>
@@ -613,7 +379,7 @@
       <div class="choice-options" id="choice-options"></div>
     </div>
 
-    <!-- (4) 제출 완료 -->
+    <!-- 선지 선택 완료 -->
     <div class="card" id="choice-done-card" style="display:none;">
       <div class="submitted-box">
         <div class="check">✓</div>
@@ -622,13 +388,76 @@
         <div class="my-choice" id="my-choice-display"></div>
       </div>
     </div>
+
+    <!-- 비대표 회색 대기 -->
+    <div class="fullscreen-msg grey" id="grey-wait-card" style="display:none;">
+      <div class="icon">⏸</div>
+      <div class="big">대기 중</div>
+      <div class="sub">팀 대표가 활동에 참여하고 있습니다</div>
+    </div>
+
+    <!-- 마을 매수 (대표) -->
+    <div class="card market-card" id="market-card" style="display:none;">
+      <div class="market-header">
+        <div class="team-info">
+          <span class="team-tag" id="market-team-tag"></span>
+          <span style="font-size:0.85rem; color:#6b7684;" id="market-rep-name"></span>
+        </div>
+        <div class="balance">
+          <span class="lbl">남은 시드</span>
+          <span id="market-cash">1,000,000원</span>
+        </div>
+      </div>
+      <div class="stock-list" id="stock-list"></div>
+      <div class="market-bottom">
+        <button class="btn-submit-portfolio" id="btn-submit-portfolio">제출하기</button>
+      </div>
+    </div>
+
+    <!-- 마을 매수 제출 완료 (대표) -->
+    <div class="card" id="market-done-card" style="display:none;">
+      <div class="market-submitted">
+        <div class="check">✓</div>
+        <h2 style="font-size:1.25rem; font-weight:700; color:#004097; margin-bottom:0.5rem;">제출 완료</h2>
+        <p style="color:#6b7684;">팀 포트폴리오가 대시보드에 표시됩니다</p>
+        <button class="btn-withdraw" id="btn-withdraw" style="margin-top:1.5rem;">제출 철회하기</button>
+      </div>
+    </div>
+
+    <!-- 프로그램 종료 메시지 (대표) -->
+    <div class="fullscreen-msg thanks" id="market-end-card" style="display:none;">
+      <div class="icon">🎯</div>
+      <div class="big">프로그램 종료!</div>
+      <div class="sub">대표로 활동해 주셔서 감사합니다</div>
+    </div>
+
+    <!-- 발표자 풀 (파란) -->
+    <div class="fullscreen-msg blue" id="speaker-blue-card" style="display:none;">
+      <div class="icon">🎤</div>
+      <div class="big">발표자 추첨</div>
+      <div class="sub">잠시 후 발표자가 선정됩니다</div>
+    </div>
+
+    <!-- 당첨 (빨간) -->
+    <div class="fullscreen-msg red" id="speaker-red-card" style="display:none;">
+      <div class="icon">🎉</div>
+      <div class="big">당첨!</div>
+      <div class="sub">우리 팀 발표자로 선정되었습니다</div>
+    </div>
+
+    <!-- 종료 (감사합니다) -->
+    <div class="fullscreen-msg thanks" id="finished-card" style="display:none;">
+      <div class="icon">🙏</div>
+      <div class="big">감사합니다!</div>
+      <div class="sub">함께해 주셔서 고맙습니다</div>
+    </div>
   </div>
 
   <!-- ============ 대시보드 화면 ============ -->
   <div id="dashboard-view" class="view">
     <div class="panel">
       <div class="panel-header">
-        <h1>대시보드</h1>
+        <h1>대시보드<span class="badge badge-step" id="dash-step-badge">대기</span></h1>
         <span class="badge badge-dashboard">DASHBOARD</span>
       </div>
       <div class="panel-body" id="dashboard-body">
@@ -644,7 +473,7 @@
   <div id="admin-view" class="view">
     <div class="panel">
       <div class="panel-header">
-        <h1>관리자</h1>
+        <h1>관리자<span class="badge badge-step" id="admin-step-badge">대기</span></h1>
         <div style="display:flex; gap:0.5rem; align-items:center;">
           <span class="badge badge-admin">ADMIN</span>
           <button class="btn-back" id="admin-back-btn">참가자 화면</button>
@@ -653,50 +482,50 @@
       <div class="panel-body">
 
         <div class="stats-bar">
-          <div class="stat-card">
-            <div class="stat-number" id="stat-total">0</div>
-            <div class="stat-label">전체</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number t1" id="stat-team1">-</div>
-            <div class="stat-label">강경파</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number t2" id="stat-team2">-</div>
-            <div class="stat-label">중립파</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number t3" id="stat-team3">-</div>
-            <div class="stat-label">전입자 옹호파</div>
-          </div>
+          <div class="stat-card"><div class="stat-number" id="stat-total">0</div><div class="stat-label">전체</div></div>
+          <div class="stat-card"><div class="stat-number t1" id="stat-team1">-</div><div class="stat-label">강경파</div></div>
+          <div class="stat-card"><div class="stat-number t2" id="stat-team2">-</div><div class="stat-label">중립파</div></div>
+          <div class="stat-card"><div class="stat-number t3" id="stat-team3">-</div><div class="stat-label">전입자 옹호파</div></div>
         </div>
 
-        <!-- 팀 관리 -->
+        <!-- 진행 단계 -->
         <div class="admin-section">
-          <div class="section-title">팀 관리</div>
+          <div class="section-title">진행 단계</div>
+          <div class="step-flow" id="step-flow"></div>
           <div class="admin-controls">
             <button class="btn-action btn-action-primary" id="btn-assign-teams">역할 배분 시작</button>
-            <button class="btn-action btn-action-secondary" id="btn-reset-teams">팀 배정 초기화</button>
-            <button class="btn-action btn-action-danger" id="btn-clear-all">전체 참가자 삭제</button>
+            <button class="btn-action btn-action-primary" id="btn-step-choice">이어서 진행: 참가자 선지 선택</button>
+            <button class="btn-action btn-action-primary" id="btn-step-market">이어서 진행: 마을 가치 매수</button>
+            <button class="btn-action btn-action-primary" id="btn-step-market-end">이어서 진행: 프로그램 종료</button>
+            <button class="btn-action btn-action-primary" id="btn-step-speaker">이어서 진행: 발표자 선정</button>
+            <button class="btn-action btn-action-primary" id="btn-step-speaker-pick">이어서 진행: 랜덤 인원 선정</button>
+            <button class="btn-action btn-action-primary" id="btn-step-finish">이어서 진행: 종료</button>
+            <button class="btn-action btn-action-secondary" id="btn-reset-all">전체 초기화</button>
           </div>
         </div>
 
-        <!-- 활동 -->
-        <div class="admin-section">
-          <div class="section-title">활동: 입장 선택</div>
-          <div class="admin-controls">
-            <button class="btn-action btn-action-primary" id="btn-start-activity">이어서 진행하기 (참가자 선지 선택)</button>
-            <button class="btn-action btn-action-secondary" id="btn-stop-activity" style="display:none;">활동 종료</button>
+        <!-- 선지 송출 관리 -->
+        <div class="admin-section" id="section-choice" style="display:none;">
+          <div class="section-title">선지 응답 관리 (팀별 1명씩 선택 후 송출)</div>
+          <div class="response-teams" id="response-teams"></div>
+          <div style="margin-top:1rem;" class="admin-controls">
+            <button class="btn-action btn-action-primary" id="btn-broadcast">송출하기</button>
+            <button class="btn-action btn-action-secondary" id="btn-stop-broadcast" style="display:none;">송출 종료</button>
           </div>
+        </div>
 
-          <div id="response-management" style="display:none; margin-top:1.25rem;">
-            <div class="section-title" style="font-size:0.9rem; margin-bottom:0.6rem;">팀별 응답 (각 팀에서 1명씩 선택 후 송출)</div>
-            <div class="response-teams" id="response-teams"></div>
-            <div style="margin-top:1rem;" class="admin-controls">
-              <button class="btn-action btn-action-primary" id="btn-broadcast">송출하기</button>
-              <button class="btn-action btn-action-secondary" id="btn-stop-broadcast" style="display:none;">송출 종료</button>
-            </div>
+        <!-- 마을 매수 관리 -->
+        <div class="admin-section" id="section-market" style="display:none;">
+          <div class="section-title">사업 (주식) 관리</div>
+          <div class="market-admin-info">
+            각 팀 대표 1명씩 자동 선정. 시드 <b>1,000,000원</b> · 1주 <b>10,000원</b> · 사업당 <b>100주</b>
+            <div style="margin-top:0.35rem;">대표: <span id="market-reps-display">-</span></div>
           </div>
+          <div class="add-stock-form">
+            <input type="text" id="new-stock-name" placeholder="새 사업명 입력 (예: 마을 정자 보수)" autocomplete="off">
+            <button class="btn-action btn-action-primary" id="btn-add-stock">반영하기</button>
+          </div>
+          <div class="stock-admin-list" id="stock-admin-list"></div>
         </div>
 
         <!-- 참가자 목록 -->
@@ -709,7 +538,7 @@
     </div>
   </div>
 
-  <!-- ============ 송출 모달 ============ -->
+  <!-- ============ 선지 송출 모달 ============ -->
   <div class="modal-backdrop" id="broadcast-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -721,6 +550,18 @@
         <button class="modal-close-btn" id="modal-close-btn">닫기</button>
         <div class="modal-admin-note" id="modal-admin-note">관리자만 닫을 수 있습니다</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ 발표자 모달 ============ -->
+  <div class="modal-backdrop" id="speaker-modal">
+    <div class="modal-content">
+      <button class="modal-close-x" id="speaker-modal-close">✕</button>
+      <div class="modal-header">
+        <div class="modal-title">🎤 발표자 선정</div>
+        <div class="modal-sub">각 팀의 발표자가 결정되었습니다</div>
+      </div>
+      <div class="modal-persons" id="speaker-persons"></div>
     </div>
   </div>
 
@@ -737,184 +578,179 @@
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     // ======================================================
-    // ⚠️ Firebase 설정: 본인의 Firebase 프로젝트 정보로 교체
+    // ⚠️ Firebase 설정
     // ======================================================
     const firebaseConfig = {
-    apiKey: "AIzaSyCb3IMThHdBe73up9s--OPcBfiKMnKrHEw",
-    authDomain: "tset2-6c1c6.firebaseapp.com",
-    databaseURL: "https://tset2-6c1c6-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "tset2-6c1c6",
-    storageBucket: "tset2-6c1c6.firebasestorage.app",
-    messagingSenderId: "342313733951",
-    appId: "1:342313733951:web:c25c701ad47e6a4c6a0d8a"
+      apiKey: "AIzaSyCb3IMThHdBe73up9s--OPcBfiKMnKrHEw",
+      authDomain: "tset2-6c1c6.firebaseapp.com",
+      databaseURL: "https://tset2-6c1c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tset2-6c1c6",
+      storageBucket: "tset2-6c1c6.firebasestorage.app",
+      messagingSenderId: "342313733951",
+      appId: "1:342313733951:web:c25c701ad47e6a4c6a0d8a"
     };
 
-    // ======================================================
-    // 팀 데이터 (시나리오 기반)
-    // ======================================================
     const TEAMS = {
-      1: {
-        name: "강경파",
-        choices: [
-          "우리의 노력을 정당한 보상으로 받는 건 합리적이다",
-          "우리의 희생과 노고를 전입자들이 인정해줘야 한다",
-          "로마에 왔으면 로마법을 따르기 마련이다"
-        ]
-      },
-      2: {
-        name: "중립파",
-        choices: [
-          "5,000만 원을 토해내게 생겼는데 서로 싸울 시간이 아니다",
-          "주민들의 노고는 알겠지만, 그렇다고 새로 온 사람을 이렇게 배척하면 안 된다",
-          "전입자들도 마을 사람들의 기여를 생각해서라도 어느 정도 납부는 필요하다"
-        ]
-      },
-      3: {
-        name: "전입자 옹호파",
-        choices: [
-          "노고는 이해하지만 이건 너무 부당한 처사이다",
-          "납부할 의향은 있지만 액수가 터무니없다",
-          "내 눈에 흙이 들어가도 절대 낼 이유가 없다"
-        ]
-      }
+      1: { name: "강경파", choices: [
+        "우리의 노력을 정당한 보상으로 받는 건 합리적이다",
+        "우리의 희생과 노고를 전입자들이 인정해줘야 한다",
+        "로마에 왔으면 로마법을 따르기 마련이다"
+      ]},
+      2: { name: "중립파", choices: [
+        "5,000만 원을 토해내게 생겼는데 서로 싸울 시간이 아니다",
+        "주민들의 노고는 알겠지만, 그렇다고 새로 온 사람을 이렇게 배척하면 안 된다",
+        "전입자들도 마을 사람들의 기여를 생각해서라도 어느 정도 납부는 필요하다"
+      ]},
+      3: { name: "전입자 옹호파", choices: [
+        "노고는 이해하지만 이건 너무 부당한 처사이다",
+        "납부할 의향은 있지만 액수가 터무니없다",
+        "내 눈에 흙이 들어가도 절대 낼 이유가 없다"
+      ]}
     };
 
-    let db = null;
-    let firebaseReady = false;
+    const DEFAULT_STOCKS = [
+      "마을 가로등 개선사업",
+      "쓰레기 수거장 설치",
+      "비포장 도로 개선",
+      "마을 회관 리모델링",
+      "마을 공원 조성",
+      "노인 복지센터 설립",
+      "마을 도서관 건립",
+      "농촌체험 프로그램 운영",
+      "마을 안내판 설치",
+      "공동 농기구 보관소"
+    ];
 
-    // ---------- 전역 상태 ----------
+    const SEED_MONEY = 1000000;
+    const PRICE_PER_SHARE = 10000;
+    const SHARES_PER_STOCK = 100;
+
+    // 진행 단계
+    const STEPS = [
+      { id: null,             label: "대기" },
+      { id: "choice",         label: "선지 선택" },
+      { id: "market",         label: "마을 매수" },
+      { id: "market_end",     label: "프로그램 종료" },
+      { id: "speaker_pool",   label: "발표자 풀" },
+      { id: "speaker_picked", label: "발표자 당첨" },
+      { id: "finished",       label: "감사합니다" }
+    ];
+
+    let db = null, firebaseReady = false;
+
+    // 전역 상태
     let participants = {};
     let teamAssigned = false;
-    let activity = null;       // { active, roundId }
-    let choices = {};          // { id: { participantId, team, choiceIndex, ... } }
-    let broadcast = null;      // { active, selections: { 1:{}, 2:{}, 3:{} } }
+    let step = null;
+    let activity = null;
+    let choices = {};
+    let broadcast = null;
+    let stocks = {};
+    let marketReps = null;
+    let portfolios = {};
+    let speakers = null;
 
     let myInfo = null;
-    let isAdmin = false;       // 관리자 화면에 들어왔는지
+    let isAdmin = false;
+    let isDashboard = false;
+    let adminSelections = { 1: null, 2: null, 3: null };
+    let dashFocusTeam = null;  // 대시보드에서 단일 팀 전체보기
+    let localQty = {};         // 매수 화면 임시 입력 수량 { stockId: number }
 
-    // 관리자 화면에서 팀별 선택 중인 응답 (라디오 상태)
-    let adminSelections = { 1: null, 2: null, 3: null }; // 각 팀에서 선택한 response id
-
-    // ---------- Firebase 초기화 ----------
+    // ======================================================
+    // Firebase 초기화
+    // ======================================================
     try {
       const app = initializeApp(firebaseConfig);
       db = getDatabase(app);
       firebaseReady = true;
 
-      onValue(ref(db, ".info/connected"), (snap) => {
-        setConnStatus(snap.val() === true);
-      });
-
-      onValue(ref(db, "participants"), (snap) => {
-        participants = snap.val() || {};
-        validateMyInfo();
+      onValue(ref(db, ".info/connected"), s => setConnStatus(s.val() === true));
+      onValue(ref(db, "participants"), s => { participants = s.val() || {}; validateMyInfo(); renderAll(); });
+      onValue(ref(db, "state"), s => {
+        const v = s.val() || {};
+        teamAssigned = v.teamAssigned === true;
+        step = v.step || null;
+        activity = v.activity || null;
         renderAll();
       });
-
-      onValue(ref(db, "state"), (snap) => {
-        const s = snap.val() || {};
-        teamAssigned = s.teamAssigned === true;
-        activity = s.activity || null;
-        renderAll();
-      });
-
-      onValue(ref(db, "choices"), (snap) => {
-        choices = snap.val() || {};
-        renderAll();
-      });
-
-      onValue(ref(db, "broadcast"), (snap) => {
-        broadcast = snap.val() || null;
-        renderBroadcastModal();
-      });
+      onValue(ref(db, "choices"), s => { choices = s.val() || {}; renderAll(); });
+      onValue(ref(db, "broadcast"), s => { broadcast = s.val() || null; renderBroadcastModal(); });
+      onValue(ref(db, "stocks"), s => { stocks = s.val() || {}; renderAll(); });
+      onValue(ref(db, "marketReps"), s => { marketReps = s.val() || null; renderAll(); });
+      onValue(ref(db, "portfolios"), s => { portfolios = s.val() || {}; renderAll(); });
+      onValue(ref(db, "speakers"), s => { speakers = s.val() || null; renderAll(); renderSpeakerModal(); });
     } catch (e) {
       console.warn("Firebase 초기화 실패:", e);
       setConnStatus(false, "Firebase 미설정");
     }
 
-    function setConnStatus(online, customText) {
+    function setConnStatus(online, custom) {
       const el = document.getElementById("conn-status");
-      const txt = document.getElementById("conn-text");
-      if (online) { el.classList.add("online"); el.classList.remove("offline"); txt.textContent = "연결됨"; }
-      else { el.classList.remove("online"); el.classList.add("offline"); txt.textContent = customText || "오프라인"; }
+      const t = document.getElementById("conn-text");
+      if (online) { el.classList.add("online"); el.classList.remove("offline"); t.textContent = "연결됨"; }
+      else { el.classList.remove("online"); el.classList.add("offline"); t.textContent = custom || "오프라인"; }
     }
 
     // ======================================================
-    // 본인 정보 (localStorage)
+    // 본인 정보
     // ======================================================
-    const ME_KEY = "facilitation_me_v2";
-
-    function loadMyInfo() {
-      try {
-        const raw = localStorage.getItem(ME_KEY);
-        if (raw) myInfo = JSON.parse(raw);
-      } catch (e) { myInfo = null; }
-    }
+    const ME_KEY = "facilitation_me_v3";
+    function loadMyInfo() { try { const r = localStorage.getItem(ME_KEY); if (r) myInfo = JSON.parse(r); } catch(e){} }
     function saveMyInfo() { if (myInfo) localStorage.setItem(ME_KEY, JSON.stringify(myInfo)); }
     function clearMyInfo() { myInfo = null; localStorage.removeItem(ME_KEY); }
-
-    function validateMyInfo() {
-      if (!myInfo) return;
-      if (!participants[myInfo.id]) clearMyInfo();
-    }
+    function validateMyInfo() { if (myInfo && !participants[myInfo.id]) clearMyInfo(); }
     function getMyTeam() {
       if (!myInfo || !participants[myInfo.id]) return null;
       return participants[myInfo.id].team || null;
     }
-    function hasISubmittedChoice() {
-      if (!myInfo || !activity || !activity.roundId) return false;
-      return Object.values(choices).some(c =>
-        c.roundId === activity.roundId && c.participantId === myInfo.id
-      );
+    function amIRep() {
+      const t = getMyTeam();
+      return !!(t && marketReps && marketReps[t] === myInfo.id);
     }
-    function getMyChoice() {
-      if (!myInfo || !activity) return null;
-      const entry = Object.values(choices).find(c =>
-        c.roundId === activity.roundId && c.participantId === myInfo.id
-      );
-      return entry || null;
-    }
-
     loadMyInfo();
 
     // ======================================================
-    // View 전환
+    // 유틸
     // ======================================================
     function showView(viewId) {
       document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
       document.getElementById(viewId).classList.add("active");
       isAdmin = (viewId === "admin-view");
-      renderBroadcastModal(); // 모달의 닫기 권한 갱신
+      isDashboard = (viewId === "dashboard-view");
+      renderBroadcastModal();
+      renderSpeakerModal();
     }
-
     function escapeHtml(s) {
-      return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[c]));
+      return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     }
-
-    function pickBalancedTeam(currentParticipants) {
-      // currentParticipants: 현재 팀에 속한 참가자들만 카운트
-      const counts = { 1: 0, 2: 0, 3: 0 };
-      Object.values(currentParticipants || participants).forEach(p => {
-        if (p.team && counts[p.team] !== undefined) counts[p.team]++;
-      });
-      const min = Math.min(counts[1], counts[2], counts[3]);
-      const candidates = [1, 2, 3].filter(t => counts[t] === min);
-      return candidates[Math.floor(Math.random() * candidates.length)];
-    }
-
+    function fmt(n) { return Number(n || 0).toLocaleString("ko-KR"); }
     function shuffle(arr) {
       const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
+      for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
       return a;
+    }
+    function pickBalancedTeam() {
+      const c = { 1: 0, 2: 0, 3: 0 };
+      Object.values(participants).forEach(p => { if (p.team && c[p.team] !== undefined) c[p.team]++; });
+      const min = Math.min(c[1], c[2], c[3]);
+      const cand = [1,2,3].filter(t => c[t] === min);
+      return cand[Math.floor(Math.random()*cand.length)];
+    }
+    function getSortedParticipants() {
+      return Object.entries(participants).sort((a,b) => (a[1].joinedAt||0) - (b[1].joinedAt||0));
+    }
+    function hasISubmittedChoice() {
+      if (!myInfo || !activity || !activity.roundId) return false;
+      return Object.values(choices).some(c => c.roundId === activity.roundId && c.participantId === myInfo.id);
+    }
+    function getMyChoice() {
+      if (!myInfo || !activity) return null;
+      return Object.values(choices).find(c => c.roundId === activity.roundId && c.participantId === myInfo.id) || null;
     }
 
     // ======================================================
-    // 참가자 등록 (team은 항상 null - 관리자가 배정)
+    // 참가자 등록
     // ======================================================
     const nameInput = document.getElementById("participant-name");
     const registerBtn = document.getElementById("register-btn");
@@ -924,41 +760,25 @@
       if (!name) { nameInput.focus(); return; }
       if (name === "관리자!") { nameInput.value = ""; showView("admin-view"); return; }
       if (name === "대시보드!") { nameInput.value = ""; showView("dashboard-view"); return; }
-      if (myInfo) return; // 이미 등록된 사용자 중복 등록 방지
+      if (myInfo) return;
       if (!firebaseReady || !db) return;
 
-      // 등록 버튼 잠시 비활성화 (연속 클릭 방지)
       registerBtn.disabled = true;
-
       try {
-        const newRef = await push(ref(db, "participants"), {
-          name: name,
-          joinedAt: serverTimestamp(),
-          team: null
-        });
-        myInfo = { id: newRef.key, name: name };
+        const newRef = await push(ref(db, "participants"), { name, joinedAt: serverTimestamp(), team: null });
+        myInfo = { id: newRef.key, name };
         saveMyInfo();
         nameInput.value = "";
-
-        // 옵티미스틱 업데이트: onValue 콜백이 늦게 와도 즉시 화면 전환
-        participants[newRef.key] = {
-          name: name,
-          team: null,
-          joinedAt: Date.now()
-        };
+        participants[newRef.key] = { name, team: null, joinedAt: Date.now() };
         renderAll();
       } catch (err) {
         console.error("등록 실패:", err);
         alert("등록 중 오류가 발생했습니다.");
-      } finally {
-        registerBtn.disabled = false;
-      }
+      } finally { registerBtn.disabled = false; }
     }
 
     registerBtn.addEventListener("click", handleRegister);
-    nameInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); handleRegister(); }
-    });
+    nameInput.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); handleRegister(); } });
 
     document.getElementById("btn-leave").addEventListener("click", () => {
       if (!confirm("현재 등록 정보를 잊고 다시 등록하시겠어요?")) return;
@@ -968,180 +788,254 @@
     });
 
     // ======================================================
-    // 참가자: 선지 선택
+    // 참가자: 선지 선택 제출
     // ======================================================
-    async function submitChoice(choiceIndex) {
+    async function submitChoice(idx) {
       if (!myInfo || !activity || !activity.roundId) return;
-      const myTeam = getMyTeam();
-      if (!myTeam) return;
-
+      const t = getMyTeam();
+      if (!t) return;
       try {
         await push(ref(db, "choices"), {
           roundId: activity.roundId,
-          participantId: myInfo.id,
-          participantName: myInfo.name,
-          team: myTeam,
-          choiceIndex: choiceIndex,
-          choiceText: TEAMS[myTeam].choices[choiceIndex],
+          participantId: myInfo.id, participantName: myInfo.name, team: t,
+          choiceIndex: idx, choiceText: TEAMS[t].choices[idx],
           submittedAt: serverTimestamp()
         });
-      } catch (err) {
-        console.error("선택 저장 실패:", err);
-        alert("선택 저장 중 오류가 발생했습니다.");
-      }
+      } catch (err) { console.error(err); alert("선택 저장 실패"); }
     }
+
+    // ======================================================
+    // 참가자: 마을 매수 - 매수/매도
+    // ======================================================
+    function calcMyPortfolioState() {
+      const t = getMyTeam();
+      if (!t || !marketReps || marketReps[t] !== myInfo.id) return null;
+      const p = (portfolios && portfolios[t]) || {};
+      const holdings = p.holdings || {};
+      let cash = SEED_MONEY;
+      Object.values(holdings).forEach(qty => { cash -= (qty * PRICE_PER_SHARE); });
+      return { team: t, holdings, cash, submitted: !!p.submitted };
+    }
+
+    function getStockEntries() {
+      return Object.entries(stocks).sort((a,b) => (a[1].order||0) - (b[1].order||0));
+    }
+
+    function getStockSharesRemaining(stockId) {
+      const stock = stocks[stockId];
+      if (!stock) return 0;
+      let totalHeld = 0;
+      [1,2,3].forEach(t => {
+        const h = (portfolios && portfolios[t] && portfolios[t].holdings && portfolios[t].holdings[stockId]) || 0;
+        totalHeld += h;
+      });
+      return SHARES_PER_STOCK - totalHeld;
+    }
+
+    async function buyStock(stockId, qty) {
+      qty = parseInt(qty, 10);
+      if (!qty || qty <= 0) return;
+      const me = calcMyPortfolioState();
+      if (!me || me.submitted) return;
+      if (qty * PRICE_PER_SHARE > me.cash) { alert("시드가 부족합니다."); return; }
+      const remain = getStockSharesRemaining(stockId);
+      if (qty > remain) { alert(`잔여 주식이 ${remain}주뿐입니다.`); return; }
+
+      const current = (me.holdings[stockId] || 0);
+      try {
+        await update(ref(db, `portfolios/${me.team}/holdings`), { [stockId]: current + qty });
+        localQty[stockId] = 0;
+        renderMarketCard();
+      } catch (err) { console.error(err); }
+    }
+    async function sellStock(stockId, qty) {
+      qty = parseInt(qty, 10);
+      if (!qty || qty <= 0) return;
+      const me = calcMyPortfolioState();
+      if (!me || me.submitted) return;
+      const current = (me.holdings[stockId] || 0);
+      if (qty > current) { alert(`보유 주식이 ${current}주뿐입니다.`); return; }
+      try {
+        await update(ref(db, `portfolios/${me.team}/holdings`), { [stockId]: current - qty });
+        localQty[stockId] = 0;
+        renderMarketCard();
+      } catch (err) { console.error(err); }
+    }
+
+    document.getElementById("btn-submit-portfolio").addEventListener("click", async () => {
+      const me = calcMyPortfolioState();
+      if (!me) return;
+      if (!confirm("포트폴리오를 제출하시겠어요?")) return;
+      try { await update(ref(db, `portfolios/${me.team}`), { submitted: true, submittedAt: serverTimestamp() }); }
+      catch (err) { console.error(err); }
+    });
+    document.getElementById("btn-withdraw").addEventListener("click", async () => {
+      const me = calcMyPortfolioState();
+      if (!me) return;
+      try { await update(ref(db, `portfolios/${me.team}`), { submitted: false }); }
+      catch (err) { console.error(err); }
+    });
 
     // ======================================================
     // 관리자 컨트롤
     // ======================================================
-    document.getElementById("admin-back-btn").addEventListener("click", () => {
-      showView("participant-view");
-      renderParticipantView();
-    });
+    document.getElementById("admin-back-btn").addEventListener("click", () => { showView("participant-view"); renderParticipantView(); });
 
-    // 역할 배분 시작 (모든 미배정 참가자에게 일괄 배정)
+    // 역할 배분 시작
     document.getElementById("btn-assign-teams").addEventListener("click", async () => {
-      const allIds = Object.keys(participants);
-      if (allIds.length === 0) { alert("참가자가 없습니다."); return; }
-
-      if (!teamAssigned) {
-        if (!confirm(`참가자 ${allIds.length}명을 3팀(강경파/중립파/전입자 옹호파)으로 배분하시겠어요?`)) return;
-        const shuffled = shuffle(allIds);
-        const updates = {};
-        shuffled.forEach((id, idx) => {
-          updates[`participants/${id}/team`] = (idx % 3) + 1;
-        });
-        updates["state/teamAssigned"] = true;
-        try { await update(ref(db), updates); }
-        catch (err) { console.error(err); alert("배분 중 오류"); }
-      } else {
-        // 재배정
-        if (!confirm("이미 배분이 완료되었습니다. 전체를 재배분 하시겠어요?")) return;
-        const shuffled = shuffle(allIds);
-        const updates = {};
-        shuffled.forEach((id, idx) => {
-          updates[`participants/${id}/team`] = (idx % 3) + 1;
-        });
-        updates["state/teamAssigned"] = true;
-        try { await update(ref(db), updates); }
-        catch (err) { console.error(err); alert("재배분 중 오류"); }
-      }
-    });
-
-    document.getElementById("btn-reset-teams").addEventListener("click", async () => {
-      if (!confirm("팀 배정을 초기화하시겠어요?")) return;
+      const ids = Object.keys(participants);
+      if (!ids.length) { alert("참가자가 없습니다."); return; }
+      const msg = teamAssigned ? "이미 배분되어 있습니다. 전체를 재배분 하시겠어요?" : `참가자 ${ids.length}명을 3팀으로 배분하시겠어요?`;
+      if (!confirm(msg)) return;
+      const shuffled = shuffle(ids);
       const updates = {};
-      Object.keys(participants).forEach(id => { updates[`participants/${id}/team`] = null; });
-      updates["state/teamAssigned"] = false;
-      updates["state/activity"] = null;
-      try {
-        await update(ref(db), updates);
-        await remove(ref(db, "choices"));
-        await remove(ref(db, "broadcast"));
-      } catch (err) { console.error(err); }
+      shuffled.forEach((id, i) => { updates[`participants/${id}/team`] = (i % 3) + 1; });
+      updates["state/teamAssigned"] = true;
+      try { await update(ref(db), updates); } catch(err) { console.error(err); alert("배분 오류"); }
     });
 
-    document.getElementById("btn-clear-all").addEventListener("click", async () => {
-      if (!confirm("모든 참가자를 삭제하시겠어요? 되돌릴 수 없습니다.")) return;
-      try {
-        await remove(ref(db, "participants"));
-        await remove(ref(db, "choices"));
-        await remove(ref(db, "broadcast"));
-        await set(ref(db, "state"), { teamAssigned: false, activity: null });
-      } catch (err) { console.error(err); }
-    });
-
-    // 미배정 참가자에 팀 자동 배정 (개별)
+    // 단일 참가자에 팀 배정
     async function assignSingleParticipant(id) {
       if (!participants[id]) return;
-      // 현재 팀별 인원수를 보고 가장 적은 팀에 배정
       const team = pickBalancedTeam();
-      try {
-        await update(ref(db, `participants/${id}`), { team });
-      } catch (err) { console.error(err); }
+      try { await update(ref(db, `participants/${id}`), { team }); }
+      catch (err) { console.error(err); }
     }
 
-    // 활동 시작
-    document.getElementById("btn-start-activity").addEventListener("click", async () => {
-      if (!teamAssigned) { alert("먼저 팀 배분을 진행해 주세요."); return; }
+    // step 진행
+    async function setStep(newStep) {
+      try { await update(ref(db, "state"), { step: newStep }); }
+      catch (err) { console.error(err); alert("단계 전환 오류"); }
+    }
 
-      // 모든 팀에 사람이 있는지 확인
-      const teamCounts = { 1: 0, 2: 0, 3: 0 };
-      Object.values(participants).forEach(p => {
-        if (p.team && teamCounts[p.team] !== undefined) teamCounts[p.team]++;
-      });
-      if (!teamCounts[1] || !teamCounts[2] || !teamCounts[3]) {
-        alert("각 팀에 최소 1명 이상이 있어야 합니다.");
-        return;
+    // 선지 선택 시작
+    document.getElementById("btn-step-choice").addEventListener("click", async () => {
+      if (!teamAssigned) { alert("먼저 팀 배분이 필요합니다."); return; }
+      const teamCnt = { 1: 0, 2: 0, 3: 0 };
+      Object.values(participants).forEach(p => { if (p.team && teamCnt[p.team] !== undefined) teamCnt[p.team]++; });
+      if (!teamCnt[1] || !teamCnt[2] || !teamCnt[3]) { alert("각 팀에 최소 1명씩 있어야 합니다."); return; }
+      if (step === "choice" && activity && activity.active) {
+        if (!confirm("새 선지 라운드를 시작하면 이전 응답/송출이 초기화됩니다. 계속?")) return;
       }
-
-      if (activity && activity.active) {
-        if (!confirm("새 활동을 시작하면 이전 응답과 송출이 초기화됩니다. 계속하시겠어요?")) return;
-      }
-
       const roundId = "r_" + Date.now();
       try {
         await remove(ref(db, "choices"));
         await remove(ref(db, "broadcast"));
-        await set(ref(db, "state/activity"), {
-          type: "choice",
-          active: true,
-          roundId: roundId
+        await update(ref(db, "state"), {
+          step: "choice",
+          activity: { type: "choice", active: true, roundId }
         });
         adminSelections = { 1: null, 2: null, 3: null };
-      } catch (err) { console.error(err); alert("활동 시작 중 오류"); }
+      } catch (err) { console.error(err); }
     });
 
-    document.getElementById("btn-stop-activity").addEventListener("click", async () => {
-      if (!confirm("활동을 종료하시겠어요? 송출된 내용은 유지됩니다.")) return;
-      try { await update(ref(db, "state/activity"), { active: false }); }
-      catch (err) { console.error(err); }
-    });
+    // 마을 매수 시작 (대표 선정 + 기본 주식 등록 + 포트폴리오 초기화)
+    document.getElementById("btn-step-market").addEventListener("click", async () => {
+      if (!teamAssigned) { alert("먼저 팀 배분이 필요합니다."); return; }
+      const byTeam = { 1: [], 2: [], 3: [] };
+      Object.entries(participants).forEach(([id, p]) => { if (p.team && byTeam[p.team]) byTeam[p.team].push(id); });
+      if (!byTeam[1].length || !byTeam[2].length || !byTeam[3].length) { alert("각 팀에 최소 1명씩 있어야 합니다."); return; }
 
-    // 송출하기
-    document.getElementById("btn-broadcast").addEventListener("click", async () => {
-      // 팀별 1명씩 선택되었는지 확인
-      const missing = [1, 2, 3].filter(t => !adminSelections[t]);
-      if (missing.length > 0) {
-        alert(`다음 팀에서 1명씩 선택해 주세요: ${missing.map(t => TEAMS[t].name).join(", ")}`);
-        return;
+      if (step === "market" || step === "market_end") {
+        if (!confirm("매수 활동을 다시 시작하면 대표 선정과 포트폴리오가 초기화됩니다. 계속?")) return;
       }
-      const selections = {};
-      for (const t of [1, 2, 3]) {
-        const respId = adminSelections[t];
-        const r = choices[respId];
-        if (!r) continue;
-        selections[t] = {
-          participantId: r.participantId,
-          participantName: r.participantName,
-          team: r.team,
-          choiceIndex: r.choiceIndex,
-          choiceText: r.choiceText
-        };
-      }
+
+      const reps = {};
+      [1,2,3].forEach(t => { reps[t] = byTeam[t][Math.floor(Math.random() * byTeam[t].length)]; });
+
+      // 기본 주식 등록 (현재 등록된 주식 유지하지 않고 새로 시작)
+      const newStocks = {};
+      DEFAULT_STOCKS.forEach((nm, i) => {
+        const sid = "s_" + Date.now() + "_" + i;
+        newStocks[sid] = { name: nm, order: i };
+      });
+
       try {
-        await set(ref(db, "broadcast"), {
-          active: true,
-          roundId: activity ? activity.roundId : null,
-          selections: selections,
-          broadcastedAt: serverTimestamp()
-        });
-      } catch (err) { console.error(err); alert("송출 중 오류"); }
+        await set(ref(db, "marketReps"), reps);
+        await set(ref(db, "stocks"), newStocks);
+        await set(ref(db, "portfolios"), { 1: { holdings: {}, submitted: false }, 2: { holdings: {}, submitted: false }, 3: { holdings: {}, submitted: false }});
+        await update(ref(db, "state"), { step: "market" });
+      } catch(err) { console.error(err); alert("마을 매수 시작 오류"); }
     });
 
-    document.getElementById("btn-stop-broadcast").addEventListener("click", async () => {
-      try { await update(ref(db, "broadcast"), { active: false }); }
+    document.getElementById("btn-step-market-end").addEventListener("click", async () => {
+      if (!confirm("프로그램 종료 메시지를 송출하시겠어요? (포트폴리오는 유지)")) return;
+      await setStep("market_end");
+    });
+
+    document.getElementById("btn-step-speaker").addEventListener("click", async () => {
+      if (!confirm("전체 참가자 화면을 발표자 풀(파란 화면)로 전환합니다. 계속?")) return;
+      await update(ref(db), { "state/step": "speaker_pool", "speakers": null });
+    });
+
+    document.getElementById("btn-step-speaker-pick").addEventListener("click", async () => {
+      const byTeam = { 1: [], 2: [], 3: [] };
+      Object.entries(participants).forEach(([id, p]) => { if (p.team && byTeam[p.team]) byTeam[p.team].push({ id, name: p.name }); });
+      if (!byTeam[1].length || !byTeam[2].length || !byTeam[3].length) { alert("각 팀에 최소 1명씩 있어야 합니다."); return; }
+      const picks = {};
+      [1,2,3].forEach(t => { const r = byTeam[t][Math.floor(Math.random()*byTeam[t].length)]; picks[t] = { id: r.id, name: r.name }; });
+      try { await update(ref(db), { "state/step": "speaker_picked", "speakers": picks }); }
       catch (err) { console.error(err); }
     });
 
-    // 모달 닫기 (관리자만)
-    document.getElementById("modal-close-btn").addEventListener("click", async () => {
-      if (!isAdmin) {
-        alert("송출 모달은 관리자만 닫을 수 있습니다.");
-        return;
+    document.getElementById("btn-step-finish").addEventListener("click", async () => {
+      if (!confirm("프로그램을 종료하시겠어요?")) return;
+      await setStep("finished");
+    });
+
+    document.getElementById("btn-reset-all").addEventListener("click", async () => {
+      if (!confirm("모든 데이터를 초기화하시겠어요? (참가자 포함)")) return;
+      try {
+        await remove(ref(db, "participants"));
+        await remove(ref(db, "choices"));
+        await remove(ref(db, "broadcast"));
+        await remove(ref(db, "stocks"));
+        await remove(ref(db, "marketReps"));
+        await remove(ref(db, "portfolios"));
+        await remove(ref(db, "speakers"));
+        await set(ref(db, "state"), { teamAssigned: false, step: null, activity: null });
+        adminSelections = { 1: null, 2: null, 3: null };
+        localQty = {};
+      } catch (err) { console.error(err); }
+    });
+
+    // 선지 송출
+    document.getElementById("btn-broadcast").addEventListener("click", async () => {
+      const missing = [1,2,3].filter(t => !adminSelections[t]);
+      if (missing.length) { alert(`다음 팀에서 1명씩 선택해 주세요: ${missing.map(t=>TEAMS[t].name).join(", ")}`); return; }
+      const sel = {};
+      for (const t of [1,2,3]) {
+        const r = choices[adminSelections[t]];
+        if (!r) continue;
+        sel[t] = { participantName: r.participantName, choiceText: r.choiceText, team: t };
       }
-      try { await update(ref(db, "broadcast"), { active: false }); }
+      try { await set(ref(db, "broadcast"), { active: true, selections: sel, broadcastedAt: serverTimestamp() }); }
       catch (err) { console.error(err); }
+    });
+    document.getElementById("btn-stop-broadcast").addEventListener("click", async () => {
+      try { await update(ref(db, "broadcast"), { active: false }); } catch(err) { console.error(err); }
+    });
+    document.getElementById("modal-close-btn").addEventListener("click", async () => {
+      if (!isAdmin) { alert("관리자만 닫을 수 있습니다."); return; }
+      try { await update(ref(db, "broadcast"), { active: false }); } catch(err) { console.error(err); }
+    });
+
+    // 발표자 모달 닫기 (누구나)
+    document.getElementById("speaker-modal-close").addEventListener("click", () => {
+      // 본인 화면에서만 닫기 (Firebase 상태는 유지)
+      document.getElementById("speaker-modal").classList.remove("active");
+    });
+
+    // 주식 추가
+    document.getElementById("btn-add-stock").addEventListener("click", async () => {
+      const inp = document.getElementById("new-stock-name");
+      const nm = inp.value.trim();
+      if (!nm) return;
+      const sid = "s_" + Date.now();
+      try {
+        await update(ref(db, "stocks"), { [sid]: { name: nm, order: Date.now() } });
+        inp.value = "";
+      } catch (err) { console.error(err); }
     });
 
     // ======================================================
@@ -1153,82 +1047,148 @@
       renderAdmin();
     }
 
-    function getSortedParticipants() {
-      return Object.entries(participants).sort((a, b) =>
-        (a[1].joinedAt || 0) - (b[1].joinedAt || 0)
-      );
-    }
-
     // ---------- 참가자 화면 ----------
     let lastShownChoiceKey = null;
-
     function renderParticipantView() {
       const registered = !!myInfo && !!participants[myInfo.id];
       const myTeam = getMyTeam();
-      const activityActive = activity && activity.active;
-      const iSubmitted = hasISubmittedChoice();
+      const iSubmittedChoice = hasISubmittedChoice();
+      const iAmRep = registered && amIRep();
+      const myPort = registered && iAmRep ? calcMyPortfolioState() : null;
+      const mySubmittedPortfolio = !!(myPort && myPort.submitted);
 
-      // 4가지 화면
-      const showRegister = !registered;
-      const showChoice = registered && activityActive && myTeam && !iSubmitted;
-      const showDone = registered && activityActive && iSubmitted;
-      const showWaiting = registered && !showChoice && !showDone;
-
-      document.getElementById("participant-card").style.display = showRegister ? "" : "none";
-      document.getElementById("waiting-card").style.display = showWaiting ? "" : "none";
-      document.getElementById("choice-card").style.display = showChoice ? "" : "none";
-      document.getElementById("choice-done-card").style.display = showDone ? "" : "none";
-
-      if (showWaiting) {
-        document.getElementById("waiting-name").textContent = myInfo.name;
-        const teamEl = document.getElementById("waiting-team");
-        if (myTeam) {
-          teamEl.textContent = TEAMS[myTeam].name;
-          teamEl.className = `team-tag t${myTeam}`;
-          teamEl.style.display = "";
+      // 화면 결정
+      let active = null;
+      if (!registered) {
+        active = "participant-card";
+      } else if (step === "finished") {
+        active = "finished-card";
+      } else if (step === "speaker_picked") {
+        // 당첨자: 빨간. 나머지: 파란.
+        const picked = speakers && myTeam && speakers[myTeam] && speakers[myTeam].id === myInfo.id;
+        active = picked ? "speaker-red-card" : "speaker-blue-card";
+      } else if (step === "speaker_pool") {
+        active = "speaker-blue-card";
+      } else if (step === "market_end") {
+        // 대표만 종료 메시지, 비대표는 회색 대기
+        active = iAmRep ? "market-end-card" : "grey-wait-card";
+      } else if (step === "market") {
+        if (iAmRep) {
+          active = mySubmittedPortfolio ? "market-done-card" : "market-card";
         } else {
-          teamEl.style.display = "none";
+          active = "grey-wait-card";
         }
+      } else if (step === "choice" && activity && activity.active && myTeam) {
+        active = iSubmittedChoice ? "choice-done-card" : "choice-card";
+      } else {
+        active = "waiting-card";
       }
 
-      if (showChoice) {
+      const allCards = ["participant-card", "waiting-card", "choice-card", "choice-done-card",
+        "grey-wait-card", "market-card", "market-done-card", "market-end-card",
+        "speaker-blue-card", "speaker-red-card", "finished-card"];
+      allCards.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === active ? "" : "none");
+      });
+
+      // 카드별 채우기
+      if (active === "waiting-card") {
+        document.getElementById("waiting-name").textContent = myInfo.name;
+        const teamEl = document.getElementById("waiting-team");
+        if (myTeam) { teamEl.textContent = TEAMS[myTeam].name; teamEl.className = `team-tag t${myTeam}`; teamEl.style.display = ""; }
+        else teamEl.style.display = "none";
+      }
+
+      if (active === "choice-card") {
         const key = `${activity.roundId}_${myTeam}`;
         if (lastShownChoiceKey !== key) {
           lastShownChoiceKey = key;
-          renderChoiceForm(myTeam);
+          const banner = document.getElementById("choice-banner");
+          banner.className = `team-banner t${myTeam}`;
+          document.getElementById("choice-team-name").textContent = TEAMS[myTeam].name;
+          const wrap = document.getElementById("choice-options");
+          wrap.innerHTML = TEAMS[myTeam].choices.map((tx, i) =>
+            `<button class="choice-btn t${myTeam}" data-idx="${i}"><span class="choice-num">${i+1}</span><span>${escapeHtml(tx)}</span></button>`
+          ).join("");
+          wrap.querySelectorAll(".choice-btn").forEach(btn => btn.addEventListener("click", () => submitChoice(parseInt(btn.dataset.idx,10))));
         }
-      } else {
-        lastShownChoiceKey = null;
-      }
+      } else { lastShownChoiceKey = null; }
 
-      if (showDone) {
+      if (active === "choice-done-card") {
         const my = getMyChoice();
         const display = document.getElementById("my-choice-display");
         if (my && myTeam) {
-          display.innerHTML = `
-            <div class="lbl">내가 선택한 ${escapeHtml(TEAMS[myTeam].name)}의 입장</div>
-            <div>${escapeHtml(my.choiceText)}</div>
-          `;
-        } else { display.innerHTML = ""; }
+          display.innerHTML = `<div class="lbl">내가 선택한 ${escapeHtml(TEAMS[myTeam].name)}의 입장</div><div>${escapeHtml(my.choiceText)}</div>`;
+        } else display.innerHTML = "";
       }
+
+      if (active === "market-card") { renderMarketCard(); }
     }
 
-    function renderChoiceForm(team) {
-      const banner = document.getElementById("choice-banner");
-      banner.className = `team-banner t${team}`;
-      document.getElementById("choice-team-name").textContent = TEAMS[team].name;
+    function renderMarketCard() {
+      const me = calcMyPortfolioState();
+      if (!me) return;
+      const tag = document.getElementById("market-team-tag");
+      tag.textContent = TEAMS[me.team].name;
+      tag.className = `team-tag t${me.team}`;
+      const repName = participants[myInfo.id] ? participants[myInfo.id].name : myInfo.name;
+      document.getElementById("market-rep-name").textContent = `대표 · ${repName}`;
+      document.getElementById("market-cash").textContent = fmt(me.cash) + "원";
 
-      const wrap = document.getElementById("choice-options");
-      wrap.innerHTML = TEAMS[team].choices.map((text, idx) => `
-        <button class="choice-btn t${team}" data-idx="${idx}">
-          <span class="choice-num">${idx + 1}</span>
-          <span>${escapeHtml(text)}</span>
-        </button>
-      `).join("");
-      wrap.querySelectorAll(".choice-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          submitChoice(parseInt(btn.dataset.idx, 10));
+      const stockList = document.getElementById("stock-list");
+      const stockEntries = getStockEntries();
+      if (stockEntries.length === 0) {
+        stockList.innerHTML = `<div class="empty-state" style="padding:2rem;">사업이 아직 없습니다</div>`;
+        return;
+      }
+      stockList.innerHTML = stockEntries.map(([sid, stk]) => {
+        const remain = getStockSharesRemaining(sid);
+        const holding = me.holdings[sid] || 0;
+        const qty = localQty[sid] || 0;
+        return `
+          <div class="stock-row" data-sid="${sid}">
+            <div class="stock-info">
+              <div class="nm">${escapeHtml(stk.name)}</div>
+              <div class="meta">
+                <span>잔여 ${remain}/${SHARES_PER_STOCK}주</span>
+                ${holding ? `<span class="holding">내 보유 ${holding}주</span>` : ""}
+              </div>
+            </div>
+            <div class="stock-controls">
+              <div class="qty-wrap">
+                <button class="qty-btn" data-act="dec">−</button>
+                <input class="qty-input" type="number" min="0" max="${SHARES_PER_STOCK}" value="${qty}">
+                <button class="qty-btn" data-act="inc">＋</button>
+              </div>
+              <button class="b buy" data-act="buy" ${remain<=0?'disabled':''}>매수</button>
+              <button class="b sell" data-act="sell" ${holding<=0?'disabled':''}>매도</button>
+            </div>
+          </div>`;
+      }).join("");
+
+      stockList.querySelectorAll(".stock-row").forEach(row => {
+        const sid = row.dataset.sid;
+        const inp = row.querySelector(".qty-input");
+        const dec = row.querySelector('[data-act="dec"]');
+        const inc = row.querySelector('[data-act="inc"]');
+        const buy = row.querySelector('[data-act="buy"]');
+        const sell = row.querySelector('[data-act="sell"]');
+        dec.addEventListener("click", () => {
+          const v = Math.max(0, (parseInt(inp.value,10)||0) - 1);
+          inp.value = v; localQty[sid] = v;
         });
+        inc.addEventListener("click", () => {
+          const v = Math.min(SHARES_PER_STOCK, (parseInt(inp.value,10)||0) + 1);
+          inp.value = v; localQty[sid] = v;
+        });
+        inp.addEventListener("input", () => {
+          let v = parseInt(inp.value,10) || 0;
+          if (v < 0) v = 0; if (v > SHARES_PER_STOCK) v = SHARES_PER_STOCK;
+          localQty[sid] = v;
+        });
+        buy.addEventListener("click", () => buyStock(sid, inp.value));
+        sell.addEventListener("click", () => sellStock(sid, inp.value));
       });
     }
 
@@ -1236,270 +1196,315 @@
     function renderDashboard() {
       const body = document.getElementById("dashboard-body");
       if (!body) return;
+      const badge = document.getElementById("dash-step-badge");
+      badge.textContent = (STEPS.find(s => s.id === step) || STEPS[0]).label;
+
       const entries = getSortedParticipants();
 
-      // 활동 진행 중 → 투표 결과 표시 (송출은 모달이 별도로 처리)
-      if (activity && activity.active) {
+      // step 별로 분기
+      if (step === "finished") {
+        body.innerHTML = `<div class="empty-state"><div class="icon">🙏</div><div style="font-size:1.4rem; font-weight:700; color:#004097;">감사합니다!</div><div style="margin-top:0.5rem;">프로그램이 종료되었습니다</div></div>`;
+        return;
+      }
+
+      if (step === "market" || step === "market_end") {
+        body.innerHTML = renderPortfoliosHTML();
+        attachPortfolioClicks();
+        return;
+      }
+
+      if (step === "choice" && activity && activity.active) {
         body.innerHTML = renderVoteResultsHTML();
         return;
       }
 
-      // 평소
+      // 평소 / 발표자 풀 시
       if (entries.length === 0) {
         body.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><div>참가자를 기다리고 있습니다...</div></div>`;
         return;
       }
 
       if (!teamAssigned) {
-        const cards = entries.map(([id, p]) =>
-          `<div class="name-card">${escapeHtml(p.name)}</div>`).join("");
-        body.innerHTML = `
-          <div class="panel-info"><strong>${entries.length}</strong>명 참가 중</div>
-          <div class="card-grid">${cards}</div>`;
+        const cards = entries.map(([id,p]) => `<div class="name-card">${escapeHtml(p.name)}</div>`).join("");
+        body.innerHTML = `<div class="panel-info"><strong>${entries.length}</strong>명 참가 중</div><div class="card-grid">${cards}</div>`;
       } else {
         const teams = { 1: [], 2: [], 3: [] };
         const unassigned = [];
-        entries.forEach(([id, p]) => {
-          if (p.team && teams[p.team]) teams[p.team].push(p);
-          else unassigned.push(p);
-        });
-        const teamHtml = [1, 2, 3].map(t => `
+        entries.forEach(([id,p]) => { if (p.team && teams[p.team]) teams[p.team].push(p); else unassigned.push(p); });
+        const teamHtml = [1,2,3].map(t => `
           <div class="team-column t${t}">
             <div class="team-header t${t}">${TEAMS[t].name}<span class="count">${teams[t].length}명</span></div>
-            <div class="team-cards">
-              ${teams[t].map(p => `<div class="name-card team-${t}">${escapeHtml(p.name)}</div>`).join("")}
-            </div>
+            <div class="team-cards">${teams[t].map(p => `<div class="name-card team-${t}">${escapeHtml(p.name)}</div>`).join("")}</div>
           </div>`).join("");
-        const unassignedHtml = unassigned.length > 0 ? `
-          <div style="margin-top:1.5rem; padding:1rem; background:#fffaf0; border-radius:12px; border:1px solid #f5e8d0;">
-            <div style="font-size:0.85rem; color:#a76b1e; margin-bottom:0.5rem; font-weight:600;">미배정 (${unassigned.length}명) — 관리자가 배정해야 합니다</div>
-            <div class="card-grid">${unassigned.map(p => `<div class="name-card">${escapeHtml(p.name)}</div>`).join("")}</div>
-          </div>` : "";
-        body.innerHTML = `
-          <div class="panel-info">팀 배분 완료 · 총 <strong>${entries.length}</strong>명</div>
-          <div class="teams-container">${teamHtml}</div>
-          ${unassignedHtml}`;
+        const unas = unassigned.length ? `<div style="margin-top:1.5rem; padding:1rem; background:#fffaf0; border-radius:12px; border:1px solid #f5e8d0;"><div style="font-size:0.85rem; color:#a76b1e; margin-bottom:0.5rem; font-weight:600;">미배정 (${unassigned.length}명)</div><div class="card-grid">${unassigned.map(p => `<div class="name-card">${escapeHtml(p.name)}</div>`).join("")}</div></div>` : "";
+        body.innerHTML = `<div class="panel-info">팀 배분 완료 · 총 <strong>${entries.length}</strong>명</div><div class="teams-container">${teamHtml}</div>${unas}`;
       }
     }
 
     function renderVoteResultsHTML() {
-      // 팀별 선지별 카운트
       const counts = { 1: [0,0,0], 2: [0,0,0], 3: [0,0,0] };
-      const teamTotals = { 1: 0, 2: 0, 3: 0 };
-      const teamMembers = { 1: 0, 2: 0, 3: 0 };
-
-      Object.values(participants).forEach(p => {
-        if (p.team && teamMembers[p.team] !== undefined) teamMembers[p.team]++;
-      });
-
+      const tot = { 1: 0, 2: 0, 3: 0 };
+      const mem = { 1: 0, 2: 0, 3: 0 };
+      Object.values(participants).forEach(p => { if (p.team && mem[p.team] !== undefined) mem[p.team]++; });
       Object.values(choices).forEach(c => {
         if (!activity || c.roundId !== activity.roundId) return;
         if (counts[c.team] && c.choiceIndex >= 0 && c.choiceIndex <= 2) {
-          counts[c.team][c.choiceIndex]++;
-          teamTotals[c.team]++;
+          counts[c.team][c.choiceIndex]++; tot[c.team]++;
         }
       });
-
-      const cards = [1, 2, 3].map(t => {
-        const total = teamTotals[t] || 0;
-        const memberCount = teamMembers[t] || 0;
-        const optionsHtml = TEAMS[t].choices.map((text, idx) => {
-          const cnt = counts[t][idx];
-          const pct = total > 0 ? (cnt / total * 100) : 0;
-          return `
-            <div class="vote-option">
-              <div class="opt-text">
-                <span class="opt-num">${idx + 1}</span>
-                <span>${escapeHtml(text)}</span>
-              </div>
-              <div class="vote-bar-wrap">
-                <div class="vote-bar t${t}" style="width:${pct}%"></div>
-              </div>
-              <div class="vote-count">
-                <span>${cnt}표</span>
-                <span>${pct.toFixed(0)}%</span>
-              </div>
-            </div>`;
-        }).join("");
-        return `
-          <div class="vote-team-card t${t}">
-            <div class="vote-team-name">${TEAMS[t].name}</div>
-            <div class="vote-team-meta">${total}/${memberCount}명 응답</div>
-            <div class="vote-options">${optionsHtml}</div>
+      const cards = [1,2,3].map(t => {
+        const total = tot[t] || 0;
+        const optHtml = TEAMS[t].choices.map((tx, i) => {
+          const cnt = counts[t][i]; const pct = total > 0 ? (cnt/total*100) : 0;
+          return `<div class="vote-option">
+            <div class="opt-text"><span class="opt-num">${i+1}</span><span>${escapeHtml(tx)}</span></div>
+            <div class="vote-bar-wrap"><div class="vote-bar t${t}" style="width:${pct}%"></div></div>
+            <div class="vote-count"><span>${cnt}표</span><span>${pct.toFixed(0)}%</span></div>
           </div>`;
+        }).join("");
+        return `<div class="vote-team-card t${t}">
+          <div class="vote-team-name">${TEAMS[t].name}</div>
+          <div class="vote-team-meta">${total}/${mem[t]||0}명 응답</div>
+          <div class="vote-options">${optHtml}</div>
+        </div>`;
       }).join("");
+      return `<div class="panel-info" style="justify-content:center;"><span>실시간 투표 결과 · 익명</span></div><div class="vote-teams">${cards}</div>`;
+    }
 
-      return `
-        <div class="panel-info" style="justify-content:center;">
-          <span>실시간 투표 결과 · 익명</span>
+    function renderPortfoliosHTML() {
+      // 단일 팀 보기?
+      if (dashFocusTeam) {
+        return `<button class="btn-portfolio-back" id="btn-portfolio-back">← 전체보기</button><div class="portfolios" style="grid-template-columns:1fr;">${renderSinglePortfolio(dashFocusTeam, true)}</div>`;
+      }
+      const cards = [1,2,3].map(t => renderSinglePortfolio(t, false)).join("");
+      return `<div class="panel-info" style="justify-content:center;"><span>마을 가치 매수 포트폴리오 · 카드를 클릭하면 크게 봅니다</span></div><div class="portfolios">${cards}</div>`;
+    }
+
+    function renderSinglePortfolio(t, big) {
+      const port = portfolios[t] || {};
+      const holdings = port.holdings || {};
+      const submitted = !!port.submitted;
+      let cash = SEED_MONEY;
+      Object.values(holdings).forEach(q => { cash -= (q * PRICE_PER_SHARE); });
+      const repId = marketReps ? marketReps[t] : null;
+      const repName = (repId && participants[repId]) ? participants[repId].name : "-";
+
+      const holdingEntries = Object.entries(holdings)
+        .filter(([_, qty]) => qty > 0)
+        .map(([sid, qty]) => ({ name: stocks[sid] ? stocks[sid].name : "(삭제됨)", qty }));
+
+      const holdingsHtml = holdingEntries.length === 0
+        ? `<div style="text-align:center; color:#aaa; font-size:0.85rem; padding:1rem;">보유 주식 없음</div>`
+        : holdingEntries.map(h => `<div class="ph-item"><span class="ph-nm">${escapeHtml(h.name)}</span><span class="ph-qty">${h.qty}주</span></div>`).join("");
+
+      return `<div class="portfolio t${t}" data-team="${t}">
+        <div class="p-team">${escapeHtml(TEAMS[t].name)}</div>
+        <div class="p-rep">${escapeHtml(repName)}</div>
+        <div class="p-cash"><span class="lbl">남은 시드</span><span class="val">${fmt(cash)}원</span></div>
+        <div class="p-holdings">${holdingsHtml}</div>
+        <div style="text-align:center; margin-top:0.85rem;">
+          <span class="p-status ${submitted ? 'submitted' : 'live'}">${submitted ? '제출 완료' : '진행 중'}</span>
         </div>
-        <div class="vote-teams">${cards}</div>`;
+      </div>`;
+    }
+
+    function attachPortfolioClicks() {
+      document.querySelectorAll(".portfolio").forEach(el => {
+        el.addEventListener("click", () => {
+          dashFocusTeam = parseInt(el.dataset.team, 10);
+          renderDashboard();
+        });
+      });
+      const back = document.getElementById("btn-portfolio-back");
+      if (back) back.addEventListener("click", () => { dashFocusTeam = null; renderDashboard(); });
     }
 
     // ---------- 관리자 ----------
     function renderAdmin() {
       const entries = getSortedParticipants();
-      const counts = { 1: 0, 2: 0, 3: 0 };
-      entries.forEach(([id, p]) => {
-        if (p.team && counts[p.team] !== undefined) counts[p.team]++;
-      });
+      const c = { 1: 0, 2: 0, 3: 0 };
+      entries.forEach(([id,p]) => { if (p.team && c[p.team] !== undefined) c[p.team]++; });
 
       document.getElementById("stat-total").textContent = entries.length;
-      document.getElementById("stat-team1").textContent = teamAssigned ? counts[1] : "-";
-      document.getElementById("stat-team2").textContent = teamAssigned ? counts[2] : "-";
-      document.getElementById("stat-team3").textContent = teamAssigned ? counts[3] : "-";
+      document.getElementById("stat-team1").textContent = teamAssigned ? c[1] : "-";
+      document.getElementById("stat-team2").textContent = teamAssigned ? c[2] : "-";
+      document.getElementById("stat-team3").textContent = teamAssigned ? c[3] : "-";
 
+      // 진행 단계 표시
+      const badge = document.getElementById("admin-step-badge");
+      badge.textContent = (STEPS.find(s => s.id === step) || STEPS[0]).label;
+      const flow = document.getElementById("step-flow");
+      const currentIdx = STEPS.findIndex(s => s.id === step);
+      flow.innerHTML = STEPS.map((s, i) => {
+        let cls = "step-pill";
+        if (i === currentIdx) cls += " active";
+        else if (i < currentIdx) cls += " done";
+        return `<span class="${cls}">${escapeHtml(s.label)}</span>`;
+      }).join("");
+
+      // 버튼 활성화
       document.getElementById("btn-assign-teams").disabled = entries.length === 0;
-      document.getElementById("btn-reset-teams").disabled = !teamAssigned;
-      document.getElementById("btn-clear-all").disabled = entries.length === 0;
-      document.getElementById("btn-assign-teams").textContent =
-        teamAssigned ? "역할 재배분" : "역할 배분 시작";
+      document.getElementById("btn-assign-teams").textContent = teamAssigned ? "역할 재배분" : "역할 배분 시작";
+      document.getElementById("btn-step-choice").disabled = !teamAssigned;
+      document.getElementById("btn-step-market").disabled = !teamAssigned;
+      document.getElementById("btn-step-market-end").disabled = step !== "market";
+      document.getElementById("btn-step-speaker").disabled = entries.length === 0;
+      document.getElementById("btn-step-speaker-pick").disabled = step !== "speaker_pool";
+      document.getElementById("btn-step-finish").disabled = entries.length === 0;
 
-      const startBtn = document.getElementById("btn-start-activity");
-      const stopBtn = document.getElementById("btn-stop-activity");
-      startBtn.disabled = !teamAssigned;
-      startBtn.textContent = (activity && activity.active)
-        ? "새 라운드 시작 (이전 응답 초기화)"
-        : "이어서 진행하기 (참가자 선지 선택)";
-      stopBtn.style.display = (activity && activity.active) ? "" : "none";
+      // 선지 송출 섹션
+      const secChoice = document.getElementById("section-choice");
+      if (step === "choice" && activity && activity.active) {
+        secChoice.style.display = "";
+        renderResponseTeams();
+      } else { secChoice.style.display = "none"; }
 
-      // 응답 관리 영역
-      const respMgmt = document.getElementById("response-management");
-      const respTeams = document.getElementById("response-teams");
-      if (activity && activity.active) {
-        respMgmt.style.display = "";
-        const responsesByTeam = { 1: [], 2: [], 3: [] };
-        Object.entries(choices).forEach(([id, c]) => {
-          if (c.roundId === activity.roundId && responsesByTeam[c.team]) {
-            responsesByTeam[c.team].push({ id, ...c });
-          }
-        });
-        // 각 팀의 응답을 시간순 정렬
-        [1, 2, 3].forEach(t => {
-          responsesByTeam[t].sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0));
-        });
-
-        respTeams.innerHTML = [1, 2, 3].map(t => {
-          const list = responsesByTeam[t];
-          const itemsHtml = list.length === 0
-            ? `<div class="response-empty">아직 응답이 없습니다</div>`
-            : list.map(r => {
-                const checked = adminSelections[t] === r.id ? "checked" : "";
-                const selectedCls = adminSelections[t] === r.id ? "selected" : "";
-                return `
-                  <label class="response-radio-item ${selectedCls}">
-                    <input type="radio" name="select-t${t}" value="${r.id}" ${checked}>
-                    <div class="ri-body">
-                      <div class="ri-name">${escapeHtml(r.participantName)}</div>
-                      <div class="ri-choice">${escapeHtml(r.choiceText)}</div>
-                    </div>
-                  </label>`;
-              }).join("");
-          return `
-            <div class="response-team-block t${t}">
-              <div class="response-team-title">${TEAMS[t].name}</div>
-              <div class="response-radio-list">${itemsHtml}</div>
-            </div>`;
-        }).join("");
-
-        // 라디오 변경 이벤트
-        respTeams.querySelectorAll('input[type="radio"]').forEach(input => {
-          input.addEventListener("change", () => {
-            const name = input.name; // select-t1, select-t2, select-t3
-            const t = parseInt(name.replace("select-t", ""), 10);
-            adminSelections[t] = input.value;
-            // 시각적 selected 갱신
-            respTeams.querySelectorAll(`input[name="${name}"]`).forEach(i => {
-              i.closest(".response-radio-item").classList.toggle("selected", i.checked);
-            });
-          });
-        });
-
-        // 송출 버튼 상태
-        const broadcastActive = broadcast && broadcast.active;
-        document.getElementById("btn-broadcast").textContent =
-          broadcastActive ? "다시 송출하기 (현재 송출 갱신)" : "송출하기";
-        document.getElementById("btn-stop-broadcast").style.display = broadcastActive ? "" : "none";
-      } else {
-        respMgmt.style.display = "none";
-      }
+      // 마을 매수 섹션
+      const secMarket = document.getElementById("section-market");
+      if (step === "market" || step === "market_end") {
+        secMarket.style.display = "";
+        renderMarketAdmin();
+      } else { secMarket.style.display = "none"; }
 
       // 참가자 목록
+      renderAdminList(entries);
+    }
+
+    function renderResponseTeams() {
+      const wrap = document.getElementById("response-teams");
+      const byTeam = { 1: [], 2: [], 3: [] };
+      Object.entries(choices).forEach(([id, c]) => {
+        if (c.roundId === activity.roundId && byTeam[c.team]) byTeam[c.team].push({ id, ...c });
+      });
+      [1,2,3].forEach(t => byTeam[t].sort((a,b) => (a.submittedAt||0) - (b.submittedAt||0)));
+
+      wrap.innerHTML = [1,2,3].map(t => {
+        const list = byTeam[t];
+        const items = list.length === 0
+          ? `<div class="response-empty">아직 응답이 없습니다</div>`
+          : list.map(r => {
+              const sel = adminSelections[t] === r.id;
+              return `<label class="response-radio-item ${sel?'selected':''}">
+                <input type="radio" name="rt${t}" value="${r.id}" ${sel?'checked':''}>
+                <div class="ri-body">
+                  <div class="ri-name">${escapeHtml(r.participantName)}</div>
+                  <div class="ri-choice">${escapeHtml(r.choiceText)}</div>
+                </div>
+              </label>`;
+            }).join("");
+        return `<div class="response-team-block t${t}"><div class="response-team-title">${TEAMS[t].name}</div><div class="response-radio-list">${items}</div></div>`;
+      }).join("");
+
+      wrap.querySelectorAll('input[type="radio"]').forEach(inp => {
+        inp.addEventListener("change", () => {
+          const t = parseInt(inp.name.replace("rt",""), 10);
+          adminSelections[t] = inp.value;
+          wrap.querySelectorAll(`input[name="${inp.name}"]`).forEach(i => i.closest(".response-radio-item").classList.toggle("selected", i.checked));
+        });
+      });
+
+      const bcActive = broadcast && broadcast.active;
+      document.getElementById("btn-broadcast").textContent = bcActive ? "다시 송출" : "송출하기";
+      document.getElementById("btn-stop-broadcast").style.display = bcActive ? "" : "none";
+    }
+
+    function renderMarketAdmin() {
+      // 대표 표시
+      const repsHtml = [1,2,3].map(t => {
+        const id = marketReps ? marketReps[t] : null;
+        const nm = (id && participants[id]) ? participants[id].name : "-";
+        return `<span class="team-pill t${t}" style="margin-right:0.4rem;">${TEAMS[t].name}: ${escapeHtml(nm)}</span>`;
+      }).join("");
+      document.getElementById("market-reps-display").innerHTML = repsHtml;
+
+      // 주식 목록
+      const list = document.getElementById("stock-admin-list");
+      const ents = getStockEntries();
+      if (ents.length === 0) {
+        list.innerHTML = `<div class="response-empty">사업이 없습니다</div>`;
+      } else {
+        list.innerHTML = ents.map(([sid, stk]) => {
+          const remain = getStockSharesRemaining(sid);
+          return `<div class="stock-admin-row">
+            <span class="sa-nm">${escapeHtml(stk.name)}</span>
+            <span class="sa-stat">잔여 ${remain}/${SHARES_PER_STOCK}</span>
+            <button class="btn-mini danger" data-sid="${sid}">삭제</button>
+          </div>`;
+        }).join("");
+        list.querySelectorAll('button[data-sid]').forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("이 사업을 삭제하시겠어요? 보유 주식 정보도 함께 정리됩니다.")) return;
+            const sid = btn.dataset.sid;
+            try {
+              await remove(ref(db, `stocks/${sid}`));
+              // 각 팀 holdings에서 제거
+              for (const t of [1,2,3]) {
+                if (portfolios[t] && portfolios[t].holdings && portfolios[t].holdings[sid] !== undefined) {
+                  await update(ref(db, `portfolios/${t}/holdings`), { [sid]: null });
+                }
+              }
+            } catch(err) { console.error(err); }
+          });
+        });
+      }
+    }
+
+    function renderAdminList(entries) {
       const list = document.getElementById("admin-list");
       document.getElementById("admin-list-header").textContent = `참가자 목록 (${entries.length}명)`;
       if (entries.length === 0) {
         list.innerHTML = `<div class="empty-state" style="padding:1.5rem;">참가자가 없습니다.</div>`;
-      } else {
-        list.innerHTML = entries.map(([id, p]) => {
-          const teamHtml = p.team
-            ? `<span class="team-pill t${p.team}">${TEAMS[p.team].name}</span>`
-            : `<span class="team-pill none">미배정</span>`;
-          const assignBtn = (!p.team && teamAssigned)
-            ? `<button class="btn-mini" data-act="assign" data-id="${id}">팀 배정</button>` : "";
-          return `
-            <div class="participant-row">
-              <span class="pname">${escapeHtml(p.name)}</span>
-              ${teamHtml}
-              ${assignBtn}
-              <button class="btn-mini danger" data-act="remove" data-id="${id}" title="내보내기">내보내기</button>
-            </div>`;
-        }).join("");
-
-        list.querySelectorAll('button[data-act="assign"]').forEach(btn => {
-          btn.addEventListener("click", async () => {
-            await assignSingleParticipant(btn.dataset.id);
-          });
-        });
-        list.querySelectorAll('button[data-act="remove"]').forEach(btn => {
-          btn.addEventListener("click", async () => {
-            if (!confirm("이 참가자를 내보내시겠어요?")) return;
-            try { await remove(ref(db, `participants/${btn.dataset.id}`)); }
-            catch (err) { console.error(err); }
-          });
-        });
+        return;
       }
+      list.innerHTML = entries.map(([id, p]) => {
+        const teamHtml = p.team ? `<span class="team-pill t${p.team}">${TEAMS[p.team].name}</span>` : `<span class="team-pill none">미배정</span>`;
+        const isRep = marketReps && p.team && marketReps[p.team] === id;
+        const repMark = isRep ? `<span class="rep-mark">대표</span>` : "";
+        const assignBtn = (!p.team && teamAssigned) ? `<button class="btn-mini" data-act="assign" data-id="${id}">팀 배정</button>` : "";
+        return `<div class="participant-row"><span class="pname">${escapeHtml(p.name)}</span>${teamHtml}${repMark}${assignBtn}<button class="btn-mini danger" data-act="remove" data-id="${id}">내보내기</button></div>`;
+      }).join("");
+
+      list.querySelectorAll('button[data-act="assign"]').forEach(b => b.addEventListener("click", () => assignSingleParticipant(b.dataset.id)));
+      list.querySelectorAll('button[data-act="remove"]').forEach(b => b.addEventListener("click", async () => {
+        if (!confirm("이 참가자를 내보내시겠어요?")) return;
+        try { await remove(ref(db, `participants/${b.dataset.id}`)); } catch (err) { console.error(err); }
+      }));
     }
 
-    // ---------- 송출 모달 ----------
+    // ---------- 송출 모달 (선지) ----------
     function renderBroadcastModal() {
       const modal = document.getElementById("broadcast-modal");
-      const note = document.getElementById("modal-admin-note");
       const closeBtn = document.getElementById("modal-close-btn");
-
+      const note = document.getElementById("modal-admin-note");
       const active = broadcast && broadcast.active && broadcast.selections;
       modal.classList.toggle("active", active);
-
       if (!active) return;
-
-      const sel = broadcast.selections;
-      const personsHtml = [1, 2, 3].map(t => {
-        const s = sel[t];
-        if (!s) {
-          return `<div class="modal-person t${t}">
-            <div class="mp-team">${TEAMS[t].name}</div>
-            <div class="mp-name" style="color:#aaa;">선택 없음</div>
-          </div>`;
-        }
-        return `
-          <div class="modal-person t${t}">
-            <div class="mp-team">${TEAMS[t].name}</div>
-            <div class="mp-name">${escapeHtml(s.participantName)}</div>
-            <div class="mp-choice">${escapeHtml(s.choiceText)}</div>
-          </div>`;
+      document.getElementById("modal-persons").innerHTML = [1,2,3].map(t => {
+        const s = broadcast.selections[t];
+        if (!s) return `<div class="modal-person t${t}"><div class="mp-team">${TEAMS[t].name}</div><div class="mp-name" style="color:#aaa;">선택 없음</div></div>`;
+        return `<div class="modal-person t${t}"><div class="mp-team">${TEAMS[t].name}</div><div class="mp-name">${escapeHtml(s.participantName)}</div><div class="mp-choice">${escapeHtml(s.choiceText)}</div></div>`;
       }).join("");
-      document.getElementById("modal-persons").innerHTML = personsHtml;
-
-      // 관리자가 아니면 닫기 버튼 숨김 처리
-      if (isAdmin) {
-        closeBtn.style.display = "";
-        note.textContent = "관리자가 닫으면 모든 참가자 화면에서 사라집니다";
-      } else {
-        closeBtn.style.display = "none";
-        note.textContent = "관리자가 안내를 마치면 자동으로 닫힙니다";
-      }
+      if (isAdmin) { closeBtn.style.display = ""; note.textContent = "관리자가 닫으면 모든 화면에서 사라집니다"; }
+      else { closeBtn.style.display = "none"; note.textContent = "관리자가 안내를 마치면 자동으로 닫힙니다"; }
     }
 
-    // 초기 렌더
+    // ---------- 발표자 모달 ----------
+    function renderSpeakerModal() {
+      const modal = document.getElementById("speaker-modal");
+      // 발표자 선정된 상태이고, 대시보드 화면에서만 자동 표시
+      const active = (step === "speaker_picked") && speakers && isDashboard;
+      // 모달이 사용자에 의해 닫혔다면 다시 안 띄움(상태는 그대로 두지만, 일단 자동 표시는 step 진입 시점에)
+      if (!active) { modal.classList.remove("active"); return; }
+      // 이미 닫혀있던 상태에서 자동 표시 트리거: speakers가 새로 들어왔을 때
+      modal.classList.add("active");
+      document.getElementById("speaker-persons").innerHTML = [1,2,3].map(t => {
+        const s = speakers[t];
+        if (!s) return `<div class="modal-person t${t}"><div class="mp-team">${TEAMS[t].name}</div><div class="mp-name" style="color:#aaa;">-</div></div>`;
+        return `<div class="modal-person t${t}"><div class="mp-team">${TEAMS[t].name}</div><div class="mp-name">${escapeHtml(s.name)}</div><div class="mp-choice" style="text-align:center; font-weight:600;">발표자로 선정되었습니다 🎤</div></div>`;
+      }).join("");
+    }
+
+    // ---------- 초기 ----------
     renderAll();
     setTimeout(() => { if (!myInfo) nameInput.focus(); }, 100);
   </script>
