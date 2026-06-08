@@ -1,1168 +1,548 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>퍼실리테이션 시스템</title>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f0f2f5;min-height:100vh;color:#111827;}
-.page{min-height:100vh;display:flex;flex-direction:column;}
-.center{flex:1;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
-.card{background:#fff;border-radius:16px;padding:1.75rem;box-shadow:0 2px 16px rgba(0,0,0,.07);}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;line-height:1;}
-.btn:hover{filter:brightness(.91);}
-.btn:active{transform:scale(.97);}
-.btn:disabled{opacity:.35;cursor:not-allowed;filter:none;transform:none;}
-.btn-indigo{background:#4f46e5;color:#fff;}
-.btn-green{background:#059669;color:#fff;}
-.btn-red{background:#e11d48;color:#fff;}
-.btn-blue{background:#2563eb;color:#fff;}
-.btn-orange{background:#ea580c;color:#fff;}
-.btn-gray{background:#f3f4f6;color:#374151;}
-.btn-dark{background:#1e293b;color:#fff;}
-.btn-purple{background:#7c3aed;color:#fff;}
-.btn-block{width:100%;}
-.btn-lg{padding:16px 20px;font-size:16px;}
-textarea,input[type=text]{width:100%;padding:11px 13px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;background:#fafafa;color:#111827;resize:vertical;}
-textarea:focus,input[type=text]:focus{border-color:#4f46e5;background:#fff;}
-.tab-wrap{display:flex;gap:3px;background:#f3f4f6;padding:4px;border-radius:10px;flex-wrap:wrap;}
-.tab{flex:1;min-width:60px;padding:7px 8px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;background:transparent;color:#6b7280;transition:all .15s;white-space:nowrap;text-align:center;}
-.tab.on{background:#fff;color:#111827;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1);}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
-.badge-live{background:#dcfce7;color:#15803d;}
-.badge-end{background:#f3f4f6;color:#6b7280;}
-.badge-prep{background:#fef3c7;color:#92400e;}
-.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.preset-btn{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;cursor:pointer;text-align:left;font-family:inherit;transition:all .15s;line-height:1.4;}
-.preset-btn.on{border-color:#4f46e5;background:#eef2ff;color:#3730a3;font-weight:700;}
-.bar-wrap{height:40px;background:#f3f4f6;border-radius:10px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:10px;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;transition:width .7s ease;}
-.bar-pct{color:#fff;font-size:13px;font-weight:700;}
-.stat{border-radius:12px;padding:14px;text-align:center;flex:1;min-width:76px;}
-.stat-num{font-size:38px;font-weight:800;line-height:1;}
-.stat-label{font-size:13px;margin-top:5px;font-weight:600;}
-.stat-sub{font-size:12px;margin-top:2px;}
-.vote-btn{width:100%;padding:18px;border:none;border-radius:13px;font-size:19px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;transition:all .2s;display:block;margin-bottom:12px;}
-.vote-btn:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.2);}
-.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
-.toggle input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:.25s;}
-.toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s;}
-.toggle input:checked+.toggle-slider{background:#4f46e5;}
-.toggle input:checked+.toggle-slider::before{transform:translateX(20px);}
-.par-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;background:#f9fafb;margin-bottom:6px;border:1px solid #f3f4f6;}
-.choice-pill{padding:3px 12px;border-radius:999px;font-size:12px;font-weight:700;}
-.pin-box{display:flex;gap:14px;justify-content:center;margin:20px 0;}
-.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid #d1d5db;transition:all .15s;}
-.pin-dot.filled{background:#4f46e5;border-color:#4f46e5;}
-.pin-dot.error{background:#ef4444;border-color:#ef4444;}
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto;}
-.num-btn{padding:16px;border:1.5px solid #e5e7eb;border-radius:12px;background:#fff;font-size:20px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;color:#111827;}
-.num-btn:hover{background:#f3f4f6;}
-.num-btn:active{transform:scale(.93);background:#eef2ff;border-color:#4f46e5;}
-/* MTS */
-.mts-wrap{min-height:100vh;background:#0d1117;display:flex;flex-direction:column;color:#fff;}
-.mts-header{background:#161b27;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e2a3a;}
-.mts-title{font-size:17px;font-weight:800;}
-.mts-tabs{display:flex;border-bottom:1px solid #1e2a3a;}
-.mts-tab{flex:1;padding:11px 8px;text-align:center;font-size:13px;color:#6b7280;border:none;background:none;cursor:pointer;font-family:inherit;font-weight:500;border-bottom:2px solid transparent;transition:all .15s;}
-.mts-tab.on{color:#fff;border-bottom-color:#2563eb;font-weight:700;}
-.mts-summary{background:#161b27;padding:14px 16px;border-bottom:1px solid #1e2a3a;}
-.mts-summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.mts-label{font-size:12px;color:#6b7280;}
-.mts-val{font-size:14px;font-weight:700;}
-.mts-val-red{color:#f87171;}
-.mts-val-blue{color:#60a5fa;}
-.mts-val-white{color:#fff;}
-.mts-table-header{display:grid;grid-template-columns:1fr 70px 80px 56px 56px;padding:8px 14px;background:#0d1117;border-bottom:1px solid #1e2a3a;}
-.mts-th{font-size:11px;color:#6b7280;font-weight:600;text-align:right;}
-.mts-th:first-child{text-align:left;}
-.mts-row{display:grid;grid-template-columns:1fr 70px 80px 56px 56px;padding:12px 14px;border-bottom:1px solid #0d1117;align-items:center;background:#161b27;}
-.mts-stock-name{font-size:13px;font-weight:700;color:#fff;}
-.mts-stock-sub{font-size:11px;color:#6b7280;margin-top:2px;}
-.mts-cell{font-size:13px;text-align:right;color:#fff;}
-.mts-cell-blue{color:#60a5fa;font-weight:700;}
-.mts-btn-buy{background:#e11d48;color:#fff;border:none;border-radius:6px;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
-.mts-btn-sell{background:#2563eb;color:#fff;border:none;border-radius:6px;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
-.mts-btn-buy:disabled,.mts-btn-sell:disabled{opacity:.3;cursor:not-allowed;}
-.mts-bottom{background:#161b27;padding:10px 16px;border-top:1px solid #1e2a3a;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6b7280;}
-.mts-bottom b{color:#f59e0b;font-size:13px;}
-.port-bar-bg{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-top:6px;}
-.port-bar-fill{height:100%;border-radius:999px;transition:width .8s ease;}
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;}
-.modal-sheet{background:#161b27;width:100%;border-radius:20px 20px 0 0;padding:1.5rem;color:#fff;max-width:500px;margin:0 auto;}
-.modal-title{font-size:16px;font-weight:800;}
-.modal-sub{font-size:13px;color:#6b7280;margin-top:2px;margin-bottom:20px;}
-.qty-row{display:flex;align-items:center;gap:12px;justify-content:center;margin:16px 0;}
-.qty-btn{width:46px;height:46px;border:1.5px solid #334155;border-radius:10px;background:#0d1117;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;font-weight:700;flex-shrink:0;}
-.qty-btn:disabled{opacity:.3;cursor:not-allowed;}
-.qty-input{font-size:32px;font-weight:800;width:90px;text-align:center;background:#0d1117;border:1.5px solid #334155;border-radius:10px;color:#fff;outline:none;font-family:inherit;padding:6px 0;}
-.qty-input:focus{border-color:#4f46e5;}
-.qty-info{background:#0d1117;border-radius:10px;padding:12px 16px;margin:12px 0;}
-.qty-info-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
-.qty-info-row:last-child{margin-bottom:0;}
-.modal-confirm-buy{width:100%;padding:15px;background:#e11d48;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;}
-.modal-confirm-sell{width:100%;padding:15px;background:#2563eb;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;}
-.modal-confirm-buy:disabled,.modal-confirm-sell:disabled{opacity:.4;cursor:not-allowed;}
-.modal-cancel{width:100%;padding:12px;background:#1e293b;color:#94a3b8;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;}
-/* Stock admin */
-.stock-item-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f9fafb;border-radius:10px;margin-bottom:8px;border:1px solid #f3f4f6;}
-.stock-item-name{flex:1;font-weight:600;font-size:14px;}
-.stock-item-del{background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;padding:2px 6px;}
-/* Blind */
-.blind-screen{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);border-radius:16px;padding:3rem 2rem;text-align:center;color:#fff;}
-.blind-orb{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:52px;border:2px solid rgba(255,255,255,.15);}
-.vdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#a5b4fc;margin:0 3px;}
-.vdot:nth-child(1){animation:pulse 1.2s .0s ease-in-out infinite;}
-.vdot:nth-child(2){animation:pulse 1.2s .2s ease-in-out infinite;}
-.vdot:nth-child(3){animation:pulse 1.2s .4s ease-in-out infinite;}
-.btn-reveal{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:15px;padding:13px 26px;border-radius:12px;box-shadow:0 4px 20px rgba(239,68,68,.35);border:none;cursor:pointer;font-family:inherit;font-weight:800;display:inline-flex;align-items:center;gap:10px;transition:all .2s;}
-.btn-reveal:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(239,68,68,.45);}
-/* Prog card */
-.prog-card{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 16px rgba(0,0,0,.07);border:2px solid transparent;cursor:pointer;transition:all .2s;}
-.prog-card:hover{border-color:#4f46e5;transform:translateY(-3px);box-shadow:0 8px 24px rgba(79,70,229,.15);}
-/* WHO AM I */
-.who-mystery-card{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:2rem;text-align:center;color:#fff;margin-bottom:14px;}
-.who-keyword-tag{display:inline-block;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;margin:3px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#e2e8f0;}
-.who-candidate-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f9fafb;border-radius:10px;margin-bottom:8px;border:1px solid #f3f4f6;}
-.who-candidate-name{flex:1;font-weight:600;font-size:14px;}
-.who-nav-btn{padding:10px 20px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
-.who-nav-btn:hover{background:#f3f4f6;}
-.who-nav-btn:disabled{opacity:.3;cursor:not-allowed;}
-/* Animations */
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.pulse{animation:pulse 2s ease-in-out infinite;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fade-in{animation:fadeIn .3s ease;}
-@keyframes revealPop{0%{opacity:0;transform:scale(.92) translateY(16px)}60%{transform:scale(1.03) translateY(-3px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-.reveal-pop{animation:revealPop .55s cubic-bezier(.34,1.56,.64,1) both;}
-@keyframes barGrow{from{width:0!important}to{}}
-.bar-reveal{animation:barGrow .8s cubic-bezier(.34,1.2,.64,1) both;}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.slide-up{animation:slideUp .3s ease;}
-@media(max-width:580px){
-  .preset-grid{grid-template-columns:1fr;}
-  .stat-num{font-size:32px;}
-  .mts-table-header,.mts-row{grid-template-columns:1fr 56px 70px 50px 50px;}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>퍼실리테이션 프로그램</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+      min-height: 100vh;
+      color: #1a1a1a;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .view {
+      display: none;
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    .view.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ---------- 참가자 화면 ---------- */
+    #participant-view .card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 10px 40px rgba(0, 64, 151, 0.08);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .logo-wrap {
+      margin-bottom: 2.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .logo-wrap svg {
+      width: 100%;
+      max-width: 340px;
+      height: auto;
+    }
+
+    #participant-view h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #004097;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    #participant-view .subtitle {
+      font-size: 0.95rem;
+      color: #6b7684;
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.95rem 1.1rem;
+      font-size: 1rem;
+      border: 2px solid #e5e8ec;
+      border-radius: 12px;
+      background: #fafbfc;
+      transition: border-color 0.15s, background 0.15s;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #009991;
+      background: #ffffff;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.95rem 1.1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #004097 0%, #009991 100%);
+      color: white;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(0, 64, 151, 0.25);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ---------- 등록 완료 ---------- */
+    .joined-box {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 10px 40px rgba(0, 64, 151, 0.08);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .joined-box .check {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #009991;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 2rem;
+    }
+
+    .joined-box h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #004097;
+      margin-bottom: 0.5rem;
+    }
+
+    .joined-box p {
+      color: #6b7684;
+      font-size: 0.95rem;
+    }
+
+    .joined-box .name-tag {
+      display: inline-block;
+      margin-top: 1.25rem;
+      padding: 0.5rem 1rem;
+      background: #f0f6f5;
+      color: #009991;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* ---------- 대시보드 / 관리자 공통 ---------- */
+    .panel {
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 64, 151, 0.06);
+      margin-bottom: 1.5rem;
+    }
+
+    .panel-header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #004097;
+    }
+
+    .panel-header .badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-dashboard {
+      background: #e8f5f4;
+      color: #009991;
+    }
+
+    .badge-admin {
+      background: #fff4e6;
+      color: #c97a1f;
+    }
+
+    .panel-body {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      min-height: 60vh;
+      box-shadow: 0 4px 16px rgba(0, 64, 151, 0.06);
+      color: #6b7684;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .panel-body .placeholder-icon {
+      font-size: 3rem;
+      opacity: 0.4;
+    }
+
+    .panel-body .placeholder-text {
+      font-size: 0.95rem;
+    }
+
+    .btn-back {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      border: 1px solid #e5e8ec;
+      border-radius: 8px;
+      background: white;
+      color: #6b7684;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-back:hover {
+      border-color: #009991;
+      color: #009991;
+    }
+
+    /* 연결 상태 표시 */
+    .conn-status {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      z-index: 100;
+    }
+
+    .conn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cbd5e0;
+    }
+
+    .conn-status.online .conn-dot {
+      background: #009991;
+    }
+
+    .conn-status.online {
+      color: #009991;
+    }
+
+    .conn-status.offline {
+      color: #aaa;
+    }
+  </style>
 </head>
 <body>
-<div id="app"></div>
-<script>
-/* ━━━━━━━━━━━━━━━━━━━━━━
-   CONFIG
-━━━━━━━━━━━━━━━━━━━━━━ */
-const DB='https://test01-53af5-default-rtdb.asia-southeast1.firebasedatabase.app';
-const PASSCODE='1234';
-const SHARE_PRICE=10000;
-const INIT_CASH=1000000;
-const WHO_COUNT=5;
 
-const C=['#4f46e5','#22c55e','#ef4444','#f59e0b','#8b5cf6','#0ea5e9','#ec4899','#14b8a6'];
-const PRESETS=[
-  {label:'찬성 / 반대 / 중립',opts:['찬성','반대','중립']},
-  {label:'찬성 / 반대',opts:['찬성','반대']},
-  {label:'매우찬성 / 찬성 / 반대 / 매우반대',opts:['매우 찬성','찬성','반대','매우 반대']},
-  {label:'동의 / 불동의 / 보류',opts:['동의','불동의','보류']},
-];
+  <!-- ============ 참가자 화면 (기본) ============ -->
+  <div id="participant-view" class="view active">
+    <div class="card" id="participant-card">
+      <div class="logo-wrap">
+        <!-- 대학로고 (인라인 SVG) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 413.76 52.34" aria-label="대학로고">
+          <g>
+            <g>
+              <path fill="#004097" d="M203.88,22.85h15.26V5.72h-39.98v11.8c0,1.69.52,3.02,1.57,3.94,1.07.93,2.67,1.39,4.79,1.39h9.79v4.28h-18.24v5.41h44.38v-5.41s-17.56,0-17.56,0v-4.28ZM186.86,17.49v-6.41h24.57v6.41h-24.57Z"/>
+              <path fill="#004097" d="M122.82,10.82c-.18-2.25-.87-5.21-7.67-5.1h-31.95v5.24h31.97v11.48s-33.56,0-33.56,0v5.19h17.46v6.48h-15.87v5.18h31.45v11.62h7.7v-16.81h-15.57v-6.48h19.29v-5.19h-3.24v-11.61Z"/>
+              <polygon fill="#004097" points="179.16 42.16 211.12 42.16 211.12 50.91 219.14 50.91 219.14 36.74 179.16 36.74 179.16 42.16"/>
+              <path fill="#004097" d="M163.85,4.71l-.02,19.36h-25.73l-.06-4.1h18.28V5.72h-26.04l-.02,5.34h18.23v3.63s-18.15,0-18.15,0l.06,9.55c0,1.72.59,3.01,1.77,3.88,1.19.88,2.93,1.49,5.26,1.49h26.45v6.29h-22.98v-3.67h-7.94v13.84c0,1.31.47,2.37,1.4,3.17.97.86,2.29,1.3,3.96,1.3h33.32l-.02-45.82h-7.76ZM163.92,45.14h-23.03v-3.77h23.03v3.77Z"/>
+              <path fill="#004097" d="M369.05,15.77h-6.59V4.75h-7.4v31.07h-31.08v5.19h31.08v8.34h7.4v-27.81h6.59v-5.77Z"/>
+              <path fill="#004097" d="M410.14,42.55V10.81c-.31-4.46-4.05-5.04-7.69-5.09h-31.38v5.66h31.46v31.17h-6.61v-20.84h-7.6v20.84h-5.74v-20.84h-7.4v20.84h-6.41v5.09h44.97v-5.09h-3.62Z"/>
+              <path fill="#004097" d="M251.29,32.32h16.6v-5.09h-5.88V10.86h5.88v-5.14h-41.38v5.14h5.88v16.38h-5.88v5.09h17.08v11.05h-19v5.09h45.08v-5.09h-18.37v-11.05ZM240.1,27.23V10.86h14.21v16.38h-14.21Z"/>
+              <path fill="#004097" d="M321.37,21.19c.29,5.83,6.65,10.51,14.8,10.51s14.62-4.92,14.71-10.51c.15-4.3-3.49-8.31-7.38-8.75l8-.04v-5.01h-11.37v-3.39h-7.57v3.39h-11.6v5.01h7.83c-3.92.55-7.57,4.66-7.4,8.8ZM336.17,15.02c4.11,0,7.46,2.53,7.46,5.64s-3.35,5.65-7.46,5.65-7.46-2.53-7.46-5.65,3.35-5.64,7.46-5.64Z"/>
+              <path fill="#004097" d="M308.79,15.95h-5.99V4.76h-7.5v33.51h-13.84V10.76h8.9v-5.04h-16.6v31.93c0,1.88.5,3.3,1.51,4.23,1.11,1.03,2.81,1.54,5.1,1.54h14.93v6.59h7.5v-28.17h5.99v28.18h7.5V4.76h-7.5v11.19Z"/>
+            </g>
+            <g>
+              <polygon fill="#009991" points="12.18 18.32 8.56 15.42 8.57 15.4 13.8 16.3 14.63 15.26 9.53 11.18 8.76 12.14 12.31 14.98 12.3 14.99 7.19 14.11 6.31 15.21 11.41 19.29 12.18 18.32"/>
+              <polygon fill="#009991" points="17.77 6.07 20.44 10.72 21.59 10.06 18.92 5.4 20.49 4.49 19.91 3.49 15.62 5.94 16.2 6.95 17.77 6.07"/>
+              <rect fill="#009991" x="22.03" y="2.55" width="1.33" height="6.53" transform="translate(-.46 9.4) rotate(-23.18)"/>
+              <path fill="#009991" d="M26.22,7.46c.6.24,1.24.27,1.92.09.67-.18,1.21-.52,1.61-1.02.62-.77.76-1.79.43-3.06-.34-1.28-.97-2.1-1.89-2.46-.6-.23-1.23-.25-1.9-.07-.67.18-1.22.52-1.62,1.01-.62.77-.76,1.79-.42,3.07.34,1.28.96,2.09,1.89,2.45ZM25.71,2.79c.21-.36.53-.61.97-.72.43-.11.82-.06,1.18.15.48.27.82.8,1.03,1.59.21.78.17,1.41-.11,1.89-.2.37-.52.61-.95.72-.43.12-.83.06-1.2-.15-.47-.28-.81-.8-1.02-1.59-.21-.79-.17-1.42.1-1.89Z"/>
+              <path fill="#009991" d="M15.94,14.14l-.5-1.34,1.86-1.51,1.18.78,1.12-.91-5.89-3.62-1.18.97,2.34,6.51,1.08-.88ZM14.03,9.17l2.26,1.49-1.27,1.04-1-2.52h.01Z"/>
+              <polygon fill="#009991" points="63.09 27.29 64.16 26.86 63.04 24.07 64.59 23.39 65.58 25.83 66.64 25.41 65.67 22.97 66.92 22.45 68.01 25.16 69.09 24.73 67.52 20.74 61.5 23.29 63.09 27.29"/>
+              <polygon fill="#009991" points="32.77 6.71 32.55 2.07 32.57 2.07 35.36 6.59 36.68 6.52 36.36 0 35.14 .06 35.36 4.6 35.34 4.6 32.62 .18 31.21 .25 31.53 6.77 32.77 6.71"/>
+              <path fill="#009991" d="M68.62,37.24l-.04,1.24c.52.01.97-.14,1.37-.47.51-.42.78-1.06.81-1.93.03-.91-.19-1.58-.67-2.02-.34-.31-.76-.47-1.25-.48-.34-.01-.62.03-.86.14-.21.09-.4.24-.55.44-.12.16-.23.37-.33.63-.06.16-.13.41-.22.75l-.2.67c-.11.4-.21.67-.29.81-.13.21-.31.31-.54.31-.3-.01-.52-.16-.65-.45-.1-.23-.15-.52-.14-.89.02-.52.16-.88.42-1.1.18-.14.39-.21.66-.21l.04-1.28c-.54-.02-1.01.13-1.4.44-.54.44-.83,1.17-.86,2.2-.02.54.08,1.03.29,1.46.34.71.92,1.08,1.74,1.1.54.02.95-.14,1.25-.47.22-.24.4-.61.54-1.13l.45-1.53c.06-.2.12-.35.19-.44.12-.15.29-.22.5-.21.27,0,.46.14.6.39.1.2.15.45.14.75-.02.5-.15.85-.41,1.06-.15.12-.36.2-.6.22Z"/>
+              <rect fill="#009991" x="57.34" y="15.06" width="6.53" height="1.33" transform="translate(3.07 40.44) rotate(-37.79)"/>
+              <path fill="#009991" d="M63.42,29.27l2.49-.58.22,1.16c.08.45.08.75-.08.92-.11.13-.41.25-.89.36-.31.07-.56.14-.76.21-.17.06-.33.13-.49.22l.34,1.43.17-.04c.02-.15.11-.26.27-.33.12-.05.43-.14.92-.25.55-.13.92-.29,1.12-.49.15-.13.25-.36.31-.67.17.27.42.46.73.57.31.11.64.11,1,.03.42-.1.76-.3,1.03-.62.38-.45.48-1.03.33-1.74l-.64-2.95-6.36,1.49.3,1.27ZM68.68,28.04l.28,1.44c.06.33.04.59-.11.78-.12.15-.29.25-.51.3-.31.07-.55.04-.73-.08-.17-.12-.31-.35-.38-.7l-.26-1.34,1.71-.4Z"/>
+              <polygon fill="#009991" points="60.3 21.17 67.05 19.3 66.3 18.15 61.3 19.8 61.29 19.8 64.84 15.9 64.06 14.71 59.61 20.11 60.3 21.17"/>
+              <polygon fill="#009991" points="47.43 7.88 44.87 6.9 46.77 1.91 45.53 1.44 43.2 7.53 47.01 8.98 47.43 7.88"/>
+              <path fill="#009991" d="M38.86,5.5l2.36.38.2,1.41,1.42.23-1.2-6.81-1.51-.24-3.32,6.08,1.38.22.67-1.26ZM40.63,2.03h.02l.38,2.68-1.62-.26,1.22-2.42Z"/>
+              <polygon fill="#009991" points="54.16 13.6 57.36 10.23 57.37 10.24 56.03 15.38 56.99 16.3 61.49 11.57 60.6 10.72 57.47 14.01 57.46 14 58.77 8.98 57.75 8.01 53.25 12.74 54.16 13.6"/>
+              <path fill="#009991" d="M49.53,10.18c.2.27.44.51.75.73.67.48,1.3.69,1.88.63.63-.06,1.18-.43,1.67-1.11l2.46-3.42-1.09-.79-2.49,3.46c-.24.33-.5.52-.78.57-.3.05-.62-.05-.98-.31-.28-.2-.44-.45-.48-.74-.05-.31.06-.64.31-.99l2.45-3.41-1.1-.8-2.51,3.49c-.19.27-.33.53-.41.78-.09.27-.12.53-.1.79.03.38.18.75.43,1.11Z"/>
+              <path fill="#009991" d="M28.94,21.43l.29,6.76c1.72,1.17,3.37,2.76,4.31,4.76-.16-5.09-1.23-10.56-4.59-11.52Z"/>
+              <path fill="#009991" d="M37.13,32.95c.93-2,2.59-3.59,4.31-4.76l.29-6.76c-3.36.96-4.44,6.42-4.59,11.52Z"/>
+              <path fill="#009991" d="M44.01,47.25c-.15-.09-.35-.14-.61-.14s-.47.05-.63.15c-.16.1-.23.23-.23.39s.07.3.23.39c.15.1.36.14.62.14s.46-.05.61-.14c.15-.09.23-.22.23-.39s-.07-.3-.22-.39Z"/>
+              <polygon fill="#009991" points="68.41 43.8 63.21 42.46 62.88 43.75 68.08 45.08 67.71 46.63 68.84 46.92 70 42.47 68.87 42.17 68.41 43.8"/>
+              <rect fill="#009991" x="66.41" y="37.04" width="1.33" height="6.53" transform="translate(16.83 100.3) rotate(-81.06)"/>
+              <path fill="#009991" d="M4.6,25.49c1.21.52,2.24.52,3.09.01.56-.33.97-.81,1.24-1.46.27-.64.33-1.27.19-1.9-.22-.96-.94-1.7-2.15-2.22-1.22-.52-2.25-.53-3.1-.02-.55.33-.95.82-1.23,1.46-.27.64-.34,1.27-.2,1.9.22.96.94,1.7,2.16,2.22ZM3.71,21.82c.17-.4.46-.68.85-.84.51-.21,1.14-.15,1.89.16.75.31,1.22.73,1.42,1.24.17.39.16.79-.01,1.19-.17.41-.46.7-.86.85-.51.21-1.13.15-1.88-.17-.75-.32-1.23-.73-1.43-1.24-.16-.39-.15-.79.02-1.21Z"/>
+              <path fill="#009991" d="M35.33,8.83c-14.62,0-26.54,11.92-26.54,26.54,0,5.97,1.99,11.49,5.33,15.93h42.41c3.45-4.59,5.33-10.18,5.33-15.93,0-14.62-11.92-26.54-26.54-26.54ZM27.11,48.96h-1.86v-2.3h-1.43v-.82c.59,0,1.03-.08,1.31-.2.28-.13.46-.34.54-.63h1.44v3.96ZM33.18,48.51c-.51.37-1.21.55-2.11.55-.67,0-1.23-.09-1.67-.29-.44-.19-.72-.46-.83-.81l1.74-.04c.05.1.15.18.27.24.13.06.29.08.48.08.31,0,.55-.08.72-.23.17-.15.26-.38.29-.69-.16.09-.37.17-.61.21-.24.05-.51.07-.81.07-.67,0-1.2-.12-1.6-.35-.4-.24-.6-.55-.6-.95,0-.44.23-.78.7-1.04.47-.25,1.11-.38,1.93-.38.95,0,1.67.17,2.15.52.48.35.72.86.72,1.55s-.25,1.17-.76,1.54ZM40,48.14h-.75v.82h-1.81v-.82h-2.92v-.96l2.97-2.17h1.77v2.24h.75v.9ZM45.4,48.68c-.47.26-1.1.38-1.92.38-.95,0-1.67-.17-2.15-.52-.48-.35-.72-.87-.72-1.55s.25-1.17.76-1.54c.5-.37,1.21-.55,2.11-.55.67,0,1.23.09,1.67.29.44.19.72.46.84.81l-1.76.04c-.05-.1-.14-.18-.26-.24-.12-.06-.29-.08-.48-.08-.31,0-.56.08-.72.23-.17.15-.26.38-.29.69.17-.09.37-.16.61-.21.24-.05.51-.07.81-.07.67,0,1.2.12,1.6.35.4.23.59.55.59.95,0,.44-.23.79-.7,1.04ZM53.72,43.56h-4.12v-14.14c-1.14.04-2.49.35-3.88.95v13.01h-4.28v-10.02c-2.84,2.71-4.4,6.1-4.44,10.02h-3.33c-.04-3.93-1.6-7.31-4.44-10.02v10.02s-4.28,0-4.28,0v-13.01c-1.39-.6-2.74-.92-3.88-.95v14.14h-4.12v-18.57c3.01-.1,5.68.25,8,.99v-.13l-.2-10.14c5.06,0,9.69,2.85,10.61,7.92.88-5.05,5.49-7.92,10.56-7.92l-.2,10.14v.13c2.33-.75,5-1.09,8-.99v18.57Z"/>
+              <polygon fill="#009991" points="61.95 46.48 61.39 47.69 63.61 48.72 66.42 52.34 67.05 50.99 64.99 48.66 68.16 48.62 68.82 47.2 64.18 47.52 61.95 46.48"/>
+              <path fill="#009991" d="M4.37,44.21c1.3-.23,2.16-.79,2.6-1.67.29-.58.37-1.21.25-1.9-.12-.68-.41-1.25-.88-1.69-.71-.68-1.71-.91-3.01-.68-1.3.23-2.17.79-2.61,1.67-.28.58-.35,1.21-.23,1.89.12.69.41,1.25.87,1.7.71.69,1.72.91,3.02.68ZM1.63,41.62c-.08-.43,0-.82.25-1.16.31-.45.87-.75,1.67-.89.8-.14,1.42-.05,1.87.27.35.24.56.57.64,1.01.08.44,0,.84-.25,1.18-.32.45-.87.74-1.67.88-.8.14-1.43.05-1.87-.26-.35-.24-.56-.58-.64-1.03Z"/>
+              <polygon fill="#009991" points="6.55 35.92 4.34 35.88 3.69 35.24 6.6 33.35 6.64 31.64 2.73 34.29 .11 31.66 .07 33.37 2.69 35.84 .03 35.79 0 37.11 6.53 37.24 6.55 35.92"/>
+              <path fill="#009991" d="M7.03,29.88l-2.33-.36.22-1.45c.11-.73-.08-1.31-.56-1.75-.34-.3-.73-.48-1.18-.56-.64-.1-1.17,0-1.59.29-.42.29-.68.74-.78,1.33l-.43,2.83,6.45.99.2-1.31ZM3.78,28.19l-.18,1.17-1.91-.29.15-.99c.06-.41.18-.69.34-.85.17-.16.41-.21.73-.17.26.04.46.12.59.22.24.2.33.5.27.92Z"/>
+              <polygon fill="#009991" points="5.11 50.55 5.1 50.54 9.32 47.49 8.81 46.3 3.69 47.2 3.68 47.19 8.35 45.21 7.86 44.07 1.85 46.62 2.6 48.38 7.57 47.49 7.57 47.49 3.5 50.49 4.25 52.27 10.26 49.72 9.77 48.57 5.11 50.55"/>
+              <path fill="#009991" d="M31.64,45.83c-.15-.09-.36-.14-.62-.14s-.46.05-.61.14c-.15.1-.22.22-.22.39s.07.3.22.39c.14.09.35.14.6.14s.47-.05.62-.14c.16-.1.23-.22.23-.39s-.07-.3-.22-.39Z"/>
+              <polygon fill="#009991" points="37.48 47.24 37.48 46.08 35.94 47.24 37.48 47.24"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <h1>퍼실리테이션 프로그램</h1>
+      <p class="subtitle">이름을 입력하고 등록해 주세요</p>
+      <div class="input-group">
+        <input
+          type="text"
+          id="participant-name"
+          placeholder="이름"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+        <button id="register-btn" class="btn-primary">등록</button>
+      </div>
+    </div>
 
-/* ━━ Firebase ━━━━━━━━━━━━ */
-async function fbGet(p){try{const r=await fetch(`${DB}/${p}.json`);return await r.json();}catch{return null;}}
-async function fbSet(p,d){try{await fetch(`${DB}/${p}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch{}}
-async function fbDel(p){try{await fetch(`${DB}/${p}.json`,{method:'DELETE'});}catch{}}
+    <!-- 등록 완료 후 표시 -->
+    <div class="joined-box" id="joined-box" style="display:none;">
+      <div class="check">✓</div>
+      <h2>등록되었습니다</h2>
+      <p>다음 활동을 기다려 주세요</p>
+      <div class="name-tag" id="joined-name"></div>
+    </div>
+  </div>
 
-/* ━━ 상태 ━━━━━━━━━━━━━━━━ */
-const pid='p'+Math.random().toString(36).substr(2,9);
-const st={
-  view:'home', dashTab:'voteBoard',
-  nameInput:'', name:'',
-  pinInput:'', pinError:false,
-  // 투표
-  preset:0, qText:'', q:null, votes:{}, anon:false, revealed:false, justRevealed:false, myVote:null,
-  // 주식
-  stockStatus:'idle', stockItems:{}, myCash:INIT_CASH, myPortfolio:{}, allHoldings:{},
-  newStockInput:'', mtsTab:'holdings', tradeModal:null,
-  // 나는 누구?
-  whoStatus:'idle',
-  whoParticipants:{}, whoSelected:[],
-  whoCurrentSubject:0, whoCandidates:{}, whoVotingOpen:false,
-  whoVotes:{}, whoRevealed:false, whoKeywords:{}, whoParticipantsDone:{},
-  // 나는 누구? 참가자 로컬
-  whoCurrentCard:0, whoKeywordDrafts:{}, whoSubmitted:{}, whoMyVote:null,
+  <!-- ============ 대시보드 화면 ============ -->
+  <div id="dashboard-view" class="view">
+    <div class="panel">
+      <div class="panel-header">
+        <h1>대시보드</h1>
+        <span class="badge badge-dashboard">DASHBOARD</span>
+      </div>
+      <div class="panel-body">
+        <div class="placeholder-icon">📊</div>
+        <div class="placeholder-text">결과값이 여기 표시됩니다</div>
+        <div class="placeholder-text" style="font-size:0.8rem; color:#aaa;">(추후 활동 모듈이 추가될 영역)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 관리자 화면 ============ -->
+  <div id="admin-view" class="view">
+    <div class="panel">
+      <div class="panel-header">
+        <h1>관리자</h1>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <span class="badge badge-admin">ADMIN</span>
+          <button class="btn-back" id="admin-back-btn">참가자 화면</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="placeholder-icon">⚙️</div>
+        <div class="placeholder-text">참가자 및 대시보드 관리 영역</div>
+        <div class="placeholder-text" style="font-size:0.8rem; color:#aaa;">(추후 활동 제어 기능이 추가될 영역)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase 연결 상태 -->
+  <div class="conn-status" id="conn-status">
+    <div class="conn-dot"></div>
+    <span id="conn-text">연결 중...</span>
+  </div>
+
+  <!-- ============ Firebase + 로직 ============ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getDatabase, ref, push, onValue, serverTimestamp, set
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // ======================================================
+    // ⚠️ Firebase 설정: 본인의 Firebase 프로젝트 정보로 교체
+    // ======================================================
+    const firebaseConfig = {
+      // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCb3IMThHdBe73up9s--OPcBfiKMnKrHEw",
+  authDomain: "tset2-6c1c6.firebaseapp.com",
+  databaseURL: "https://tset2-6c1c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "tset2-6c1c6",
+  storageBucket: "tset2-6c1c6.firebasestorage.app",
+  messagingSenderId: "342313733951",
+  appId: "1:342313733951:web:c25c701ad47e6a4c6a0d8a"
 };
-let pollTimer=null;
 
-/* ━━ 유틸 ━━━━━━━━━━━━━━━━ */
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function $(id){return document.getElementById(id);}
-function fmt(n){return Number(n||0).toLocaleString('ko-KR');}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+    };
 
-/* ━━━━━━━━━━━━━━━━━━━━━━
-   RENDER  (focus 복원)
-━━━━━━━━━━━━━━━━━━━━━━ */
-function render(){
-  const fa=document.activeElement;
-  const fid=fa?.id; const fss=fa?.selectionStart; const fse=fa?.selectionEnd;
-  const app=$('app');
-  switch(st.view){
-    case 'home':       app.innerHTML=homeHTML();       bindHome();break;
-    case 'lock':       app.innerHTML=lockHTML();       bindLock();break;
-    case 'progSelect': app.innerHTML=progSelectHTML(); bindProgSelect();break;
-    case 'parVote':    app.innerHTML=parVoteHTML();    bindParVote();break;
-    case 'parStock':   app.innerHTML=parStockHTML();   bindParStock();break;
-    case 'parWho':     app.innerHTML=parWhoHTML();     bindParWho();break;
-    case 'dash':       app.innerHTML=dashHTML();       bindDash();break;
-  }
-  // 포커스 복원
-  if(fid){
-    const el=$(fid);
-    if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA')){
-      el.focus();
-      try{el.setSelectionRange(fss,fse);}catch{}
+    let db = null;
+    let firebaseReady = false;
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      firebaseReady = true;
+
+      // 연결 상태 감지
+      const connRef = ref(db, ".info/connected");
+      onValue(connRef, (snap) => {
+        const connected = snap.val() === true;
+        setConnStatus(connected);
+      });
+    } catch (e) {
+      console.warn("Firebase 초기화 실패:", e);
+      setConnStatus(false, "Firebase 미설정");
     }
-  }
-}
 
-/* ══════════════════════
-   HOME
-══════════════════════ */
-function homeHTML(){return`
-<div class="page" style="background:linear-gradient(135deg,#eef2ff 0%,#f0f9ff 100%)">
-<div class="center"><div class="card fade-in" style="max-width:420px;width:100%;text-align:center;padding:2.75rem">
-  <div style="font-size:52px;margin-bottom:14px">🎯</div>
-  <h1 style="font-size:22px;font-weight:800;margin-bottom:6px">퍼실리테이션 시스템</h1>
-  <p style="color:#6b7280;font-size:14px;margin-bottom:36px">역할을 선택해주세요</p>
-  <div style="display:flex;flex-direction:column;gap:14px">
-    <button class="btn btn-green btn-block btn-lg" id="btnPar" style="font-size:17px;padding:18px">🙋 참가자로 참여하기</button>
-    <button class="btn btn-indigo btn-block btn-lg" id="btnDash" style="font-size:17px;padding:18px">📊 대시보드 현황판</button>
-  </div>
-  <p style="font-size:12px;color:#9ca3af;margin-top:28px">같은 링크에서 역할만 다르게 선택하세요</p>
-</div></div></div>`;}
-function bindHome(){
-  $('btnPar')?.addEventListener('click',()=>{st.view='progSelect';render();});
-  $('btnDash')?.addEventListener('click',()=>{st.pinInput='';st.pinError=false;st.view='lock';render();});
-}
-
-/* ══════════════════════
-   LOCK
-══════════════════════ */
-function lockHTML(){
-  const f=st.pinInput.length;
-  const dots=[0,1,2,3].map(i=>`<div class="pin-dot ${f>i?(st.pinError?'error':'filled'):''}"></div>`).join('');
-  const nums=['1','2','3','4','5','6','7','8','9','','0','←'];
-  return`
-<div class="page" style="background:linear-gradient(135deg,#eef2ff 0%,#f0f9ff 100%)">
-<div class="center">
-  <button class="btn btn-gray" id="lockBack" style="position:fixed;top:16px;left:16px;font-size:13px">← 뒤로</button>
-  <div class="card fade-in" style="max-width:320px;width:100%;text-align:center;padding:2rem">
-    <div style="font-size:40px;margin-bottom:10px">🔐</div>
-    <h2 style="font-size:18px;font-weight:800;margin-bottom:4px">보안코드 입력</h2>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:2px">대시보드 전용 화면</p>
-    <p style="font-size:13px;height:20px;color:#ef4444;font-weight:600;margin-top:4px">${st.pinError?'코드가 올바르지 않습니다':''}</p>
-    <div class="pin-box">${dots}</div>
-    <div class="numpad">${nums.map(n=>`<button class="num-btn" data-n="${n}" ${n===''?'style="visibility:hidden"':''}>${n}</button>`).join('')}</div>
-  </div>
-</div></div>`;}
-function bindLock(){
-  $('lockBack')?.addEventListener('click',()=>{st.view='home';render();});
-  document.querySelectorAll('.num-btn').forEach(b=>{
-    b.addEventListener('click',()=>{
-      const n=b.dataset.n;
-      if(n==='←'){st.pinInput=st.pinInput.slice(0,-1);st.pinError=false;render();return;}
-      if(n===''||st.pinInput.length>=4)return;
-      st.pinInput+=n;render();
-      if(st.pinInput.length===4){
-        if(st.pinInput===PASSCODE){st.pinInput='';st.pinError=false;st.view='dash';render();startPoll('dash');}
-        else{st.pinError=true;render();setTimeout(()=>{st.pinInput='';st.pinError=false;render();},900);}
-      }
-    });
-  });
-}
-
-/* ══════════════════════
-   PROGRAM SELECT
-══════════════════════ */
-function progSelectHTML(){
-  if(!st.name)return`
-<div class="page" style="background:#f0f2f5">
-  <button class="btn btn-gray" id="psBack" style="position:fixed;top:16px;left:16px;font-size:13px;z-index:99">← 뒤로</button>
-  <div class="center"><div class="card fade-in" style="max-width:380px;width:100%;text-align:center;padding:2.5rem">
-    <div style="font-size:48px;margin-bottom:12px">👋</div>
-    <h2 style="font-size:20px;font-weight:800;margin-bottom:6px">참가자 등록</h2>
-    <p style="color:#6b7280;font-size:14px;margin-bottom:24px">이름을 입력하고 프로그램을 선택하세요</p>
-    <input type="text" id="nameInput" placeholder="이름 입력 (최대 10자)"
-      style="text-align:center;font-size:16px;margin-bottom:14px" value="${esc(st.nameInput)}" maxlength="10">
-    <button class="btn btn-green btn-block btn-lg" id="nameSubmit" ${!st.nameInput.trim()?'disabled':''}>다음 →</button>
-  </div></div>
-</div>`;
-  return`
-<div class="page" style="background:#f0f2f5">
-  <button class="btn btn-gray" id="psBack" style="position:fixed;top:16px;left:16px;font-size:13px;z-index:99">← 뒤로</button>
-  <div style="padding:60px 20px 20px;max-width:520px;margin:0 auto;width:100%">
-    <p style="font-size:22px;font-weight:800;margin-bottom:4px">안녕하세요, ${esc(st.name)}님! 👋</p>
-    <p style="color:#6b7280;font-size:14px;margin-bottom:24px">참여할 프로그램을 선택해주세요</p>
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div class="prog-card" id="progVote">
-        <div style="font-size:40px;margin-bottom:12px">🗳️</div>
-        <div style="font-size:16px;font-weight:800;margin-bottom:4px">투표 시스템</div>
-        <div style="font-size:13px;color:#6b7280">퍼실리테이터의 질문에 의견을 표현하고 실시간 결과를 확인합니다</div>
-      </div>
-      <div class="prog-card" id="progStock">
-        <div style="font-size:40px;margin-bottom:12px">📈</div>
-        <div style="font-size:16px;font-weight:800;margin-bottom:4px">마을 사업 주식 시뮬레이터</div>
-        <div style="font-size:13px;color:#6b7280;margin-bottom:10px">마을 사업을 주식처럼 매수·매도해 가장 필요한 사업을 알아봅니다</div>
-        <div style="display:flex;gap:8px">
-          <span style="background:#e11d4820;color:#e11d48;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700">매수</span>
-          <span style="background:#2563eb20;color:#2563eb;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700">매도</span>
-        </div>
-      </div>
-      <div class="prog-card" id="progWho">
-        <div style="font-size:40px;margin-bottom:12px">🎭</div>
-        <div style="font-size:16px;font-weight:800;margin-bottom:4px">나는 누구일까?</div>
-        <div style="font-size:13px;color:#6b7280">5명의 키워드를 제출하고, 퍼실리테이터가 제시한 키워드의 주인공을 맞혀봅니다</div>
-      </div>
-    </div>
-  </div>
-</div>`;}
-function bindProgSelect(){
-  $('psBack')?.addEventListener('click',()=>{if(!st.name){st.view='home';}else{st.name='';st.nameInput='';}render();});
-  const ni=$('nameInput');
-  if(ni){
-    ni.addEventListener('input',e=>{st.nameInput=e.target.value;const sb=$('nameSubmit');if(sb)sb.disabled=!e.target.value.trim();});
-    ni.addEventListener('keydown',e=>{if(e.key==='Enter'&&st.nameInput.trim()){st.name=st.nameInput.trim();render();}});
-    ni.focus();
-  }
-  $('nameSubmit')?.addEventListener('click',()=>{if(st.nameInput.trim()){st.name=st.nameInput.trim();render();}});
-  $('progVote')?.addEventListener('click',()=>{st.myVote=null;st.view='parVote';render();startPoll('par');});
-  $('progStock')?.addEventListener('click',()=>enterStock());
-  $('progWho')?.addEventListener('click',()=>enterWho());
-}
-
-/* ══════════════════════
-   PAR - 투표
-══════════════════════ */
-function parVoteHTML(){
-  const back=`<button class="btn btn-gray" id="parVoteBack" style="position:fixed;top:16px;left:16px;font-size:13px;z-index:99">← 뒤로</button>`;
-  if(st.myVote){const idx=st.q?st.q.opts.indexOf(st.myVote):0;const col=C[Math.max(0,idx)%C.length];
-    return`<div class="page center" style="background:#f0f2f5">${back}
-    <div style="text-align:center" class="fade-in">
-      <div style="width:86px;height:86px;background:${col}20;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:40px">✅</div>
-      <h2 style="font-size:22px;font-weight:800;margin-bottom:6px">투표 완료!</h2>
-      <p style="color:#6b7280;font-size:14px;margin-bottom:16px">${esc(st.name)}님의 응답이 기록되었습니다</p>
-      <div style="background:${col}15;border:2px solid ${col}40;border-radius:12px;padding:10px 32px;display:inline-block">
-        <span style="color:${col};font-weight:800;font-size:20px">${esc(st.myVote)}</span>
-      </div>
-    </div></div>`;}
-  if(!st.q||!st.q.active)return`<div class="page center" style="background:#f0f2f5">${back}
-    <div style="text-align:center" class="fade-in">
-      <div class="pulse" style="font-size:54px;margin-bottom:18px">⏳</div>
-      <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">안녕하세요, ${esc(st.name)}님!</h2>
-      <p style="color:#6b7280;font-size:14px">퍼실리테이터가 투표를 시작하면 여기에 나타납니다</p>
-      ${st.q&&!st.q.active?`<p style="margin-top:16px;background:#f3f4f6;color:#6b7280;font-size:13px;padding:8px 18px;border-radius:8px;display:inline-block">투표가 종료되었습니다</p>`:''}
-    </div></div>`;
-  return`<div class="page" style="background:#f0f2f5">${back}
-  <div class="center"><div style="width:100%;max-width:480px" class="fade-in">
-    <div class="card" style="margin-bottom:20px;text-align:center">
-      <p style="font-size:11px;color:#9ca3af;margin-bottom:8px;letter-spacing:.06em">질문</p>
-      <p style="font-size:20px;font-weight:800;line-height:1.5">${esc(st.q.text)}</p>
-    </div>
-    ${st.q.opts.map((o,i)=>`<button class="vote-btn" data-choice="${esc(o)}" style="background:${C[i%C.length]}">${esc(o)}</button>`).join('')}
-  </div></div></div>`;}
-function bindParVote(){
-  $('parVoteBack')?.addEventListener('click',()=>{stopPoll();st.view='progSelect';st.myVote=null;render();});
-  document.querySelectorAll('.vote-btn').forEach(b=>b.addEventListener('click',()=>submitVote(b.dataset.choice)));
-}
-
-/* ══════════════════════
-   PAR - 주식
-══════════════════════ */
-function parStockHTML(){
-  if(st.stockStatus==='idle'||st.stockStatus==='listing'){
-    return`<div class="mts-wrap">
-      <div class="mts-header">
-        <button onclick="leaveStock()" style="background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;padding:0">‹</button>
-        <span class="mts-title">마을 사업 주식</span>
-        <span style="font-size:13px;color:#6b7280">${esc(st.name)}</span>
-      </div>
-      <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:2rem;text-align:center">
-        <div class="pulse" style="font-size:52px">📋</div>
-        <h2 style="font-size:18px;font-weight:800;color:#fff">사업 종목 상장 중...</h2>
-        <p style="color:#6b7280;font-size:14px">퍼실리테이터가 종목 등록 후<br>게임을 시작하면 거래가 시작됩니다</p>
-        ${Object.keys(st.stockItems).length>0?`<div style="background:#1e293b;border-radius:12px;padding:12px 20px;margin-top:8px">
-          <p style="font-size:12px;color:#6b7280;margin-bottom:8px">등록된 종목</p>
-          ${getSortedStocks().map(s=>`<p style="font-size:14px;color:#e2e8f0;font-weight:600;margin-bottom:4px">• ${esc(s.name)}</p>`).join('')}
-        </div>`:''}
-      </div>
-    </div>`;}
-  if(st.stockStatus==='ended'){
-    const stocks=getSortedStocks();
-    const totalInvested=INIT_CASH-st.myCash;
-    return`<div class="mts-wrap">
-      <div class="mts-header">
-        <button onclick="leaveStock()" style="background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;padding:0">‹</button>
-        <span class="mts-title">포트폴리오 결과</span>
-        <span style="font-size:13px;color:#6b7280">${esc(st.name)}</span>
-      </div>
-      <div style="padding:16px;overflow-y:auto;flex:1">
-        <div style="background:#1e293b;border-radius:12px;padding:14px 16px;margin-bottom:14px">
-          <div class="mts-summary-row"><span class="mts-label">총 투자금액</span><span class="mts-val mts-val-red">₩${fmt(totalInvested)}</span></div>
-          <div class="mts-summary-row" style="margin:0"><span class="mts-label">잔여 현금</span><span class="mts-val mts-val-white">₩${fmt(st.myCash)}</span></div>
-        </div>
-        ${stocks.map((s,i)=>{const qty=st.myPortfolio[s.id]||0;const amt=qty*SHARE_PRICE;const pct=totalInvested>0?Math.round(amt/totalInvested*100):0;const color=C[i%C.length];if(!qty)return'';
-          return`<div style="background:#1e293b;border-radius:12px;padding:14px 16px;margin-bottom:10px">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-              <div><p style="font-size:14px;font-weight:700;color:#fff;margin-bottom:2px">${esc(s.name)}</p><p style="font-size:12px;color:#6b7280">${qty}주 · ₩${fmt(amt)}</p></div>
-              <span style="background:${color}25;color:${color};padding:3px 10px;border-radius:6px;font-size:13px;font-weight:700">${pct}%</span>
-            </div>
-            <div class="port-bar-bg"><div class="port-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-          </div>`;}).join('')}
-        ${totalInvested===0?`<div style="text-align:center;padding:2rem;color:#6b7280"><p style="font-size:40px">😅</p><p style="margin-top:8px">투자한 사업이 없습니다</p></div>`:''}
-      </div>
-      <div class="mts-bottom"><span>게임 종료</span><b>결과가 퍼실리테이터에게 전송되었습니다</b></div>
-    </div>`;}
-  const stocks=getSortedStocks();
-  const totalVal=Object.entries(st.myPortfolio).reduce((s,[,q])=>s+q*SHARE_PRICE,0);
-  const isH=st.mtsTab==='holdings';
-  return`<div class="mts-wrap">
-    <div class="mts-header">
-      <button onclick="leaveStock()" style="background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;padding:0">‹</button>
-      <span class="mts-title">마을 사업 주식/손익</span>
-      <span style="font-size:13px;color:#6b7280">${esc(st.name)}</span>
-    </div>
-    <div class="mts-tabs">
-      <button class="mts-tab ${isH?'on':''}" id="mtsTabH">주식잔고</button>
-      <button class="mts-tab ${!isH?'on':''}" id="mtsTabP">포트폴리오</button>
-    </div>
-    <div class="mts-summary">
-      <div class="mts-summary-row"><span class="mts-label">💰 잔여 현금</span><span class="mts-val mts-val-white">₩${fmt(st.myCash)}</span></div>
-      <div class="mts-summary-row" style="margin:0"><span class="mts-label">📊 평가금액</span><span class="mts-val mts-val-blue">₩${fmt(totalVal)}</span></div>
-    </div>
-    ${isH?`
-    <div class="mts-table-header">
-      <span class="mts-th">종목명</span><span class="mts-th">보유량</span><span class="mts-th">평가금액</span>
-      <span class="mts-th">매수</span><span class="mts-th">매도</span>
-    </div>
-    <div style="flex:1;overflow-y:auto">
-      ${stocks.map(s=>{const qty=st.myPortfolio[s.id]||0;const amt=qty*SHARE_PRICE;const canB=st.myCash>=SHARE_PRICE;const canS=qty>0;
-        return`<div class="mts-row">
-          <div><div class="mts-stock-name">${esc(s.name)}</div><div class="mts-stock-sub">₩${fmt(SHARE_PRICE)}/주</div></div>
-          <div class="mts-cell">${qty}<span style="font-size:10px;color:#6b7280">주</span></div>
-          <div class="mts-cell">${amt>0?`<span class="mts-cell-blue">₩${fmt(amt)}</span>`:'<span style="color:#475569">-</span>'}</div>
-          <div class="mts-cell"><button class="mts-btn-buy" data-sid="${s.id}" data-type="buy" ${canB?'':'disabled'}>매수</button></div>
-          <div class="mts-cell"><button class="mts-btn-sell" data-sid="${s.id}" data-type="sell" ${canS?'':'disabled'}>매도</button></div>
-        </div>`;}).join('')}
-    </div>`:`
-    <div style="flex:1;overflow-y:auto;padding:14px">
-      ${stocks.map((s,i)=>{const qty=st.myPortfolio[s.id]||0;const amt=qty*SHARE_PRICE;const pct=totalVal>0?Math.round(amt/totalVal*100):0;const color=C[i%C.length];
-        return`<div style="background:#1e293b;border-radius:12px;padding:14px 16px;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:14px;font-weight:700;color:#fff">${esc(s.name)}</span><span style="color:${color};font-weight:700">${qty}주</span></div>
-          <div class="port-bar-bg"><div class="port-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:12px;color:#6b7280">₩${fmt(amt)}</span><span style="font-size:12px;color:${color}">${pct}%</span></div>
-        </div>`;}).join('')}
-      ${totalVal===0?`<div style="text-align:center;padding:2rem;color:#6b7280">아직 매수한 종목이 없습니다</div>`:''}
-    </div>`}
-    <div class="mts-bottom"><span>마을사업 MARKET</span><b>₩${fmt(SHARE_PRICE)}/주 고정</b></div>
-    ${tradeModalHTML()}
-  </div>`;}
-
-function tradeModalHTML(){
-  if(!st.tradeModal)return'';
-  const{stockId,type,qty}=st.tradeModal;
-  const s=st.stockItems[stockId];if(!s)return'';
-  const isBuy=type==='buy';
-  const maxBuy=Math.floor(st.myCash/SHARE_PRICE);
-  const maxSell=st.myPortfolio[stockId]||0;
-  const maxQty=isBuy?maxBuy:maxSell;
-  const total=qty*SHARE_PRICE;
-  return`
-<div class="modal-overlay" id="tradeOverlay">
-<div class="modal-sheet slide-up">
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div><div class="modal-title">${esc(s.name)}</div><div class="modal-sub">${isBuy?'매수':'매도'} · 1주당 ₩${fmt(SHARE_PRICE)}</div></div>
-    <span style="${isBuy?'background:#e11d4820;color:#e11d48':'background:#2563eb20;color:#2563eb'};padding:4px 12px;border-radius:8px;font-size:13px;font-weight:700">${isBuy?'매수':'매도'}</span>
-  </div>
-  <div class="qty-row">
-    <button class="qty-btn" id="qtyMinus" ${qty<=0?'disabled':''}>−</button>
-    <input class="qty-input" type="number" id="qtyInput" min="0" max="${maxQty}" value="${qty}">
-    <button class="qty-btn" id="qtyPlus" ${qty>=maxQty?'disabled':''}>+</button>
-  </div>
-  <div class="qty-info">
-    <div class="qty-info-row"><span style="color:#94a3b8">주문 금액</span><span id="tradeTotal" style="font-weight:700;color:#fff">₩${fmt(total)}</span></div>
-    ${isBuy?`
-    <div class="qty-info-row"><span style="color:#94a3b8">주문 후 잔여</span><span id="tradeAfterCash" style="color:#60a5fa;font-weight:700">₩${fmt(st.myCash-total)}</span></div>
-    <div class="qty-info-row" style="margin:0"><span style="color:#94a3b8">최대 매수</span><span style="color:#94a3b8">${maxBuy}주</span></div>`:
-    `<div class="qty-info-row" style="margin:0"><span style="color:#94a3b8">보유수량</span><span style="color:#94a3b8">${maxSell}주</span></div>`}
-  </div>
-  <button class="${isBuy?'modal-confirm-buy':'modal-confirm-sell'}" id="tradeConfirm" ${qty===0?'disabled':''}>
-    ${isBuy?`📈 ${qty}주 매수 확정`:`📉 ${qty}주 매도 확정`}
-  </button>
-  <button class="modal-cancel" id="tradeCancel">취소</button>
-</div></div>`;}
-
-/* 모달 수량만 in-place 업데이트 (render 호출 없음) */
-function updateModalUI(){
-  const m=st.tradeModal;if(!m)return;
-  const isBuy=m.type==='buy';
-  const total=m.qty*SHARE_PRICE;
-  const maxBuy=Math.floor(st.myCash/SHARE_PRICE);
-  const maxSell=st.myPortfolio[m.stockId]||0;
-  const maxQty=isBuy?maxBuy:maxSell;
-  const qi=$('qtyInput');if(qi&&document.activeElement!==qi)qi.value=m.qty;
-  const minus=$('qtyMinus');const plus=$('qtyPlus');
-  if(minus)minus.disabled=m.qty<=0;
-  if(plus)plus.disabled=m.qty>=maxQty;
-  const totalEl=$('tradeTotal');if(totalEl)totalEl.textContent=`₩${fmt(total)}`;
-  if(isBuy){const ae=$('tradeAfterCash');if(ae)ae.textContent=`₩${fmt(st.myCash-total)}`;}
-  const cb=$('tradeConfirm');
-  if(cb){cb.disabled=m.qty===0;cb.innerHTML=isBuy?`📈 ${m.qty}주 매수 확정`:`📉 ${m.qty}주 매도 확정`;}
-}
-
-function bindParStock(){
-  document.querySelectorAll('.mts-btn-buy,.mts-btn-sell').forEach(b=>{
-    b.addEventListener('click',()=>{st.tradeModal={stockId:b.dataset.sid,type:b.dataset.type,qty:1};render();});
-  });
-  $('mtsTabH')?.addEventListener('click',()=>{st.mtsTab='holdings';render();});
-  $('mtsTabP')?.addEventListener('click',()=>{st.mtsTab='portfolio';render();});
-  bindTradeModal();
-}
-function bindTradeModal(){
-  if(!st.tradeModal)return;
-  const{type,stockId}=st.tradeModal;
-  const maxBuy=Math.floor(st.myCash/SHARE_PRICE);
-  const maxSell=st.myPortfolio[stockId]||0;
-  const maxQty=type==='buy'?maxBuy:maxSell;
-  $('qtyMinus')?.addEventListener('click',()=>{if(st.tradeModal.qty>0){st.tradeModal.qty--;updateModalUI();}});
-  $('qtyPlus')?.addEventListener('click',()=>{if(st.tradeModal.qty<maxQty){st.tradeModal.qty++;updateModalUI();}});
-  $('qtyInput')?.addEventListener('input',e=>{
-    let v=parseInt(e.target.value)||0;v=Math.max(0,Math.min(v,maxQty));
-    st.tradeModal.qty=v;
-    const total=v*SHARE_PRICE;
-    const cb=$('tradeConfirm');if(cb){cb.disabled=v===0;cb.innerHTML=type==='buy'?`📈 ${v}주 매수 확정`:`📉 ${v}주 매도 확정`;}
-    const te=$('tradeTotal');if(te)te.textContent=`₩${fmt(total)}`;
-    if(type==='buy'){const ae=$('tradeAfterCash');if(ae)ae.textContent=`₩${fmt(st.myCash-total)}`;}
-  });
-  $('qtyInput')?.addEventListener('blur',e=>{
-    let v=parseInt(e.target.value)||0;v=Math.max(0,Math.min(v,maxQty));
-    st.tradeModal.qty=v;e.target.value=v;updateModalUI();
-  });
-  $('tradeConfirm')?.addEventListener('click',async()=>{
-    const{stockId,type,qty}=st.tradeModal;if(qty===0)return;
-    if(type==='buy'){const cost=qty*SHARE_PRICE;if(st.myCash<cost)return;st.myCash-=cost;st.myPortfolio[stockId]=(st.myPortfolio[stockId]||0)+qty;}
-    else{const held=st.myPortfolio[stockId]||0;if(held<qty)return;st.myCash+=qty*SHARE_PRICE;st.myPortfolio[stockId]=held-qty;if(!st.myPortfolio[stockId])delete st.myPortfolio[stockId];}
-    await fbSet(`stock/holdings/${pid}`,{name:st.name,cash:st.myCash,portfolio:st.myPortfolio});
-    st.tradeModal=null;render();
-  });
-  $('tradeCancel')?.addEventListener('click',()=>{st.tradeModal=null;render();});
-  $('tradeOverlay')?.addEventListener('click',e=>{if(e.target.id==='tradeOverlay'){st.tradeModal=null;render();}});
-}
-function leaveStock(){stopPoll();st.view='progSelect';st.tradeModal=null;render();}
-
-/* ══════════════════════
-   PAR - 나는 누구?
-══════════════════════ */
-function parWhoHTML(){
-  const back=`<button class="btn btn-gray" id="parWhoBack" style="position:fixed;top:16px;left:16px;font-size:13px;z-index:99">← 뒤로</button>`;
-  const pCount=Object.keys(st.whoParticipants).length;
-
-  // 대기
-  if(st.whoStatus==='idle'){return`<div class="page center" style="background:#f0f2f5">${back}
-    <div style="text-align:center" class="fade-in">
-      <div class="pulse" style="font-size:54px;margin-bottom:18px">🎭</div>
-      <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">안녕하세요, ${esc(st.name)}님!</h2>
-      <p style="color:#6b7280;font-size:14px">퍼실리테이터가 게임을 시작하면 나타납니다</p>
-      <div style="margin-top:16px;background:#eef2ff;border-radius:10px;padding:10px 20px;display:inline-block">
-        <span style="font-size:14px;color:#4f46e5;font-weight:600">등록된 참가자 ${pCount}명</span>
-      </div>
-    </div></div>`;}
-
-  // 키워드 수집
-  if(st.whoStatus==='collecting'){
-    const myCards=st.whoSelected.filter(p=>p!==pid);
-    if(myCards.length===0){return`<div class="page center" style="background:#f0f2f5">${back}
-      <div style="text-align:center" class="fade-in">
-        <div style="font-size:54px;margin-bottom:18px">🌟</div>
-        <h2 style="font-size:18px;font-weight:800;margin-bottom:8px">당신이 주인공 중 한 명입니다!</h2>
-        <p style="color:#6b7280;font-size:14px">다른 참가자들이 키워드를 입력하고 있습니다</p>
-      </div></div>`;}
-
-    const cardIdx=Math.min(st.whoCurrentCard,myCards.length-1);
-    const targetPid=myCards[cardIdx];
-    const targetName=st.whoParticipants[targetPid]||'?';
-    const submitted=!!st.whoSubmitted[targetPid];
-    const draft=st.whoKeywordDrafts[targetPid]||'';
-    const submittedCount=myCards.filter(p=>st.whoSubmitted[p]).length;
-    const allDone=submittedCount===myCards.length;
-
-    return`<div class="page" style="background:#f0f2f5;min-height:100vh">
-      ${back}
-      <div style="padding:60px 16px 20px;max-width:480px;margin:0 auto;width:100%">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <span style="font-size:14px;font-weight:700">키워드 입력</span>
-          <span style="font-size:13px;color:#6b7280;background:#f3f4f6;padding:3px 12px;border-radius:999px">${submittedCount}/${myCards.length} 완료</span>
-        </div>
-        <div class="card" style="text-align:center;padding:1.75rem;margin-bottom:14px;position:relative">
-          <div style="position:absolute;top:12px;right:14px;font-size:12px;color:#9ca3af;font-weight:600">${cardIdx+1}/${myCards.length}</div>
-          <div style="width:72px;height:72px;background:${C[cardIdx%C.length]}20;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;font-weight:800;color:${C[cardIdx%C.length]}">${targetName.charAt(0)}</div>
-          <h3 style="font-size:20px;font-weight:800;margin-bottom:4px">${esc(targetName)}</h3>
-          <p style="font-size:13px;color:#6b7280">이 사람의 특징 키워드를 입력해주세요</p>
-          ${submitted?`<div style="margin-top:12px;background:#f0fdf4;border-radius:8px;padding:8px 12px;border:1px solid #bbf7d0"><span style="font-size:13px;color:#15803d;font-weight:600">✅ 제출 완료</span></div>`:''}
-        </div>
-        ${!submitted?`
-        <div class="card" style="margin-bottom:14px">
-          <textarea id="whoKwInput" rows="3" placeholder="키워드를 입력하세요&#10;예: 활발함, 리더십, 창의적, 꼼꼼함">${esc(draft)}</textarea>
-          <button class="btn btn-indigo btn-block" id="whoSubmitKw" style="margin-top:10px" ${!draft.trim()?'disabled':''}>제출하기 ✓</button>
-        </div>`:`
-        <div class="card" style="margin-bottom:14px;background:#f0fdf4;border:1px solid #bbf7d0">
-          <p style="font-size:13px;color:#15803d;margin-bottom:6px;font-weight:600">제출된 키워드</p>
-          <p style="font-size:14px;color:#374151">${esc(draft||'-')}</p>
-          <button class="btn btn-gray btn-block" id="whoEditKw" style="margin-top:10px;font-size:13px">수정하기</button>
-        </div>`}
-        <div style="display:flex;gap:10px;margin-bottom:14px">
-          <button class="who-nav-btn" id="whoPrev" style="flex:1" ${cardIdx===0?'disabled':''}>← 이전</button>
-          <button class="who-nav-btn" id="whoNext" style="flex:1" ${cardIdx===myCards.length-1?'disabled':''}>다음 →</button>
-        </div>
-        ${allDone?`<button class="btn btn-green btn-block btn-lg" id="whoRegister">✅ 등록하기 (모두 완료)</button>`:''}
-      </div>
-    </div>`;}
-
-  // 투표 대기
-  if(st.whoStatus==='revealing'){return`<div class="page center" style="background:#f0f2f5">${back}
-    <div style="text-align:center" class="fade-in">
-      <div class="pulse" style="font-size:54px;margin-bottom:18px">🤔</div>
-      <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">키워드 수집 완료!</h2>
-      <p style="color:#6b7280;font-size:14px">퍼실리테이터가 투표를 준비하고 있습니다...</p>
-    </div></div>`;}
-
-  // 투표 중
-  if(st.whoStatus==='voting'&&st.whoVotingOpen){
-    if(st.whoMyVote){const vn=st.whoParticipants[st.whoMyVote]||'?';
-      return`<div class="page center" style="background:#f0f2f5">${back}
-      <div style="text-align:center" class="fade-in">
-        <div style="font-size:54px;margin-bottom:18px">✅</div>
-        <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">투표 완료!</h2>
-        <p style="color:#6b7280;font-size:14px">내 선택: <strong>${esc(vn)}</strong></p>
-      </div></div>`;}
-    const cands=Object.entries(st.whoCandidates).filter(([,v])=>v).map(([p])=>p);
-    return`<div class="page" style="background:#f0f2f5;min-height:100vh">
-      ${back}
-      <div style="padding:60px 16px 20px;max-width:480px;margin:0 auto;width:100%">
-        <div class="card" style="text-align:center;margin-bottom:16px">
-          <p style="font-size:12px;color:#9ca3af;margin-bottom:8px;letter-spacing:.06em">나는 누구일까요?</p>
-          <h2 style="font-size:20px;font-weight:800">정답을 맞혀보세요!</h2>
-        </div>
-        ${cands.map((p,i)=>`<button class="vote-btn" data-wpid="${p}" style="background:${C[i%C.length]}">${esc(st.whoParticipants[p]||'?')}</button>`).join('')}
-      </div></div>`;}
-
-  // 종료
-  return`<div class="page center" style="background:#f0f2f5">${back}
-  <div style="text-align:center" class="fade-in">
-    <div style="font-size:54px;margin-bottom:18px">🎉</div>
-    <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">게임 종료!</h2>
-    <p style="color:#6b7280;font-size:14px">수고하셨습니다</p>
-  </div></div>`;}
-
-function bindParWho(){
-  $('parWhoBack')?.addEventListener('click',()=>{stopPoll();st.view='progSelect';render();});
-  const kwIn=$('whoKwInput');
-  if(kwIn){
-    const myCards=st.whoSelected.filter(p=>p!==pid);
-    const targetPid=myCards[Math.min(st.whoCurrentCard,myCards.length-1)];
-    kwIn.addEventListener('input',e=>{
-      st.whoKeywordDrafts[targetPid]=e.target.value;
-      const sb=$('whoSubmitKw');if(sb)sb.disabled=!e.target.value.trim();
-    });
-  }
-  $('whoSubmitKw')?.addEventListener('click',async()=>{
-    const myCards=st.whoSelected.filter(p=>p!==pid);
-    const targetPid=myCards[Math.min(st.whoCurrentCard,myCards.length-1)];
-    const kw=st.whoKeywordDrafts[targetPid]||'';
-    if(!kw.trim())return;
-    await fbSet(`who/keywords/${targetPid}/${pid}`,kw);
-    st.whoSubmitted[targetPid]=true;
-    // 다음 카드로 자동 이동
-    if(st.whoCurrentCard<myCards.length-1)st.whoCurrentCard++;
-    render();
-  });
-  $('whoEditKw')?.addEventListener('click',()=>{
-    const myCards=st.whoSelected.filter(p=>p!==pid);
-    const targetPid=myCards[Math.min(st.whoCurrentCard,myCards.length-1)];
-    delete st.whoSubmitted[targetPid];render();
-  });
-  $('whoPrev')?.addEventListener('click',()=>{if(st.whoCurrentCard>0){st.whoCurrentCard--;render();}});
-  $('whoNext')?.addEventListener('click',()=>{
-    const myCards=st.whoSelected.filter(p=>p!==pid);
-    if(st.whoCurrentCard<myCards.length-1){st.whoCurrentCard++;render();}
-  });
-  $('whoRegister')?.addEventListener('click',async()=>{
-    await fbSet(`who/participantsDone/${pid}`,true);render();
-  });
-  // WHO 투표
-  document.querySelectorAll('[data-wpid]').forEach(b=>{
-    b.addEventListener('click',async()=>{
-      const targetPid=b.dataset.wpid;
-      await fbSet(`who/votes/${pid}`,targetPid);
-      st.whoMyVote=targetPid;render();
-    });
-  });
-}
-
-/* ══════════════════════
-   DASHBOARD
-══════════════════════ */
-function dashHTML(){
-  const vStatus=st.q?(st.q.active?'live':'ended'):'idle';
-  const sStatus=st.stockStatus;
-  const wStatus=st.whoStatus;
-  return`<div class="page" style="background:#f0f2f5">
-  <div style="background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.07);flex-wrap:wrap;gap:8px">
-    <div style="display:flex;align-items:center;gap:8px">
-      <button class="btn btn-gray" id="dashBack" style="padding:7px 11px;font-size:13px">← 뒤로</button>
-      <span style="font-weight:800;font-size:15px">대시보드</span>
-    </div>
-    <div class="tab-wrap">
-      <button class="tab ${st.dashTab==='voteBoard'?'on':''}" id="tabVB">🗳️ 투표 현황</button>
-      <button class="tab ${st.dashTab==='voteFac'?'on':''}" id="tabVF">⚙️ 투표 관리</button>
-      <button class="tab ${st.dashTab==='stockBoard'?'on':''}" id="tabSB">📈 주식 현황</button>
-      <button class="tab ${st.dashTab==='stockFac'?'on':''}" id="tabSF">🏭 주식 관리</button>
-      <button class="tab ${st.dashTab==='whoBoard'?'on':''}" id="tabWB">🎭 나는누구 현황</button>
-      <button class="tab ${st.dashTab==='whoFac'?'on':''}" id="tabWF">🎲 나는누구 관리</button>
-    </div>
-  </div>
-  <div style="flex:1;padding:18px;max-width:960px;margin:0 auto;width:100%">
-    ${st.dashTab==='voteBoard'?voteBoardHTML()
-    :st.dashTab==='voteFac'?voteFacHTML()
-    :st.dashTab==='stockBoard'?stockBoardHTML()
-    :st.dashTab==='stockFac'?stockFacHTML()
-    :st.dashTab==='whoBoard'?whoBoardHTML()
-    :whoFacHTML()}
-  </div>
-</div>`;}
-
-/* ── 투표 현황판 ── */
-function voteBoardHTML(){
-  const{counts,total}=countVotes();
-  if(!st.q)return`<div class="card" style="text-align:center;padding:3rem"><div style="font-size:48px;margin-bottom:12px">🗳️</div><p style="color:#6b7280">진행 중인 투표가 없습니다</p></div>`;
-  if(!st.revealed){
-    const vl=Object.values(st.votes||{}).filter(v=>v&&v.questionId===st.q.id);
-    return`<div class="blind-screen"><div class="blind-orb">🗳️</div>
-      <h2 style="font-size:22px;font-weight:800;margin-bottom:8px">블라인드 투표 진행 중</h2>
-      <p style="font-size:15px;opacity:.75;margin-bottom:24px">${esc(st.q.text)}</p>
-      <div style="background:rgba(255,255,255,.1);border-radius:12px;padding:16px 32px;display:inline-block;margin-bottom:20px">
-        <span style="font-size:48px;font-weight:800">${vl.length}</span><span style="font-size:16px;opacity:.8;margin-left:8px">명 응답</span>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:20px">
-        <span class="vdot"></span><span class="vdot"></span><span class="vdot"></span>
-      </div>
-      <p style="font-size:12px;opacity:.45">투표 관리 탭에서 결과를 공개할 수 있습니다</p>
-    </div>`;}
-  const aC=st.justRevealed?'reveal-pop':'fade-in';
-  const sc=[`<div class="stat" style="background:#eef2ff"><div class="stat-num" style="color:#4f46e5">${total}</div><div class="stat-label" style="color:#6b7280">전체 참여</div></div>`]
-    .concat(st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;
-      return`<div class="stat" style="background:${C[i]}15;border:1px solid ${C[i]}30"><div class="stat-num" style="color:${C[i]}">${cnt}</div><div class="stat-label" style="color:${C[i]}">${esc(o)}</div><div class="stat-sub" style="color:${C[i]}90">${pct}%</div></div>`;})).join('');
-  const bars=st.q.opts.map((o,i)=>{const cnt=counts[o]||0;const pct=total>0?Math.round(cnt/total*100):0;
-    return`<div style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:15px;font-weight:700">${esc(o)}</span><span style="color:#6b7280;font-size:14px">${cnt}명 (${pct}%)</span></div>
-    <div class="bar-wrap"><div class="bar-fill ${st.justRevealed?'bar-reveal':''}" style="width:${pct}%;background:${C[i]};animation-delay:${i*.12}s">${pct>12?`<span class="bar-pct">${pct}%</span>`:''}</div></div></div>`;}).join('');
-  const vl=Object.values(st.votes||{}).filter(v=>v&&v.questionId===st.q.id);
-  const listHTML=(!st.anon&&vl.length>0)?`<div class="card" style="margin-top:14px"><p style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:12px">참가자별 응답</p>${vl.map(v=>{const idx=st.q.opts.indexOf(v.choice);const col=C[Math.max(0,idx)%C.length];return`<div class="par-row"><span style="font-weight:600;font-size:14px">${esc(v.name)}</span><span class="choice-pill" style="background:${col}20;color:${col};border:1px solid ${col}40">${esc(v.choice)}</span></div>`;}).join('')}</div>`:'';
-  return`<div class="${aC}">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">🎉</span><span style="font-weight:800;font-size:16px">결과 공개</span><span style="font-size:13px;color:#6b7280">${esc(st.q.text)}</span></div>
-      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:14px;font-weight:600">이름 표시</span><label class="toggle"><input type="checkbox" id="anonToggle" ${!st.anon?'checked':''}><span class="toggle-slider"></span></label></div>
-    </div>
-    <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">${sc}</div>
-    <div class="card">${bars}</div>${listHTML}
-  </div>`;}
-
-/* ── 투표 관리 ── */
-function voteFacHTML(){
-  const status=st.q?(st.q.active?'live':'ended'):'idle';
-  const hasQ=st.qText.trim().length>0;
-  const hasActive=st.q!==null;
-  const vl=Object.values(st.votes||{}).filter(v=>v&&st.q&&v.questionId===st.q.id);
-  return`<div style="display:flex;flex-direction:column;gap:14px">
-  <div class="card">
-    <h3 style="font-size:15px;font-weight:800;margin-bottom:14px">질문 설정</h3>
-    <textarea id="qInput" rows="2" placeholder="참가자에게 보여줄 질문...">${esc(st.qText)}</textarea>
-    <div style="margin-top:14px"><p style="font-size:13px;color:#6b7280;margin-bottom:8px">선택지 형태</p>
-      <div class="preset-grid">${PRESETS.map((p,i)=>`<button class="preset-btn ${st.preset===i?'on':''}" data-preset="${i}">${p.label}</button>`).join('')}</div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">${PRESETS[st.preset].opts.map((o,i)=>`<span style="padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700;background:${C[i]}20;color:${C[i]};border:1px solid ${C[i]}40">${esc(o)}</span>`).join('')}</div>
-    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-indigo" id="startVoteBtn" style="flex:1" ${hasQ?'':'disabled'}>▶ 투표 시작</button>
-      ${status==='live'?`<button class="btn btn-red" id="endVoteBtn">■ 종료</button>`:''}
-      ${hasActive?`<button class="btn btn-gray" id="resetVoteBtn">↺ 초기화</button>`:''}
-    </div>
-    ${(hasActive&&!st.revealed)?`<div style="margin-top:16px;padding-top:16px;border-top:1px solid #f3f4f6;text-align:center"><p style="font-size:12px;color:#9ca3af;margin-bottom:12px">모두 완료 후 결과를 공개하세요</p><button class="btn-reveal" id="revealBtn">🎉 결과 공개하기</button></div>`:''}
-    ${(hasActive&&st.revealed)?`<div style="margin-top:14px;padding:12px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;display:flex;align-items:center;gap:8px"><span>✅</span><span style="font-size:13px;font-weight:600;color:#15803d">결과가 현황판에 공개되었습니다</span></div>`:''}
-  </div>
-  ${hasActive?`<div class="card"><p style="font-size:14px;font-weight:700;margin-bottom:12px">참가자별 응답 <span style="font-weight:400;color:#6b7280;font-size:13px">${vl.length}명</span></p>
-    ${vl.length===0?`<p style="color:#9ca3af;font-size:13px;text-align:center;padding:1rem">아직 응답 없음</p>`:vl.map(v=>{const idx=st.q.opts.indexOf(v.choice);const col=C[Math.max(0,idx)%C.length];return`<div class="par-row"><span style="font-weight:600;font-size:14px">${esc(v.name)}</span><span class="choice-pill" style="background:${col}20;color:${col};border:1px solid ${col}40">${esc(v.choice)}</span></div>`;}).join('')}
-  </div>`:''}
-</div>`;}
-
-/* ── 주식 현황판 ── */
-function stockBoardHTML(){
-  const stocks=getSortedStocks();
-  if(st.stockStatus==='idle')return`<div class="card" style="text-align:center;padding:3rem"><div style="font-size:48px;margin-bottom:12px">📈</div><p style="color:#6b7280">주식 시뮬레이터가 시작되지 않았습니다</p></div>`;
-  if(st.stockStatus==='listing')return`<div class="card" style="text-align:center;padding:3rem"><div class="pulse" style="font-size:48px;margin-bottom:12px">⚙️</div><p style="color:#374151;font-weight:700">종목 상장 중</p></div>`;
-  const totalsByStock={};stocks.forEach(s=>totalsByStock[s.id]=0);
-  const holders=Object.values(st.allHoldings||{});
-  holders.forEach(h=>{if(!h?.portfolio)return;Object.entries(h.portfolio).forEach(([sid,qty])=>{if(totalsByStock[sid]!==undefined)totalsByStock[sid]+=qty;});});
-  const grandTotal=Object.values(totalsByStock).reduce((a,b)=>a+b,0);
-  if(st.stockStatus==='ended'){
-    return`<div style="display:flex;flex-direction:column;gap:14px">
-    <div class="card"><h3 style="font-size:16px;font-weight:800;margin-bottom:4px">🏆 최종 투자 결과</h3>
-      <p style="font-size:13px;color:#6b7280;margin-bottom:16px">${holders.length}명 참여 · ${grandTotal}주 거래</p>
-      ${stocks.map((s,i)=>{const qty=totalsByStock[s.id]||0;const pct=grandTotal>0?Math.round(qty/grandTotal*100):0;
-        return`<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-weight:700">${esc(s.name)}</span><span style="color:#6b7280;font-size:14px">${qty}주 (${pct}%)</span></div>
-        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${C[i%C.length]}">${pct>12?`<span class="bar-pct">${pct}%</span>`:''}</div></div></div>`;}).join('')}
-    </div>
-    <div class="card"><h3 style="font-size:15px;font-weight:700;margin-bottom:12px">참가자별 포트폴리오</h3>
-      ${holders.map(h=>{const invested=INIT_CASH-(h.cash||INIT_CASH);
-        return`<div class="par-row" style="flex-direction:column;align-items:flex-start;gap:6px">
-          <div style="display:flex;justify-content:space-between;width:100%"><span style="font-weight:700">${esc(h.name)}</span><span style="font-size:13px;color:#6b7280">투자 ₩${fmt(invested)}</span></div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px">${stocks.map((s,i)=>{const q=h.portfolio?.[s.id]||0;if(!q)return'';return`<span style="background:${C[i%C.length]}20;color:${C[i%C.length]};border:1px solid ${C[i%C.length]}40;padding:2px 10px;border-radius:6px;font-size:12px;font-weight:700">${esc(s.name)} ${q}주</span>`;}).join('')}</div>
-        </div>`;}).join('')}
-    </div></div>`;}
-  return`<div style="display:flex;flex-direction:column;gap:14px">
-  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h3 style="font-size:16px;font-weight:800">📊 실시간 투자 현황</h3><span style="font-size:13px;color:#6b7280">총 ${grandTotal}주</span></div>
-    ${stocks.map((s,i)=>{const qty=totalsByStock[s.id]||0;const pct=grandTotal>0?Math.round(qty/grandTotal*100):0;
-      return`<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-weight:700">${esc(s.name)}</span><span style="color:#6b7280;font-size:14px">${qty}주 (${pct}%)</span></div>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${C[i%C.length]}">${pct>12?`<span class="bar-pct">${pct}%</span>`:''}</div></div></div>`;}).join('')}
-  </div>
-  <div class="card"><p style="font-size:14px;font-weight:700;margin-bottom:12px">참가자 현황 <span style="font-weight:400;font-size:13px;color:#6b7280">${holders.length}명</span></p>
-    ${holders.map(h=>`<div class="par-row"><span style="font-weight:600">${esc(h.name)}</span><span style="font-size:13px;color:#6b7280">₩${fmt(INIT_CASH-(h.cash||INIT_CASH))} 투자</span></div>`).join('')}
-  </div></div>`;}
-
-/* ── 주식 관리 ── */
-function stockFacHTML(){
-  const stocks=getSortedStocks();
-  const isI=st.stockStatus==='idle',isL=st.stockStatus==='listing',isA=st.stockStatus==='active',isE=st.stockStatus==='ended';
-  return`<div style="display:flex;flex-direction:column;gap:14px"><div class="card">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <h3 style="font-size:15px;font-weight:800">종목 상장 관리</h3>
-      ${isL?'<span class="badge badge-prep">⚙ 상장 중</span>':''}${isA?'<span class="badge badge-live">● 거래 중</span>':''}${isE?'<span class="badge badge-end">■ 종료됨</span>':''}
-    </div>
-    ${(isI||isL)?`<div style="display:flex;gap:8px;margin-bottom:14px">
-      <input type="text" id="stockNameInput" placeholder="사업 종목명 입력 (예: 마을 도로 정비 사업)" style="flex:1" value="${esc(st.newStockInput)}" maxlength="30">
-      <button class="btn btn-dark" id="addStockBtn" ${!st.newStockInput.trim()?'disabled':''}>+ 상장</button>
-    </div>`:''}
-    <div style="margin-bottom:12px">
-      ${stocks.length===0?`<p style="color:#9ca3af;font-size:13px;text-align:center;padding:12px">등록된 종목이 없습니다</p>`:
-      stocks.map((s,i)=>`<div class="stock-item-row"><span style="font-size:13px;color:#6b7280;width:20px;font-weight:700">${i+1}</span><span class="stock-item-name">${esc(s.name)}</span>${(isI||isL)?`<button class="stock-item-del" data-sid="${s.id}">✕</button>`:''}</div>`).join('')}
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${(isI||isL)&&stocks.length>0?`<button class="btn btn-green" id="startStockBtn" style="flex:1">🏁 상장 완료 · 게임 시작</button>`:''}
-      ${isA?`<button class="btn btn-red" id="endStockBtn" style="flex:1">⏹ 게임 종료</button>`:''}
-      ${isE?`<button class="btn btn-gray" id="resetStockBtn" style="flex:1">↺ 초기화</button>`:''}
-    </div>
-    ${isA?`<div style="margin-top:12px;background:#f0fdf4;border-radius:10px;padding:12px;border:1px solid #bbf7d0"><p style="font-size:13px;color:#15803d;font-weight:600">✅ 거래 진행 중</p></div>`:''}
-  </div></div>`;}
-
-/* ── 나는 누구? 현황판 ── */
-function whoBoardHTML(){
-  if(st.whoStatus==='idle'||st.whoStatus==='collecting'){
-    const pCount=Object.keys(st.whoParticipants).length;
-    const doneCount=Object.keys(st.whoParticipantsDone||{}).length;
-    return`<div class="card" style="text-align:center;padding:3rem">
-      <div style="font-size:48px;margin-bottom:12px">🎭</div>
-      <p style="font-weight:700;font-size:16px;color:#374151">${st.whoStatus==='idle'?'게임이 시작되지 않았습니다':'키워드 수집 중...'}</p>
-      ${st.whoStatus==='collecting'?`<p style="font-size:14px;color:#6b7280;margin-top:8px">${doneCount}/${pCount}명 등록 완료</p>
-      <div style="margin-top:16px;max-width:300px;margin-left:auto;margin-right:auto">
-        ${Object.entries(st.whoParticipants).map(([p,name])=>`<div class="par-row"><span style="font-weight:600">${esc(name)}</span><span style="font-size:13px;color:${st.whoParticipantsDone?.[p]?'#15803d':'#6b7280'}">${st.whoParticipantsDone?.[p]?'✅ 완료':'대기중...'}</span></div>`).join('')}
-      </div>`:''}
-    </div>`;}
-
-  // revealing / voting / ended: 키워드 공개
-  const subjectPid=st.whoSelected[st.whoCurrentSubject];
-  const kwObj=st.whoKeywords?.[subjectPid]||{};
-  const allKws=Object.values(kwObj).filter(Boolean);
-  const kwTags=allKws.map(kw=>kw.split(/[,，\n]/).map(k=>k.trim()).filter(Boolean)).flat();
-  const cands=Object.entries(st.whoCandidates||{}).filter(([,v])=>v).map(([p])=>p);
-  const allParticipants=Object.entries(st.whoParticipants||{});
-
-  // 투표 결과 집계
-  const voteCounts={};
-  cands.forEach(p=>voteCounts[p]=0);
-  const totalVotes=Object.values(st.whoVotes||{}).length;
-  Object.values(st.whoVotes||{}).forEach(p=>{if(voteCounts[p]!==undefined)voteCounts[p]++;});
-
-  return`<div style="display:flex;flex-direction:column;gap:14px">
-  <!-- 미스터리 헤더 -->
-  <div class="who-mystery-card">
-    <p style="font-size:12px;opacity:.6;margin-bottom:8px;letter-spacing:.08em">나는 누구일까요?</p>
-    <h2 style="font-size:26px;font-weight:800;margin-bottom:20px">🎭 ???</h2>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-bottom:20px;min-height:40px">
-      ${kwTags.length>0?kwTags.map(k=>`<span class="who-keyword-tag">${esc(k)}</span>`).join(''):`<span style="opacity:.4;font-size:14px">키워드가 없습니다</span>`}
-    </div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:16px">
-      <button class="who-nav-btn" id="whoSubPrev" style="color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)" ${st.whoCurrentSubject===0?'disabled':''}>← 이전</button>
-      <span style="font-size:14px;opacity:.7">${st.whoCurrentSubject+1} / ${st.whoSelected.length}</span>
-      <button class="who-nav-btn" id="whoSubNext" style="color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)" ${st.whoCurrentSubject>=st.whoSelected.length-1?'disabled':''}>다음 →</button>
-    </div>
-    ${st.whoRevealed?`<div style="margin-top:16px;background:rgba(255,255,255,.15);border-radius:12px;padding:12px 24px;display:inline-block"><p style="font-size:12px;opacity:.7;margin-bottom:4px">정답</p><p style="font-size:24px;font-weight:800">${esc(st.whoParticipants[subjectPid]||'?')}</p></div>`:''}
-  </div>
-
-  <!-- 투표 관리 -->
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 style="font-size:15px;font-weight:800">투표 후보 관리</h3>
-      ${st.whoVotingOpen?'<span class="badge badge-live">● 투표 중</span>':''}
-    </div>
-    <div style="margin-bottom:12px">
-      ${allParticipants.map(([p,name])=>{
-        const isActive=!!st.whoCandidates?.[p];
-        return`<div class="who-candidate-row">
-          <span class="who-candidate-name">${esc(name)}</span>
-          ${st.whoVotingOpen?`<span style="font-size:13px;color:#6b7280">${voteCounts[p]||0}표</span>`:''}
-          ${!st.whoVotingOpen?`<button class="btn ${isActive?'btn-red':'btn-green'}" data-cpid="${p}" id="candBtn_${p}" style="padding:6px 12px;font-size:13px">${isActive?'✕ 제외':'+ 후보 등록'}</button>`:''}
-        </div>`;}).join('')}
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${!st.whoVotingOpen&&cands.length>0?`<button class="btn btn-indigo" id="whoOpenVote" style="flex:1">🗳️ 등록 마감 · 투표 시작</button>`:''}
-      ${st.whoVotingOpen?`<button class="btn btn-red" id="whoCloseVote" style="flex:1">■ 투표 종료</button>`:''}
-      ${(st.whoStatus==='voting'||st.whoStatus==='ended')&&!st.whoRevealed?`<button class="btn btn-orange" id="whoRevealAnswer">🎉 정답 확인하기</button>`:''}
-      ${st.whoRevealed?`<button class="btn btn-purple" id="whoNextSubject" ${st.whoCurrentSubject>=st.whoSelected.length-1?'disabled':''}>다음 미스터리 →</button>`:''}
-    </div>
-    ${st.whoVotingOpen&&totalVotes>0?`<div style="margin-top:14px"><p style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:10px">실시간 투표 결과 (${totalVotes}명)</p>
-      ${cands.map((p,i)=>{const cnt=voteCounts[p]||0;const pct=totalVotes>0?Math.round(cnt/totalVotes*100):0;return`<div style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:600">${esc(st.whoParticipants[p]||'?')}</span><span style="color:#6b7280;font-size:13px">${cnt}표 (${pct}%)</span></div>
-        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${C[i%C.length]}">${pct>12?`<span class="bar-pct">${pct}%</span>`:''}</div></div>
-      </div>`;}).join('')}
-    </div>`:''}
-  </div>
-</div>`;}
-
-/* ── 나는 누구? 관리 ── */
-function whoFacHTML(){
-  const allP=Object.entries(st.whoParticipants||{});
-  const isI=st.whoStatus==='idle';
-  const isC=st.whoStatus==='collecting';
-  const doneCount=Object.keys(st.whoParticipantsDone||{}).length;
-  return`<div style="display:flex;flex-direction:column;gap:14px"><div class="card">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <h3 style="font-size:15px;font-weight:800">나는 누구일까? 관리</h3>
-      ${isC?'<span class="badge badge-prep">⚙ 수집 중</span>':''}
-      ${st.whoStatus==='revealing'?'<span class="badge badge-live">● 공개 단계</span>':''}
-      ${st.whoStatus==='voting'?'<span class="badge badge-live">● 투표 중</span>':''}
-      ${st.whoStatus==='ended'?'<span class="badge badge-end">■ 종료됨</span>':''}
-    </div>
-    <div style="margin-bottom:14px">
-      <p style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:10px">등록된 참가자 (${allP.length}명)</p>
-      ${allP.length===0?`<p style="color:#9ca3af;font-size:13px;text-align:center;padding:12px">아직 참가자가 없습니다</p>`:
-      allP.map(([p,name])=>`<div class="par-row">
-        <span style="font-weight:600">${esc(name)}</span>
-        ${isC?`<span style="font-size:13px;color:${st.whoParticipantsDone?.[p]?'#15803d':'#6b7280'}">${st.whoParticipantsDone?.[p]?'✅ 완료':'입력 중...'}</span>`:''}
-        ${st.whoSelected.includes(p)?`<span style="background:#8b5cf620;color:#8b5cf6;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">주인공</span>`:''}
-      </div>`).join('')}
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${isI&&allP.length>=WHO_COUNT?`<button class="btn btn-purple" id="whoStartBtn" style="flex:1">🎲 게임 시작 (${WHO_COUNT}명 랜덤 선택)</button>`:''}
-      ${isI&&allP.length<WHO_COUNT?`<p style="font-size:13px;color:#ef4444">참가자가 최소 ${WHO_COUNT}명 필요합니다 (현재 ${allP.length}명)</p>`:''}
-      ${isC?`<button class="btn btn-orange" id="whoEndCollect" style="flex:1">⏹ 키워드 수집 종료</button>`:''}
-      ${(st.whoStatus!=='idle'&&st.whoStatus!=='collecting')?`<button class="btn btn-gray" id="whoResetBtn">↺ 초기화</button>`:''}
-    </div>
-    ${isC?`<div style="margin-top:12px;background:#fef3c7;border-radius:10px;padding:12px;border:1px solid #fde68a"><p style="font-size:13px;color:#92400e;font-weight:600">⚙ 키워드 수집 중 — ${doneCount}/${allP.length}명 등록 완료</p></div>`:''}
-  </div></div>`;}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━
-   DASHBOARD BIND
-━━━━━━━━━━━━━━━━━━━━━━ */
-function bindDash(){
-  $('dashBack')?.addEventListener('click',()=>{stopPoll();st.view='home';render();});
-  $('tabVB')?.addEventListener('click',()=>{st.dashTab='voteBoard';render();});
-  $('tabVF')?.addEventListener('click',()=>{st.dashTab='voteFac';render();});
-  $('tabSB')?.addEventListener('click',()=>{st.dashTab='stockBoard';render();});
-  $('tabSF')?.addEventListener('click',()=>{st.dashTab='stockFac';render();});
-  $('tabWB')?.addEventListener('click',()=>{st.dashTab='whoBoard';render();});
-  $('tabWF')?.addEventListener('click',()=>{st.dashTab='whoFac';render();});
-  // 투표
-  $('anonToggle')?.addEventListener('change',async e=>{st.anon=!e.target.checked;await fbSet('session/anon',st.anon);render();});
-  $('qInput')?.addEventListener('input',e=>{st.qText=e.target.value;const sb=$('startVoteBtn');if(sb)sb.disabled=!e.target.value.trim();});
-  document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',()=>{st.preset=+b.dataset.preset;render();}));
-  $('startVoteBtn')?.addEventListener('click',startVote);
-  $('endVoteBtn')?.addEventListener('click',endVote);
-  $('resetVoteBtn')?.addEventListener('click',resetVote);
-  $('revealBtn')?.addEventListener('click',revealResults);
-  // 주식
-  $('stockNameInput')?.addEventListener('input',e=>{st.newStockInput=e.target.value;const ab=$('addStockBtn');if(ab)ab.disabled=!e.target.value.trim();});
-  $('stockNameInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&st.newStockInput.trim())addStock();});
-  $('addStockBtn')?.addEventListener('click',addStock);
-  document.querySelectorAll('.stock-item-del').forEach(b=>b.addEventListener('click',()=>removeStock(b.dataset.sid)));
-  $('startStockBtn')?.addEventListener('click',startStockGame);
-  $('endStockBtn')?.addEventListener('click',endStockGame);
-  $('resetStockBtn')?.addEventListener('click',resetStock);
-  // 나는 누구?
-  $('whoStartBtn')?.addEventListener('click',startWhoGame);
-  $('whoEndCollect')?.addEventListener('click',endWhoCollect);
-  $('whoResetBtn')?.addEventListener('click',resetWho);
-  $('whoSubPrev')?.addEventListener('click',()=>{if(st.whoCurrentSubject>0){st.whoCurrentSubject--;st.whoRevealed=false;st.whoCandidates={};st.whoVotingOpen=false;st.whoVotes={};fbSet('who/currentSubject',st.whoCurrentSubject);fbSet('who/candidates',{});fbSet('who/votingOpen',false);fbSet('who/votes',null);fbSet('who/revealed',false);render();}});
-  $('whoSubNext')?.addEventListener('click',()=>{if(st.whoCurrentSubject<st.whoSelected.length-1){st.whoCurrentSubject++;st.whoRevealed=false;st.whoCandidates={};st.whoVotingOpen=false;st.whoVotes={};fbSet('who/currentSubject',st.whoCurrentSubject);fbSet('who/candidates',{});fbSet('who/votingOpen',false);fbSet('who/votes',null);fbSet('who/revealed',false);render();}});
-  document.querySelectorAll('[id^="candBtn_"]').forEach(b=>{
-    b.addEventListener('click',async()=>{
-      const p=b.dataset.cpid;
-      st.whoCandidates[p]=!st.whoCandidates[p];
-      await fbSet('who/candidates',st.whoCandidates);render();
-    });
-  });
-  $('whoOpenVote')?.addEventListener('click',async()=>{
-    st.whoVotingOpen=true;st.whoVotes={};
-    await fbSet('who/votingOpen',true);await fbSet('who/votes',null);
-    await fbSet('who/status','voting');st.whoStatus='voting';render();
-  });
-  $('whoCloseVote')?.addEventListener('click',async()=>{
-    st.whoVotingOpen=false;await fbSet('who/votingOpen',false);
-    await fbSet('who/status','ended');st.whoStatus='ended';render();
-  });
-  $('whoRevealAnswer')?.addEventListener('click',async()=>{st.whoRevealed=true;await fbSet('who/revealed',true);render();});
-  $('whoNextSubject')?.addEventListener('click',()=>{$('whoSubNext')?.click();});
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━
-   VOTE ACTIONS
-━━━━━━━━━━━━━━━━━━━━━━ */
-function countVotes(){
-  const counts={};if(st.q)st.q.opts.forEach(o=>counts[o]=0);let total=0;
-  Object.values(st.votes||{}).forEach(v=>{if(v&&st.q&&v.questionId===st.q.id&&counts[v.choice]!==undefined){counts[v.choice]++;total++;}});
-  return{counts,total};}
-async function startVote(){
-  const text=st.qText.trim();if(!text)return;
-  const q={id:Date.now().toString(),text,opts:PRESETS[st.preset].opts,active:true};
-  await fbDel('votes');await fbSet('session/q',q);await fbSet('session/revealed',false);
-  st.q=q;st.votes={};st.revealed=false;st.justRevealed=false;render();}
-async function endVote(){if(!st.q)return;const q={...st.q,active:false};await fbSet('session/q',q);st.q=q;render();}
-async function resetVote(){await fbDel('session');await fbDel('votes');st.q=null;st.votes={};st.qText='';st.revealed=false;st.justRevealed=false;render();}
-async function revealResults(){
-  await fbSet('session/revealed',true);st.justRevealed=true;st.revealed=true;st.dashTab='voteBoard';render();
-  setTimeout(()=>{st.justRevealed=false;},1200);}
-async function submitVote(choice){
-  if(!st.q||st.myVote||!st.name)return;
-  await fbSet(`votes/${pid}`,{questionId:st.q.id,choice,name:st.name,pid});
-  st.myVote=choice;render();}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━
-   STOCK ACTIONS
-━━━━━━━━━━━━━━━━━━━━━━ */
-function getSortedStocks(){return Object.values(st.stockItems||{}).sort((a,b)=>(a.order||0)-(b.order||0));}
-async function enterStock(){
-  st.myCash=INIT_CASH;st.myPortfolio={};
-  const ex=await fbGet(`stock/holdings/${pid}`);
-  if(ex?.name){st.myCash=ex.cash||INIT_CASH;st.myPortfolio=ex.portfolio||{};}
-  else await fbSet(`stock/holdings/${pid}`,{name:st.name,cash:INIT_CASH,portfolio:{}});
-  st.view='parStock';render();startPoll('stock');}
-async function addStock(){
-  const name=st.newStockInput.trim();if(!name)return;
-  const id='s'+Date.now();const order=Object.keys(st.stockItems||{}).length;
-  st.stockItems[id]={id,name,order};await fbSet(`stock/items/${id}`,{id,name,order});
-  if(st.stockStatus==='idle')await fbSet('stock/status','listing');
-  st.stockStatus='listing';st.newStockInput='';render();}
-async function removeStock(id){delete st.stockItems[id];await fbDel(`stock/items/${id}`);
-  if(!Object.keys(st.stockItems||{}).length){await fbSet('stock/status','idle');st.stockStatus='idle';}render();}
-async function startStockGame(){await fbSet('stock/status','active');st.stockStatus='active';render();}
-async function endStockGame(){await fbSet('stock/status','ended');st.stockStatus='ended';render();}
-async function resetStock(){await fbDel('stock');st.stockStatus='idle';st.stockItems={};st.allHoldings={};st.newStockInput='';render();}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━
-   WHO AM I ACTIONS
-━━━━━━━━━━━━━━━━━━━━━━ */
-async function enterWho(){
-  await fbSet(`who/participants/${pid}`,st.name);
-  st.whoParticipants[pid]=st.name;
-  st.view='parWho';render();startPoll('who');}
-
-async function startWhoGame(){
-  const pids=Object.keys(st.whoParticipants);
-  if(pids.length<WHO_COUNT)return;
-  // 랜덤 5명 선택 (Fisher-Yates)
-  const shuffled=[...pids];
-  for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
-  const selected=shuffled.slice(0,WHO_COUNT);
-  const selObj={};selected.forEach((p,i)=>selObj[i]=p);
-  await fbSet('who/selected',selObj);
-  await fbSet('who/status','collecting');
-  await fbDel('who/keywords');await fbDel('who/participantsDone');
-  await fbSet('who/currentSubject',0);await fbSet('who/candidates',{});
-  await fbSet('who/votingOpen',false);await fbSet('who/votes',null);await fbSet('who/revealed',false);
-  st.whoSelected=selected;st.whoStatus='collecting';render();}
-
-async function endWhoCollect(){
-  await fbSet('who/status','revealing');st.whoStatus='revealing';render();}
-
-async function resetWho(){
-  await fbDel('who');
-  st.whoStatus='idle';st.whoParticipants={};st.whoSelected=[];
-  st.whoCurrentSubject=0;st.whoCandidates={};st.whoVotingOpen=false;
-  st.whoVotes={};st.whoRevealed=false;st.whoKeywords={};st.whoParticipantsDone={};render();}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━
-   POLLING
-━━━━━━━━━━━━━━━━━━━━━━ */
-function startPoll(role){
-  stopPoll();
-  const tick=async()=>{
-    if(role==='dash'){
-      const[q,v,anon,rev,ss,si,sh,whoAll]=await Promise.all([
-        fbGet('session/q'),fbGet('votes'),fbGet('session/anon'),fbGet('session/revealed'),
-        fbGet('stock/status'),fbGet('stock/items'),fbGet('stock/holdings'),fbGet('who')]);
-      const wasRev=st.revealed;
-      const changed=JSON.stringify(q)!==JSON.stringify(st.q)||JSON.stringify(v)!==JSON.stringify(st.votes)
-        ||!!anon!==st.anon||!!rev!==st.revealed||ss!==st.stockStatus
-        ||JSON.stringify(si)!==JSON.stringify(st.stockItems)||JSON.stringify(sh)!==JSON.stringify(st.allHoldings)
-        ||JSON.stringify(whoAll)!==JSON.stringify(st._lastWho);
-      st.q=q;st.votes=v||{};st.anon=!!anon;
-      if(!!rev&&!wasRev){st.justRevealed=true;setTimeout(()=>{st.justRevealed=false;},1200);}
-      st.revealed=!!rev;
-      if(ss)st.stockStatus=ss;
-      st.stockItems=si||{};st.allHoldings=sh||{};
-      if(whoAll){
-        st._lastWho=whoAll;
-        st.whoStatus=whoAll.status||'idle';
-        st.whoParticipants=whoAll.participants||{};
-        if(whoAll.selected)st.whoSelected=Object.values(whoAll.selected);
-        st.whoCandidates=whoAll.candidates||{};
-        st.whoVotingOpen=!!whoAll.votingOpen;
-        st.whoVotes=whoAll.votes||{};
-        st.whoRevealed=!!whoAll.revealed;
-        st.whoKeywords=whoAll.keywords||{};
-        st.whoParticipantsDone=whoAll.participantsDone||{};
-        if(whoAll.currentSubject!==undefined)st.whoCurrentSubject=whoAll.currentSubject;
-      }
-      if(changed)render();
-    } else if(role==='par'){
-      const q=await fbGet('session/q');
-      if(q?.id!==st.q?.id)st.myVote=null;
-      const changed=JSON.stringify(q)!==JSON.stringify(st.q);
-      st.q=q;if(changed&&!st.myVote)render();
-    } else if(role==='stock'){
-      const[ss,si,myH]=await Promise.all([fbGet('stock/status'),fbGet('stock/items'),fbGet(`stock/holdings/${pid}`)]);
-      const changed=ss!==st.stockStatus||JSON.stringify(si)!==JSON.stringify(st.stockItems);
-      if(ss)st.stockStatus=ss;st.stockItems=si||{};
-      if(myH){st.myCash=myH.cash||INIT_CASH;st.myPortfolio=myH.portfolio||{};}
-      if(changed&&!st.tradeModal)render();
-    } else if(role==='who'){
-      const whoAll=await fbGet('who');
-      if(whoAll){
-        const newSt=whoAll.status||'idle';
-        const newCands=JSON.stringify(whoAll.candidates||{});
-        const changed=newSt!==st.whoStatus||newCands!==JSON.stringify(st.whoCandidates)||!!whoAll.votingOpen!==st.whoVotingOpen;
-        st.whoStatus=newSt;
-        st.whoParticipants=whoAll.participants||{};
-        if(whoAll.selected)st.whoSelected=Object.values(whoAll.selected);
-        st.whoCandidates=whoAll.candidates||{};
-        st.whoVotingOpen=!!whoAll.votingOpen;
-        st.whoParticipantsDone=whoAll.participantsDone||{};
-        if(changed)render();
+    function setConnStatus(online, customText) {
+      const el = document.getElementById("conn-status");
+      const txt = document.getElementById("conn-text");
+      if (online) {
+        el.classList.add("online");
+        el.classList.remove("offline");
+        txt.textContent = "연결됨";
+      } else {
+        el.classList.remove("online");
+        el.classList.add("offline");
+        txt.textContent = customText || "오프라인";
       }
     }
-  };
-  tick();pollTimer=setInterval(tick,2000);
-}
-function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 
-render();
-</script>
+    // ======================================================
+    // View 전환
+    // ======================================================
+    function showView(viewId) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.getElementById(viewId).classList.add("active");
+    }
+
+    // ======================================================
+    // 참가자 등록 핸들러
+    // ======================================================
+    const nameInput = document.getElementById("participant-name");
+    const registerBtn = document.getElementById("register-btn");
+
+    function handleRegister() {
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.focus();
+        return;
+      }
+
+      // 특수 트리거: 관리자 / 대시보드
+      if (name === "관리자!") {
+        nameInput.value = "";
+        showView("admin-view");
+        return;
+      }
+      if (name === "대시보드!") {
+        nameInput.value = "";
+        showView("dashboard-view");
+        return;
+      }
+
+      // 일반 참가자 등록
+      if (firebaseReady && db) {
+        const participantsRef = ref(db, "participants");
+        push(participantsRef, {
+          name: name,
+          joinedAt: serverTimestamp()
+        }).then(() => {
+          showJoined(name);
+        }).catch((err) => {
+          console.error("등록 실패:", err);
+          // Firebase 실패해도 일단 등록 완료 화면은 표시 (로컬 폴백)
+          showJoined(name);
+        });
+      } else {
+        // Firebase 미설정 시 로컬 폴백
+        showJoined(name);
+      }
+    }
+
+    function showJoined(name) {
+      document.getElementById("participant-card").style.display = "none";
+      const joinedBox = document.getElementById("joined-box");
+      document.getElementById("joined-name").textContent = name;
+      joinedBox.style.display = "block";
+    }
+
+    registerBtn.addEventListener("click", handleRegister);
+    nameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleRegister();
+      }
+    });
+
+    // ======================================================
+    // 관리자: 참가자 화면으로 돌아가기
+    // ======================================================
+    document.getElementById("admin-back-btn").addEventListener("click", () => {
+      // 참가자 화면 초기 상태로
+      document.getElementById("participant-card").style.display = "";
+      document.getElementById("joined-box").style.display = "none";
+      nameInput.value = "";
+      showView("participant-view");
+    });
+
+    // 초기 포커스
+    setTimeout(() => nameInput.focus(), 100);
+  </script>
 </body>
 </html>
