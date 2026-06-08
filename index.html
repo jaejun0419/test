@@ -740,13 +740,13 @@
     // ⚠️ Firebase 설정: 본인의 Firebase 프로젝트 정보로 교체
     // ======================================================
     const firebaseConfig = {
-      apiKey: "AIzaSyCb3IMThHdBe73up9s--OPcBfiKMnKrHEw",
-      authDomain: "tset2-6c1c6.firebaseapp.com",
-      databaseURL: "https://tset2-6c1c6-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "tset2-6c1c6",
-      storageBucket: "tset2-6c1c6.firebasestorage.app",
-      messagingSenderId: "342313733951",
-      appId: "1:342313733951:web:c25c701ad47e6a4c6a0d8a"
+    apiKey: "AIzaSyCb3IMThHdBe73up9s--OPcBfiKMnKrHEw",
+    authDomain: "tset2-6c1c6.firebaseapp.com",
+    databaseURL: "https://tset2-6c1c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tset2-6c1c6",
+    storageBucket: "tset2-6c1c6.firebasestorage.app",
+    messagingSenderId: "342313733951",
+    appId: "1:342313733951:web:c25c701ad47e6a4c6a0d8a"
     };
 
     // ======================================================
@@ -924,7 +924,11 @@
       if (!name) { nameInput.focus(); return; }
       if (name === "관리자!") { nameInput.value = ""; showView("admin-view"); return; }
       if (name === "대시보드!") { nameInput.value = ""; showView("dashboard-view"); return; }
+      if (myInfo) return; // 이미 등록된 사용자 중복 등록 방지
       if (!firebaseReady || !db) return;
+
+      // 등록 버튼 잠시 비활성화 (연속 클릭 방지)
+      registerBtn.disabled = true;
 
       try {
         const newRef = await push(ref(db, "participants"), {
@@ -935,9 +939,19 @@
         myInfo = { id: newRef.key, name: name };
         saveMyInfo();
         nameInput.value = "";
+
+        // 옵티미스틱 업데이트: onValue 콜백이 늦게 와도 즉시 화면 전환
+        participants[newRef.key] = {
+          name: name,
+          team: null,
+          joinedAt: Date.now()
+        };
+        renderAll();
       } catch (err) {
         console.error("등록 실패:", err);
         alert("등록 중 오류가 발생했습니다.");
+      } finally {
+        registerBtn.disabled = false;
       }
     }
 
