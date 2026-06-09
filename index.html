@@ -106,6 +106,9 @@
     .stock-controls .b.sell { color: #d4537e; border-color: #d4537e; }
     .stock-controls .b.sell:hover:not(:disabled) { background: #d4537e; color: white; }
     .stock-controls .b:disabled { opacity: 0.35; cursor: not-allowed; }
+    .stock-row.depleted { opacity: 0.55; background: #f0f2f4; }
+    .stock-row.depleted .nm { color: #aaa; text-decoration: line-through; }
+    .stock-info .invested { color: #d4537e; font-weight: 700; }
     .market-bottom { margin-top: 1.5rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
     .btn-submit-portfolio { flex: 1; padding: 0.85rem; border: none; border-radius: 12px; background: linear-gradient(135deg, #004097 0%, #009991 100%); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit; }
     .btn-withdraw { padding: 0.85rem 1.5rem; border: 1px solid #d5dae0; border-radius: 12px; background: #fff; color: #6b7684; font-weight: 600; cursor: pointer; font-family: inherit; }
@@ -403,9 +406,15 @@
           <span class="team-tag" id="market-team-tag"></span>
           <span style="font-size:0.85rem; color:#6b7684;" id="market-rep-name"></span>
         </div>
-        <div class="balance">
-          <span class="lbl">남은 시드</span>
-          <span id="market-cash">1,000,000원</span>
+        <div style="display:flex; gap:1.5rem; flex-wrap:wrap;">
+          <div class="balance">
+            <span class="lbl">남은 시드</span>
+            <span id="market-cash">1,000,000원</span>
+          </div>
+          <div class="balance">
+            <span class="lbl">총 매수 체결액</span>
+            <span id="market-invested" style="color:#d4537e;">0원</span>
+          </div>
         </div>
       </div>
       <div class="stock-list" id="stock-list"></div>
@@ -499,6 +508,7 @@
             <button class="btn-action btn-action-primary" id="btn-step-market-end">이어서 진행: 프로그램 종료</button>
             <button class="btn-action btn-action-primary" id="btn-step-speaker">이어서 진행: 발표자 선정</button>
             <button class="btn-action btn-action-primary" id="btn-step-speaker-pick">이어서 진행: 랜덤 인원 선정</button>
+            <button class="btn-action btn-action-primary" id="btn-step-portfolio-recap">이어서 진행: 결과 다시 보기</button>
             <button class="btn-action btn-action-primary" id="btn-step-finish">이어서 진행: 종료</button>
             <button class="btn-action btn-action-secondary" id="btn-reset-all">전체 초기화</button>
           </div>
@@ -627,13 +637,14 @@
 
     // 진행 단계
     const STEPS = [
-      { id: null,             label: "대기" },
-      { id: "choice",         label: "선지 선택" },
-      { id: "market",         label: "마을 매수" },
-      { id: "market_end",     label: "프로그램 종료" },
-      { id: "speaker_pool",   label: "발표자 풀" },
-      { id: "speaker_picked", label: "발표자 당첨" },
-      { id: "finished",       label: "감사합니다" }
+      { id: null,              label: "대기" },
+      { id: "choice",          label: "선지 선택" },
+      { id: "market",          label: "마을 매수" },
+      { id: "market_end",      label: "프로그램 종료" },
+      { id: "speaker_pool",    label: "발표자 풀" },
+      { id: "speaker_picked",  label: "발표자 당첨" },
+      { id: "portfolio_recap", label: "결과 다시 보기" },
+      { id: "finished",        label: "감사합니다" }
     ];
 
     let db = null, firebaseReady = false;
@@ -978,6 +989,10 @@
       catch (err) { console.error(err); }
     });
 
+    document.getElementById("btn-step-portfolio-recap").addEventListener("click", async () => {
+      await setStep("portfolio_recap");
+    });
+
     document.getElementById("btn-step-finish").addEventListener("click", async () => {
       if (!confirm("프로그램을 종료하시겠어요?")) return;
       await setStep("finished");
@@ -1069,7 +1084,7 @@
         active = picked ? "speaker-red-card" : "speaker-blue-card";
       } else if (step === "speaker_pool") {
         active = "speaker-blue-card";
-      } else if (step === "market_end") {
+      } else if (step === "market_end" || step === "portfolio_recap") {
         // 대표만 종료 메시지, 비대표는 회색 대기
         active = iAmRep ? "market-end-card" : "grey-wait-card";
       } else if (step === "market") {
@@ -1135,6 +1150,8 @@
       const repName = participants[myInfo.id] ? participants[myInfo.id].name : myInfo.name;
       document.getElementById("market-rep-name").textContent = `대표 · ${repName}`;
       document.getElementById("market-cash").textContent = fmt(me.cash) + "원";
+      const totalInvested = SEED_MONEY - me.cash;
+      document.getElementById("market-invested").textContent = fmt(totalInvested) + "원";
 
       const stockList = document.getElementById("stock-list");
       const stockEntries = getStockEntries();
@@ -1146,13 +1163,16 @@
         const remain = getStockSharesRemaining(sid);
         const holding = me.holdings[sid] || 0;
         const qty = localQty[sid] || 0;
+        const invested = holding * PRICE_PER_SHARE;
+        const depleted = remain <= 0;
         return `
-          <div class="stock-row" data-sid="${sid}">
+          <div class="stock-row${depleted ? ' depleted' : ''}" data-sid="${sid}">
             <div class="stock-info">
               <div class="nm">${escapeHtml(stk.name)}</div>
               <div class="meta">
                 <span>잔여 ${remain}/${SHARES_PER_STOCK}주</span>
                 ${holding ? `<span class="holding">내 보유 ${holding}주</span>` : ""}
+                ${invested ? `<span class="invested">투자 ${fmt(invested)}원</span>` : ""}
               </div>
             </div>
             <div class="stock-controls">
@@ -1207,7 +1227,7 @@
         return;
       }
 
-      if (step === "market" || step === "market_end") {
+      if (step === "market" || step === "market_end" || step === "portfolio_recap") {
         body.innerHTML = renderPortfoliosHTML();
         attachPortfolioClicks();
         return;
@@ -1350,6 +1370,7 @@
       document.getElementById("btn-step-market-end").disabled = step !== "market";
       document.getElementById("btn-step-speaker").disabled = entries.length === 0;
       document.getElementById("btn-step-speaker-pick").disabled = step !== "speaker_pool";
+      document.getElementById("btn-step-portfolio-recap").disabled = step !== "speaker_picked";
       document.getElementById("btn-step-finish").disabled = entries.length === 0;
 
       // 선지 송출 섹션
